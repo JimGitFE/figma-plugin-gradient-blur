@@ -19,8 +19,50 @@ module.exports = (env, argv) => ({
          // Converts TypeScript code to JavaScript
          { test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/ },
 
-         // Enables including CSS by doing "import './file.css'" in your TypeScript code
-         { test: /\.css$/, use: ["style-loader", { loader: "css-loader" }] },
+         // -- For *.module.css files (CSS Modules) ---------------
+         {
+            test: /\.module\.css$/,
+            use: [
+               "style-loader",
+               {
+                  loader: "css-loader",
+                  options: {
+                     modules: true, // Enable CSS modules
+                     importLoaders: 1, // Number of loaders before css-loader
+                  },
+               },
+            ],
+         },
+
+         // -- For regular *.css files (not modules) --------------
+         {
+            test: /\.css$/,
+            exclude: /\.module\.css$/,
+            use: ["style-loader", "css-loader"],
+         },
+
+         // -- For *.module.scss files (SCSS Modules) -------------
+         {
+            test: /\.module\.scss$/,
+            use: [
+               "style-loader",
+               {
+                  loader: "css-loader",
+                  options: {
+                     modules: true, // Enable SCSS modules
+                     importLoaders: 2, // postcss-loader + sass-loader (if you use postcss-loader)
+                  },
+               },
+               "sass-loader",
+            ],
+         },
+
+         // -- For regular *.scss files (not modules) -------------
+         {
+            test: /\.scss$/,
+            exclude: /\.module\.scss$/,
+            use: ["style-loader", "css-loader", "sass-loader"],
+         },
 
          // Allows you to use "<%= require('./file.svg') %>" in your HTML code to get a data URI
          { test: /\.(png|jpg|gif|webp|svg)$/, loader: "url-loader" },

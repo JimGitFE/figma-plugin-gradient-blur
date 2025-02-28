@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useCallback } from "react"
-import "./styles/utilities.css" // Import your CSS file
+import "./styles/globals.scss" // Import your CSS file
+// import "./styles/utilities.css" // Import your CSS file
+
+import Button from "@/components/Button"
+import Theme from "./components/Theme"
 
 function Interface() {
    const textbox = useRef<HTMLInputElement>(undefined)
@@ -10,8 +14,9 @@ function Interface() {
    }, [])
 
    const onCreate = () => {
-      const count = parseInt(textbox.current.value, 10)
-      parent.postMessage({ pluginMessage: { type: "create-rectangles", count } }, "*")
+      // const count = parseInt(textbox.current.value, 10)
+      // parent.postMessage({ pluginMessage: { type: "create-rectangles", count } }, "*")
+      console.log("aa")
    }
 
    const onCancel = () => {
@@ -29,17 +34,38 @@ function Interface() {
    }, [])
 
    return (
-      <div className="d-f fd-co">
-         {/* <img src={logo} /> */}
-         <h2>Rectangle Creator</h2>
-         <p className="p-small">
-            Count: <input ref={countRef} />
-         </p>
-         <button className="p-8px button button--primary" id="create" onClick={onCreate}>
-            Create
-         </button>
-         <button onClick={onCancel}>Cancel</button>
-      </div>
+      <Theme>
+         <div className={`d-f fd-co type--small type--medium type--inverse`}>
+            {/* <img src={logo} /> */}
+            <h2>Rectangle Creator</h2>
+            <p className="p-small type--inverse">
+               Count: <input ref={countRef} />
+            </p>
+            <div className="input">
+               <input type="input" className="input__field" placeholder="Placeholder" />
+            </div>
+            <div className="radio">
+               <input id="radioButton2" type="radio" className="radio__button" value="Value" name="radioGroup" checked />
+               <label htmlFor="radioButton2" className="radio__label">
+                  Radio button
+               </label>
+            </div>
+            <div className="button default">
+               <button className="p-8px button--primary" id="create" onClick={onCreate}>
+                  Create
+               </button>
+            </div>
+            <div className={`d-f gap-8px`}>
+               <Button secondary>Cancel</Button>
+               <Button>Create</Button>
+            </div>
+            <div className="onboarding-tip">
+               <div className="icon icon--styles"></div>
+               <div className="onboarding-tip__msg">Onboarding tip goes here.</div>
+            </div>
+            <button onClick={onCancel}>Cancel</button>
+         </div>
+      </Theme>
    )
 }
 

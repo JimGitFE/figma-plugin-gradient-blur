@@ -1,4 +1,6 @@
+.bg--figma-color-bg { background: var(--figma-color-bg); }
 .d-f { display: flex; }
 .fd-co { flex-direction: column; }
+.gap-8px { gap: 8px; }
 .p-8px { padding: 8px; }
 .p-small { padding: small; }
