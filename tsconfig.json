@@ -1,11 +1,12 @@
 {
-  "compilerOptions": {
-    "target": "es6",
-    "lib": ["es6"],
-    "strict": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@figma"
-    ]
-  }
+  "extends": "@create-figma-plugin/tsconfig",
+  // "compilerOptions": {
+  //   "target": "es6",
+  //   "lib": ["es6"],
+  //   "strict": true,
+  //   "typeRoots": [
+  //     "./node_modules/@types",
+  //     "./node_modules/@figma"
+  //   ]
+  // }
 }

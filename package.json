@@ -4,16 +4,18 @@
   "description": "Your Figma Plugin",
   "main": "code.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "build-figma-plugin --typecheck --minify",
+    "dev": "build-figma-plugin --typecheck --watch",
     "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
-    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
-    "watch": "npm run build -- --watch"
-  },
+    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix ."
+    },
   "author": "",
   "license": "",
   "devDependencies": {
+    "@create-figma-plugin/build": "^4.0.0-alpha.0",
+    "@create-figma-plugin/tsconfig": "^4.0.0-alpha.0",
     "@figma/eslint-plugin-figma-plugins": "*",
-    "@figma/plugin-typings": "*",
+    "@figma/plugin-typings": "^1.108.0",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
     "eslint": "^8.54.0",
@@ -40,5 +42,17 @@
         }
       ]
     }
+  },
+  "dependencies": {
+    "@create-figma-plugin/ui": "^4.0.0-alpha.0",
+    "@create-figma-plugin/utilities": "^4.0.0-alpha.0"
+  },
+  "figma-plugin": {
+    "editorType": [
+      "figma"
+    ],
+    "name": "Rectangles",
+    "main": "src/controller.ts",
+    "ui": "src/ui.tsx"
   }
 }
