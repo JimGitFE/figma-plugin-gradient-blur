@@ -1,54 +1,46 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
+import React, { useEffect, useRef, useCallback } from "react"
+import "./styles/utilities.css" // Import your CSS file
 
-// import React from 'react';
-// import logo from '../assets/logo.svg';
-// import '../styles/ui.css';
+function Interface() {
+   const textbox = useRef<HTMLInputElement>(undefined)
 
-function App() {
-  const textbox = React.useRef<HTMLInputElement>(undefined);
+   const countRef = useCallback((element: HTMLInputElement) => {
+      if (element) element.value = "5"
+      textbox.current = element
+   }, [])
 
-  const countRef = React.useCallback((element: HTMLInputElement) => {
-    if (element) element.value = '5';
-    textbox.current = element;
-  }, []);
+   const onCreate = () => {
+      const count = parseInt(textbox.current.value, 10)
+      parent.postMessage({ pluginMessage: { type: "create-rectangles", count } }, "*")
+   }
 
-  const onCreate = () => {
-    const count = parseInt(textbox.current.value, 10);
-    parent.postMessage({ pluginMessage: { type: 'create-rectangles', count } }, '*');
-  };
+   const onCancel = () => {
+      parent.postMessage({ pluginMessage: { type: "cancel" } }, "*")
+   }
 
-  const onCancel = () => {
-    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
-  };
-
-  React.useEffect(() => {
-    // This is how we read messages sent from the plugin controller
-    window.onmessage = (event) => {
-      const { type, message } = event.data.pluginMessage;
-      if (type === 'create-rectangles') {
-        console.log(`Figma Says: ${message}`);
+   useEffect(() => {
+      // This is how we read messages sent from the plugin controller
+      window.onmessage = (event) => {
+         const { type, message } = event.data.pluginMessage
+         if (type === "create-rectangles") {
+            console.log(`Figma Says: ${message}`)
+         }
       }
-    };
-  }, []);
+   }, [])
 
-  return (
-    <div>
-      {/* <img src={logo} /> */}
-      <h2>Rectangle Creator</h2>
-      <p>
-        Count: <input ref={countRef} />
-      </p>
-      <button id="create" onClick={onCreate}>
-        Create
-      </button>
-      <button onClick={onCancel}>Cancel</button>
-    </div>
-  );
+   return (
+      <div className="d-f fd-co">
+         {/* <img src={logo} /> */}
+         <h2>Rectangle Creator</h2>
+         <p className="p-small">
+            Count: <input ref={countRef} />
+         </p>
+         <button className="p-8px button button--primary" id="create" onClick={onCreate}>
+            Create
+         </button>
+         <button onClick={onCancel}>Cancel</button>
+      </div>
+   )
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  const container = document.getElementById('react-page');
-  const root = createRoot(container);
-  root.render(<App />);
-});
+export default Interface

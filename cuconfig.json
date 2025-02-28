@@ -1,0 +1,8 @@
+{
+   "acceptAnyVariable": false,
+   "acceptAnyValue": true,
+   "readFrom": "src/",
+   "writeTo": "./src/styles/utilities.css",
+   "extensions": "tsx,ts,js,jsx",
+   "exclude": ["node_modules", ".git", ".*/**/*"]
+}

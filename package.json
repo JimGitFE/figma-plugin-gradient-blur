@@ -1,70 +1,61 @@
 {
-  "name": "gradient-blur",
-  "version": "1.0.0",
-  "description": "Your Figma Plugin",
-  "main": "code.js",
-  "scripts": {
-    "build": "build-figma-plugin --typecheck --minify",
-    "dev": "build-figma-plugin --typecheck --watch",
-    "dev2": "webpack --mode=development --watch",
-    "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
-    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix ."
-  },
-  "author": "",
-  "license": "",
-  "devDependencies": {
-    "@create-figma-plugin/build": "^4.0.0-alpha.0",
-    "@create-figma-plugin/tsconfig": "^4.0.0-alpha.0",
-    "@figma/plugin-typings": "^1.50.0",
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
-    "css-loader": "^6.7.1",
-    "html-webpack-plugin": "^5.5.0",
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3",
-    "prettier": "^2.7.1",
-    "react-dev-utils": "^12.0.1",
-    "style-loader": "^3.3.1",
-    "ts-loader": "^9.3.1",
-    "typescript": "^4.7.4",
-    "url-loader": "^4.1.1",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
-  },
-  "eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@figma/figma-plugins/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    },
-    "root": true,
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_",
-          "caughtErrorsIgnorePattern": "^_"
-        }
-      ]
-    }
-  },
-  "dependencies": {
-    "@create-figma-plugin/ui": "^4.0.0-alpha.0",
-    "@create-figma-plugin/utilities": "^4.0.0-alpha.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "figma-plugin": {
-    "editorType": [
-      "figma"
-    ],
-    "name": "Rectangles",
-    "main": "src/controller.ts",
-    "ui": "src/ui.tsx"
-  }
+   "name": "gradient-blur",
+   "version": "1.0.0",
+   "description": "Your Figma Plugin",
+   "scripts": {
+      "dev": "concurrently \"npm:watch\" \"npm:utils\"",
+      "build": "webpack --mode=production",
+      "watch": "webpack --mode=development --watch",
+      "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
+      "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
+      "utils": "css-utils watch"
+   },
+   "dependencies": {
+      "@create-figma-plugin/ui": "^4.0.0-alpha.0",
+      "@create-figma-plugin/utilities": "^4.0.0-alpha.0",
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+   },
+   "devDependencies": {
+      "@figma/plugin-typings": "^1.50.0",
+      "@types/react": "^18.0.17",
+      "@types/react-dom": "^18.0.6",
+      "concurrently": "^9.1.2",
+      "css-loader": "^6.7.1",
+      "css-utilities-generator": "^1.6.2",
+      "html-webpack-plugin": "^5.5.0",
+      "husky": "^8.0.1",
+      "lint-staged": "^13.0.3",
+      "prettier": "^2.8.8",
+      "react-dev-utils": "^12.0.1",
+      "style-loader": "^3.3.1",
+      "ts-loader": "^9.3.1",
+      "tsconfig-paths-webpack-plugin": "^4.2.0",
+      "typescript": "^4.7.4",
+      "url-loader": "^4.1.1",
+      "webpack": "^5.74.0",
+      "webpack-cli": "^4.10.0"
+   },
+   "eslintConfig": {
+      "extends": [
+         "eslint:recommended",
+         "plugin:@typescript-eslint/recommended",
+         "plugin:@figma/figma-plugins/recommended"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+         "project": "./tsconfig.json"
+      },
+      "root": true,
+      "rules": {
+         "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+               "argsIgnorePattern": "^_",
+               "varsIgnorePattern": "^_",
+               "caughtErrorsIgnorePattern": "^_"
+            }
+         ]
+      }
+   }
 }
