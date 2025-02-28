@@ -587,10 +587,10 @@
     }
   });
 
-  // ../../../../AppData/Local/Temp/41e46965-024c-48ff-87cb-6d1f071a8c33/text.module.js
+  // ../../../../AppData/Local/Temp/865993e7-06fa-4df4-8198-4c630c0b1d1a/text.module.js
   var text_module_default;
   var init_text_module = __esm({
-    "../../../../AppData/Local/Temp/41e46965-024c-48ff-87cb-6d1f071a8c33/text.module.js"() {
+    "../../../../AppData/Local/Temp/865993e7-06fa-4df4-8198-4c630c0b1d1a/text.module.js"() {
       if (document.getElementById("5a3acae760") === null) {
         const element = document.createElement("style");
         element.id = "5a3acae760";
@@ -648,10 +648,10 @@
     }
   });
 
-  // ../../../../AppData/Local/Temp/482385d6-4c36-4b8c-bdad-a7ad3d1258ef/container.module.js
+  // ../../../../AppData/Local/Temp/8e471d5b-376e-49a5-847d-3b104020b83e/container.module.js
   var container_module_default;
   var init_container_module = __esm({
-    "../../../../AppData/Local/Temp/482385d6-4c36-4b8c-bdad-a7ad3d1258ef/container.module.js"() {
+    "../../../../AppData/Local/Temp/8e471d5b-376e-49a5-847d-3b104020b83e/container.module.js"() {
       if (document.getElementById("cbf2792955") === null) {
         const element = document.createElement("style");
         element.id = "cbf2792955";
@@ -692,10 +692,10 @@
     }
   });
 
-  // ../../../../AppData/Local/Temp/6c7e79aa-a543-40e7-bc9b-0c272acd1058/vertical-space.module.js
+  // ../../../../AppData/Local/Temp/2831834f-651d-468c-bbf7-da18c2a8a703/vertical-space.module.js
   var vertical_space_module_default;
   var init_vertical_space_module = __esm({
-    "../../../../AppData/Local/Temp/6c7e79aa-a543-40e7-bc9b-0c272acd1058/vertical-space.module.js"() {
+    "../../../../AppData/Local/Temp/2831834f-651d-468c-bbf7-da18c2a8a703/vertical-space.module.js"() {
       if (document.getElementById("870d683287") === null) {
         const element = document.createElement("style");
         element.id = "870d683287";
@@ -736,9 +736,9 @@
     }
   });
 
-  // ../../../../AppData/Local/Temp/c993b59b-648d-4740-ae4d-312ccdf26d28/base.js
+  // ../../../../AppData/Local/Temp/05e49421-7704-4ee3-bcc4-816fbb57e167/base.js
   var init_base = __esm({
-    "../../../../AppData/Local/Temp/c993b59b-648d-4740-ae4d-312ccdf26d28/base.js"() {
+    "../../../../AppData/Local/Temp/05e49421-7704-4ee3-bcc4-816fbb57e167/base.js"() {
       if (document.getElementById("cf7b2fd3c6") === null) {
         const element = document.createElement("style");
         element.id = "cf7b2fd3c6";
@@ -900,7 +900,6 @@ svg {
   var ui_default;
   var init_ui = __esm({
     "src/ui.tsx"() {
-      "use strict";
       init_lib();
       init_preact_module();
       ui_default = render(Plugin);

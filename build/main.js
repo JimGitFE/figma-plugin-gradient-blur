@@ -70,7 +70,6 @@ function controller_default() {
 }
 var init_controller = __esm({
   "src/controller.ts"() {
-    "use strict";
     init_lib();
   }
 });
