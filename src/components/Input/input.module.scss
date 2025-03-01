@@ -10,6 +10,9 @@
 .textbox:focus-within {
    z-index: var(--z-index-2); /* Stack `.textbox` over its sibling elements */
 }
+.textbox:hover {
+   border-color: var(--figma-color-border);
+}
 .textbox:has(input:focus) {
    border-color: var(--figma-color-border-selected);
 }
@@ -41,9 +44,7 @@
    height: var(--space-24);
    width: 24px;
 }
-.input:hover {
-   border-color: var(--figma-color-border);
-}
+
 .disabled .input {
    border-color: var(--figma-color-border-disabled);
    background-color: transparent;
