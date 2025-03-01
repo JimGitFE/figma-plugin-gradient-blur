@@ -1,6 +1,6 @@
 import React from "react"
 
-import styles from "./button.module.css"
+import styles from "./button.module.scss"
 
 export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    children: React.ReactNode
@@ -19,11 +19,14 @@ export default function Button({
    fullWidth = false,
    loading = false,
    secondary = false,
+   className,
+   style,
    ...atts
 }: ButtonProps) {
    return (
       <div
-         className={`${styles.button} ${secondary ? styles.secondary : styles.default}`}
+         className={`${styles.button} ${secondary ? styles.secondary : styles.default} ${className}`}
+         style={style}
          //  class={createClassName([
          //     styles.button,
          //     secondary === true ? styles.secondary : styles.default,
