@@ -71,6 +71,7 @@ span {
    user-select: none;
 }
 
+p,
 h1,
 h2,
 h3 {
@@ -113,4 +114,11 @@ svg {
 
 ::selection {
    background-color: var(--figma-color-bg-onselected);
+}
+
+hr,
+.divider {
+   width: 100%;
+   height: 1px;
+   background-color: var(--figma-color-border);
 }

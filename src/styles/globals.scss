@@ -7,5 +7,14 @@ html {
 }
 
 section {
-   padding: 2rem;
+   padding-left: 1.2rem;
+   padding-right: 1rem;
+
+   display: flex;
+   flex-direction: column;
+   gap: 6px;
+}
+
+.config-menu {
+   border-right: 1px solid var(--figma-color-border);
 }
