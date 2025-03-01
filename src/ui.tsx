@@ -40,14 +40,15 @@ function Interface() {
    return (
       <Theme>
          <div className="d-f">
-            <div className={`config-menu d-f fd-co gap-6px bc-red pt-2rem pb-2rem c-white type--small type--medium type--inverse mw-200px`}>
+            {/* Properties panel */}
+            <div className={`props-panel d-f fd-co gap-6px bc-red pt-1rem pb-1rem c-white type--small type--medium type--inverse mw-200px`}>
                <section>
                   {/* Title */}
                   <div className="d-f ai-c jc-sb">
                      {/* Plugin Icon & Menu title */}
                      <div className="d-f">
                         {/* <img src={logo} /> */}
-                        <h3 className={`fs-14px fw-550`}>Gradient Creator</h3>
+                        <h3 className={`fs-14px fw-550`}>Properties Panel</h3>
                      </div>
                      {/* Buttons */}
                      <div>
@@ -60,8 +61,9 @@ function Interface() {
 
                <section>
                   {/* Title */}
-                  <div className="d-f ai-c h-30px">
-                     <p className="p-small type--inverse fw-500">Resolution:</p>
+                  <div className="d-f jc-sb ai-c h-30px">
+                     <p className="p-small type--inverse fw-500">Resolution</p>
+                     <InputButton buttons={[{ value: false, icon: "info", large: true }]} />
                   </div>
 
                   {/* Gradient Type */}
@@ -108,7 +110,7 @@ function Interface() {
                   {/* Title */}
                   <div className="d-f jc-sb ai-c h-30px">
                      <p className="p-small type--inverse fw-500" style={{ flex: 1 }}>
-                        Blur handle steps:
+                        Gradient Handles
                      </p>
                      <InputButton buttons={[{ value: false, icon: "swap", large: true }]} />
                      <InputButton buttons={[{ value: false, icon: "plus", large: true }]} />
@@ -229,7 +231,7 @@ function Interface() {
 
                {/* Caption */}
                <section>
-                  <div className="d-f ai-c gap-12px o-60">
+                  <div className="d-f ai-c mt-4px gap-12px o-60">
                      {/* <div className="icon icon--warning icon--white8 o-80" /> */} {/* On Frame with children */}
                      <div className="icon icon--resolve icon--white8 o-80" />
                      <p>

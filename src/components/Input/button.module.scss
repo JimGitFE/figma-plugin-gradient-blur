@@ -45,7 +45,7 @@
       color: var(--figma-color-border-brand-strong);
    }
 }
-.input:focus {
+.input:not(.large):focus {
    background: var(--figma-color-border-selected);
 }
 .disabled .input {

@@ -1,5 +1,5 @@
 {
-   "name": "gradient-blur",
+   "name": "Gradient Blurs",
    "id": "figma-plugin",
    "api": "1.0.0",
    "main": "dist/controller.js",

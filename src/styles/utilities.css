@@ -16,12 +16,13 @@
 .jc-fe { justify-content: flex-end; }
 .jc-sb { justify-content: space-between; }
 .ml-6px { margin-left: 6px; }
+.mt-4px { margin-top: 4px; }
 .mt-8px { margin-top: 8px; }
 .o-60 { opacity: 60%; }
 .o-70 { opacity: 70%; }
 .o-80 { opacity: 80%; }
 .p-small { padding: small; }
-.pb-2rem { padding-bottom: 2rem; }
+.pb-1rem { padding-bottom: 1rem; }
 .pos-relative { position: relative; }
-.pt-2rem { padding-top: 2rem; }
+.pt-1rem { padding-top: 1rem; }
 .w-100 { width: 100%; }
