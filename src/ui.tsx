@@ -133,12 +133,17 @@ function Interface() {
                />
             </div>
             {/* Submit */}
-            <Input
-               inputs={[
-                  { value: grad.handles[2].blur, placeholder: "Blur in px", icon: "image", style: { width: 68 } },
-                  { after: <span>%</span>, value: grad.handles[2].blur, placeholder: "Blur in px", style: { width: 22 } },
-               ]}
-            />
+
+            <p className="p-small type--inverse">Blur handle steps:</p>
+            <div className={`d-f gap-6px`}>
+               <Input
+                  inputs={[
+                     { value: grad.handles[2].blur, placeholder: "Blur in px", icon: "image", style: { width: 68 } },
+                     { after: <span>%</span>, value: grad.handles[2].blur, placeholder: "Blur in px", style: { width: 22 } },
+                  ]}
+               />
+               <InputButton buttons={[{ value: false, text: "-" }]} />
+            </div>
             <div className={`d-f gap-8px mt-16px`}>
                <Button className="w-80px" onClick={onCreate}>
                   Create
