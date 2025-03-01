@@ -8,9 +8,10 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    text?: string
    value: boolean
    disabled?: boolean
+   large?: boolean
 }
 
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
    buttons: ButtonProps[]
    value?: string | number
 }
@@ -18,8 +19,8 @@ interface Props {
 export default function InputButton({ buttons, ...atts }: Props) {
    return (
       <div {...atts} className={`${styles.textbox} d-f gap-1px`}>
-         {buttons.map(({ icon, text, value, ...atts }, i) => (
-            <button {...atts} key={i} className={`${styles.input} ${numeric.input} ${value && styles.active}`}>
+         {buttons.map(({ icon, text, value, large = false, ...atts }, i) => (
+            <button {...atts} key={i} className={`${styles.input} ${large && styles.large} ${numeric.input} ${value && styles.active}`}>
                {icon && <div className={`${styles.icon} icon icon--${icon} icon--${value ? "blue" : "white"}`} />}
                {text && <span className="text type--small type--bold fw-500">{text}</span>}
             </button>

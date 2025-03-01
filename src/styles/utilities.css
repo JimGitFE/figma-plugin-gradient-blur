@@ -8,9 +8,11 @@
 .gap-5px { gap: 5px; }
 .gap-6px { gap: 6px; }
 .gap-8px { gap: 8px; }
+.jc-sb { justify-content: space-between; }
 .ml-6px { margin-left: 6px; }
 .mt-16px { margin-top: 16px; }
 .o-70 { opacity: 70%; }
 .p-small { padding: small; }
 .pos-relative { position: relative; }
+.w-187px { width: 187px; }
 .w-80px { width: 80px; }

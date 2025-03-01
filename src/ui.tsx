@@ -42,10 +42,25 @@ function Interface() {
          <section className={`d-f fd-co gap-6px c-white type--small type--medium type--inverse`}>
             {/* <img src={logo} /> */}
             <h2>Rectangle Creator</h2>
-            {/* Resolution */}
+
+            <hr></hr>
             <p className="p-small type--inverse">Resolution:</p>
+
+            {/* Gradient Type */}
             <div className={`d-f gap-5px`}>
+               <InputButton
+                  style={{ width: 187 }}
+                  buttons={[
+                     { value: false, text: "Radial" },
+                     { value: false, text: "Linear" },
+                  ]}
+               />
+            </div>
+
+            {/* Resolution & Angle */}
+            <div className={`d-f gap-5px w-187px`}>
                <Input
+                  style={{ flex: 1 }}
                   inputs={[
                      {
                         onChange: (e) => {
@@ -60,90 +75,105 @@ function Interface() {
                />
                <InputButton
                   buttons={[
-                     { icon: "image", value: true, text: "Hi" },
-                     { value: false, text: "Radial" },
-                     { icon: "theme", value: false },
+                     { value: false, icon: "rotate" },
+                     { value: false, icon: "mirror-y" },
+                     { value: false, icon: "mirror-x" },
                   ]}
                />
             </div>
-            {/* Parameters */}
-            <div className={`d-f gap-5px`}>
-               <Input
-                  inputs={[
-                     {
-                        onChange: (e) => {
-                           setGrad("handles", (prev) => {
-                              return prev.map((item, index) => {
-                                 if (index === 0) {
-                                    // Update the condition to match the specific object you want to update
-                                    return { ...item, blur: Number((e.target as HTMLInputElement).value) }
-                                 }
-                                 return item
-                              })
-                           })
-                        },
-                        value: grad.handles[0].blur,
-                        placeholder: "Blur in px",
-                        icon: "image",
-                        style: { width: 24 },
-                     },
-                  ]}
-               />
-               <Input
-                  inputs={[
-                     {
-                        onChange: (e) => {
-                           setGrad("handles", (prev) => {
-                              return prev.map((item, index) => {
-                                 if (index === 1) {
-                                    // Update the condition to match the specific object you want to update
-                                    return { ...item, blur: Number((e.target as HTMLInputElement).value) }
-                                 }
-                                 return item
-                              })
-                           })
-                        },
-                        value: grad.handles[1].blur,
-                        placeholder: "Blur in px",
-                        icon: "image",
-                        style: { width: 24 },
-                     },
-                  ]}
-               />
-               <Input
-                  inputs={[
-                     {
-                        onChange: (e) => {
-                           setGrad("handles", (prev) => {
-                              return prev.map((item, index) => {
-                                 if (index === 2) {
-                                    // Update the condition to match the specific object you want to update
-                                    return { ...item, blur: Number((e.target as HTMLInputElement).value) }
-                                 }
-                                 return item
-                              })
-                           })
-                        },
-                        value: grad.handles[2].blur,
-                        placeholder: "Blur in px",
-                        icon: "image",
-                        style: { width: 24 },
-                     },
-                  ]}
-               />
-            </div>
-            {/* Submit */}
 
-            <p className="p-small type--inverse">Blur handle steps:</p>
-            <div className={`d-f gap-6px`}>
-               <Input
-                  inputs={[
-                     { value: grad.handles[2].blur, placeholder: "Blur in px", icon: "image", style: { width: 68 } },
-                     { after: <span>%</span>, value: grad.handles[2].blur, placeholder: "Blur in px", style: { width: 22 } },
-                  ]}
-               />
-               <InputButton buttons={[{ value: false, text: "-" }]} />
+            <hr></hr>
+            {/* Parameters */}
+
+            {/* Title */}
+            <div className="d-f jc-sb ai-c w-187px">
+               <p className="p-small type--inverse">Blur handle steps:</p>
+               <InputButton buttons={[{ value: false, icon: "swap", large: true }]} />
             </div>
+
+            {/* Inputs Handles */}
+            <div className={`d-f fd-co gap-6px w-187px`}>
+               <div className="d-f gap-6px">
+                  <Input
+                     inputs={[
+                        // blur value
+                        {
+                           onChange: (e) => {
+                              setGrad("handles", (prev) => {
+                                 return prev.map((item, index) => {
+                                    if (index === 0) {
+                                       // Update the condition to match the specific object you want to update
+                                       return { ...item, blur: Number((e.target as HTMLInputElement).value) }
+                                    }
+                                    return item
+                                 })
+                              })
+                           },
+                           value: grad.handles[0].blur,
+                           placeholder: "Blur in px",
+                           icon: "image",
+                        },
+                        // position
+                        { after: <span>%</span>, value: grad.handles[2].blur, placeholder: "Blur in px", style: { width: 52, flex: 0 } },
+                     ]}
+                  />
+                  <InputButton buttons={[{ value: false, icon: "minus", large: true }]} />
+               </div>
+               <div className="d-f gap-6px">
+                  <Input
+                     inputs={[
+                        // blur value
+                        {
+                           onChange: (e) => {
+                              setGrad("handles", (prev) => {
+                                 return prev.map((item, index) => {
+                                    if (index === 1) {
+                                       // Update the condition to match the specific object you want to update
+                                       return { ...item, blur: Number((e.target as HTMLInputElement).value) }
+                                    }
+                                    return item
+                                 })
+                              })
+                           },
+                           value: grad.handles[1].blur,
+                           placeholder: "Blur in px",
+                           icon: "image",
+                        },
+                        // position
+                        { after: <span>%</span>, value: grad.handles[2].blur, placeholder: "Blur in px", style: { width: 52, flex: 0 } },
+                     ]}
+                  />
+                  <InputButton buttons={[{ value: false, icon: "minus", large: true }]} />
+               </div>
+               <div className="d-f gap-6px">
+                  <Input
+                     inputs={[
+                        // blur value
+                        {
+                           onChange: (e) => {
+                              setGrad("handles", (prev) => {
+                                 return prev.map((item, index) => {
+                                    if (index === 2) {
+                                       // Update the condition to match the specific object you want to update
+                                       return { ...item, blur: Number((e.target as HTMLInputElement).value) }
+                                    }
+                                    return item
+                                 })
+                              })
+                           },
+                           value: grad.handles[2].blur,
+                           placeholder: "Blur in px",
+                           icon: "image",
+                        },
+                        // position
+                        { after: <span>%</span>, value: grad.handles[2].blur, placeholder: "Blur in px", style: { width: 52, flex: 0 } },
+                     ]}
+                  />
+                  <InputButton buttons={[{ value: false, icon: "minus", large: true }]} />
+               </div>
+            </div>
+
+            {/* Submit */}
             <div className={`d-f gap-8px mt-16px`}>
                <Button className="w-80px" onClick={onCreate}>
                   Create

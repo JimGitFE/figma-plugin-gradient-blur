@@ -1,6 +1,6 @@
 // Interface
 figma.showUI(__html__)
-figma.ui.resize(700, 300)
+figma.ui.resize(700, 400)
 
 // Methods
 figma.ui.onmessage = (msg) => {

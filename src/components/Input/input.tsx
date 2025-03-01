@@ -9,16 +9,21 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
    value?: string | number
    after?: any
 }
-interface Props {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
    inputs: InputProps[]
 }
 
-export default function Input({ inputs }: Props) {
+export default function Input({ inputs, ...atts }: Props) {
    const inputRefs = useRef<HTMLInputElement[]>([])
    return (
-      <div className={`d-f ai-c gap-1px ${styles.textbox}`}>
-         {inputs.map(({ icon, disabled = false, after, ...atts }, index) => (
-            <div key={index} className={`d-f ai-c pos-relative ${styles.input}`} onClick={() => inputRefs.current[index]?.focus()}>
+      <div {...atts} className={`d-f ai-c gap-1px ${styles.textbox}`}>
+         {inputs.map(({ icon, disabled = false, after, style, ...atts }, index) => (
+            <div
+               style={style}
+               key={index}
+               className={`d-f ai-c pos-relative ${styles.input}`}
+               onClick={() => inputRefs.current[index]?.focus()}
+            >
                <input
                   {...atts}
                   ref={(ref) => (inputRefs.current[index] = ref)}
