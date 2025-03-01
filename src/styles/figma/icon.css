@@ -3,10 +3,8 @@
    align-items: center;
    justify-content: center;
    cursor: default;
-   width: var(--size-medium);
-   height: var(--size-medium);
-   font-family: var(--font-stack);
-   font-size: var(--font-size-xsmall);
+   width: var(--space-24);
+   height: var(--space-24);
    -webkit-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
@@ -38,7 +36,7 @@
 }
 
 .icon--blue {
-   filter: invert(54%) sepia(16%) saturate(7499%) hue-rotate(179deg) brightness(98%) contrast(101%);
+   filter: invert(54%) sepia(16%) saturate(2499%) hue-rotate(179deg) brightness(120%) contrast(101%);
 }
 
 .icon--purple {
