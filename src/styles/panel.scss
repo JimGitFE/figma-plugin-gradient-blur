@@ -1,0 +1,24 @@
+.props-panel {
+   border-right: 1px solid var(--figma-color-border);
+   padding-top: var(--props-menu-pad);
+   padding-bottom: var(--props-menu-pad);
+}
+
+.heading {
+   margin-top: -8px;
+   height: 30px;
+}
+
+section {
+   padding: 16px 0;
+   padding-left: var(--props-menu-pad);
+   padding-right: var(--props-menu-pad-r);
+
+   display: flex;
+   flex-direction: column;
+   gap: 6px;
+}
+
+.heading {
+   font-weight: 500;
+}

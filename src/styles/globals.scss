@@ -1,27 +1,13 @@
 @use "figma/index.scss";
 @use "utilities.css";
+@use "panel.scss";
 // @use "thomas.css";
 
 :root {
-   --props-menu-pad: 1.2rem;
-   --props-menu-pad-r: 1rem;
+   --props-menu-pad: 1rem;
+   --props-menu-pad-r: 0.6rem;
 }
 
 html {
    background: black;
-}
-
-section {
-   padding-left: var(--props-menu-pad);
-   padding-right: var(--props-menu-pad-r);
-
-   display: flex;
-   flex-direction: column;
-   gap: 6px;
-}
-
-.props-panel {
-   border-right: 1px solid var(--figma-color-border);
-   padding-top: var(--props-menu-pad);
-   padding-bottom: var(--props-menu-pad);
 }

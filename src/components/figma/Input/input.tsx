@@ -13,10 +13,10 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
    inputs: InputProps[]
 }
 
-export default function Input({ inputs, ...atts }: Props) {
+function Inputs({ inputs, ...atts }: Props) {
    const inputRefs = useRef<HTMLInputElement[]>([])
    return (
-      <div {...atts} className={`d-f ai-c gap-1px ${styles.textbox}`}>
+      <div {...atts} className={`d-f ai-c gap-1px ${styles.textbox} textbox`}>
          {inputs.map(({ icon, disabled = false, after, style, ...atts }, index) => (
             <div
                style={style}
@@ -39,3 +39,9 @@ export default function Input({ inputs, ...atts }: Props) {
       </div>
    )
 }
+
+function Input({ ...atts }: InputProps) {
+   return <Inputs inputs={[{ ...atts }]} />
+}
+
+export { Inputs, Input }

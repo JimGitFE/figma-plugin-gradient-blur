@@ -1,0 +1,38 @@
+// Gradient Handles Reorderables
+.item {
+   --gap: 6px;
+   margin: 0 calc(var(--props-menu-pad) * -1);
+   margin-right: calc(var(--props-menu-pad-r) * -1);
+   padding: 3px var(--props-menu-pad);
+   padding-right: var(--props-menu-pad-r);
+   gap: var(--gap);
+
+   // Icon
+   .handle {
+      width: calc(var(--props-menu-pad) - var(--gap));
+      margin-left: calc(var(--props-menu-pad) * -1);
+      cursor: grab;
+      opacity: 0;
+      transition: opacity 75ms ease-out;
+   }
+
+   &:hover {
+      background: rgba(255, 255, 255, 0.02);
+      & .handle {
+         opacity: 1;
+      }
+   }
+
+   &:has(.active) {
+      background: var(--figma-color-bg-brand-tertiary);
+
+      :global(.textbox) {
+         border-color: var(--figma-color-border-selected) !important;
+      }
+
+      .handle {
+         cursor: grabbing;
+         opacity: 1;
+      }
+   }
+}

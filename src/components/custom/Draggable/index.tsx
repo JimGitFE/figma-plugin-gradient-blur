@@ -5,21 +5,17 @@ import styles from "./draggable.module.scss"
 
 interface DragContextProps {
    onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+   /** Item being dragged */
+   isActive: boolean
 }
 
+/** Individual item drag context */
 const DragContext = createContext<DragContextProps | undefined>(undefined)
-
-/** Custom Drag handle */
-export const useDrag = () => {
-   const context = React.useContext(DragContext)
-   if (!context) throw new Error("useDrag must be used within a DragProvider")
-   return context
-}
 
 // Container
 
 interface Props<T> extends React.HTMLAttributes<HTMLDivElement> {
-   children: React.ReactElement<{ isDrag?: boolean }>[]
+   children: React.ReactElement<{ isDrag?: boolean; id: number }>[]
    sources: T[]
    /** reordered data source */
    onReorder: (dataSources: T[]) => void
@@ -102,6 +98,7 @@ export const Reorderable = <T extends {}>({ children, sources, onReorder, ...att
       <div className="pos-relative" {...atts}>
          {children.map((item, index) => {
             const [activeRect, itemRect] = [itemRefs.current.rects[activeIndex], itemRefs.current.rects[index]]
+            const isActive = activeIndex === index
 
             // Make room for empty slot (draggable new position)
             const slotDy = activeIndex < index ? -activeRect?.height : activeRect?.height
@@ -110,7 +107,7 @@ export const Reorderable = <T extends {}>({ children, sources, onReorder, ...att
             return (
                // Slot Item Container
                <div
-                  key={index}
+                  key={item.props.id}
                   onMouseDown={(e) => item.props.isDrag && onDragStart(e, index)}
                   style={{
                      height: isDragging && itemRect.height,
@@ -120,15 +117,15 @@ export const Reorderable = <T extends {}>({ children, sources, onReorder, ...att
                >
                   {/* Draggable Item */}
                   <div
-                     className={`${styles.draggable} ${activeIndex === index && styles.moving} ${isDragging && styles.dragging}`}
+                     className={`${isActive && styles.active} ${isDragging && styles.floating}`}
                      style={{
                         position: isDragging ? "absolute" : "relative",
-                        transform: `translateY(${activeIndex === index ? clientY - downY : moveY}px)`,
+                        transform: `translateY(${isActive ? clientY - downY : moveY}px)`,
                         width: isDragging && itemRect.width,
                         height: isDragging && itemRect.height,
                      }}
                   >
-                     <DragContext.Provider value={{ onDragStart: (e) => onDragStart(e, index) }}>{item}</DragContext.Provider>
+                     <DragContext.Provider value={{ onDragStart: (e) => onDragStart(e, index), isActive }}>{item}</DragContext.Provider>
                   </div>
                </div>
             )
@@ -138,6 +135,13 @@ export const Reorderable = <T extends {}>({ children, sources, onReorder, ...att
 }
 
 // Utils
+
+/** Custom Drag handle */
+export const useDrag = () => {
+   const context = React.useContext(DragContext)
+   if (!context) throw new Error("useDrag must be used within a DragProvider")
+   return context
+}
 
 function isBetween(idxMid, idxA, idxB) {
    const low = Math.min(idxA, idxB)

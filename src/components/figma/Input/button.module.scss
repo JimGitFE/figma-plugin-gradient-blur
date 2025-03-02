@@ -20,6 +20,7 @@
    display: flex;
    flex: 1;
    align-items: center;
+   justify-content: center;
    min-width: calc(var(--space-24));
    width: fit-content;
    height: calc(var(--space-24));
@@ -72,7 +73,8 @@
 .large {
    background-color: transparent;
    &:hover {
-      background-color: var(--figma-color-bg-secondary);
+      // background-color: var(--figma-color-bg-secondary);
+      background-color: rgba(255, 255, 255, 0.08);
    }
    & .icon {
       background-size: 130% !important;

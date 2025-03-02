@@ -1,8 +1,7 @@
-// .draggable:not(.moving) {
-.dragging:not(.moving) {
+.floating:not(.active) {
    transition: transform 120ms linear;
 }
-.moving {
+.active {
    z-index: 89;
 }
 

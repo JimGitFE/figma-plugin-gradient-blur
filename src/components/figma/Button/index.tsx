@@ -3,7 +3,8 @@ import React from "react"
 import styles from "./button.module.scss"
 
 export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
-   children: React.ReactNode
+   children?: React.ReactNode
+   label?: string
    danger?: boolean
    disabled?: boolean
    fullWidth?: boolean
@@ -12,8 +13,9 @@ export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    secondary?: boolean
 }
 
-export default function Button({
+function Button({
    children,
+   label,
    danger = false,
    disabled = false,
    fullWidth = false,
@@ -44,7 +46,7 @@ export default function Button({
             // onKeyDown={handleKeyDown}
             tabIndex={0}
          >
-            <div className={styles.children}>{children}</div>
+            <div className={styles.children}>{label ?? children}</div>
          </button>
          {/* {loading === true ? (
             <div class={styles.loadingIndicator}>
@@ -54,3 +56,5 @@ export default function Button({
       </div>
    )
 }
+
+export { Button }
