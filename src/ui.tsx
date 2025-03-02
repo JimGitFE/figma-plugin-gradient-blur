@@ -7,6 +7,7 @@ import Theme from "./components/Theme"
 import useDynamicState from "./hooks/useDynamicState"
 import Input from "./components/Input/input"
 import InputButton from "./components/Input/button"
+import ReorderableList from "./components/Draggable"
 
 const DEFAULT_RESOLUTION = 5
 const DEFAULT_HANDLES = [
@@ -58,11 +59,27 @@ function Interface() {
                </section>
 
                <hr className="mt-8px" />
+               <section>
+                  <ReorderableList
+                     items={[
+                        <div className="bg-red">
+                           <p>Asd 1</p>
+                        </div>,
+                        <div className="bg-red">
+                           <p>Asd 2</p>
+                        </div>,
+                        <div className="bg-red">
+                           <p>Asd 3</p>
+                        </div>,
+                     ]}
+                  ></ReorderableList>
+               </section>
+               <hr className="mt-8px" />
 
                <section>
                   {/* Title */}
                   <div className="d-f jc-sb ai-c h-30px">
-                     <p className="p-small type--inverse fw-500">Resolution</p>
+                     <p className="p-small type--inverse fw-500">Resolution / Type</p>
                      <InputButton buttons={[{ value: false, icon: "info", large: true }]} />
                   </div>
 
