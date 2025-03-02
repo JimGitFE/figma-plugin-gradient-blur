@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import "./styles/globals.scss" // Import your CSS file
 // import "./styles/utilities.css" // Import your CSS file
 
@@ -7,7 +7,7 @@ import Theme from "./components/Theme"
 import useDynamicState from "./hooks/useDynamicState"
 import Input from "./components/Input/input"
 import InputButton from "./components/Input/button"
-import ReorderableList from "./components/Draggable"
+import { Reorderable, ReorderableItem } from "./components/Draggable"
 
 const DEFAULT_RESOLUTION = 5
 const DEFAULT_HANDLES = [
@@ -16,8 +16,27 @@ const DEFAULT_HANDLES = [
    { pos: 100, blur: 0 },
 ]
 
+const DEFAULT_ITEMS = [
+   { key: 1, txt: "Asd 1" },
+   { key: 2, txt: "Asd 2" },
+   { key: 3, txt: "Asd 3" },
+   { key: 4, txt: "Asd 4" },
+   { key: 5, txt: "Asd 5" },
+]
+
+function RowDrag({ onDragStart, index, children }: ReorderableItem) {
+   if (!onDragStart) throw new Error("onDragStart is required injection failed")
+   return (
+      <div className="d-f ai-c gap-6px" onMouseDown={(e) => onDragStart(e, index)}>
+         {children}
+      </div>
+   )
+}
+
 function Interface() {
    const [grad, setGrad] = useDynamicState({ resolution: DEFAULT_RESOLUTION, handles: DEFAULT_HANDLES })
+
+   const [handles, setHandles] = useState(DEFAULT_ITEMS)
 
    const onCreate = () => {
       // const count = parseInt(textbox.current.value, 10)
@@ -60,19 +79,16 @@ function Interface() {
 
                <hr className="mt-8px" />
                <section>
-                  <ReorderableList
-                     items={[
-                        <div className="bg-red">
-                           <p>Asd 1</p>
-                        </div>,
-                        <div className="bg-red">
-                           <p>Asd 2</p>
-                        </div>,
-                        <div className="bg-red">
-                           <p>Asd 3</p>
-                        </div>,
-                     ]}
-                  ></ReorderableList>
+                  <Reorderable
+                     source={handles}
+                     onReorder={(newSource) => {
+                        setHandles(newSource)
+                        console.log(newSource)
+                     }}
+                     items={handles.map(({ txt }) => (
+                        <RowDrag>{txt}</RowDrag>
+                     ))}
+                  ></Reorderable>
                </section>
                <hr className="mt-8px" />
 

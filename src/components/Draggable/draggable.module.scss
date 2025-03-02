@@ -1,3 +1,11 @@
-.placeholder {
-   //    transition: height 120ms linear;
+// .draggable:not(.moving) {
+.dragging:not(.moving) {
+   transition: transform 120ms linear;
 }
+.moving {
+   z-index: 89;
+}
+
+// .last {
+//    transition: transform 1120ms linear;
+// }

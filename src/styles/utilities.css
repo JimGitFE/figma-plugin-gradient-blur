@@ -1,8 +1,6 @@
 .ai-c { align-items: center; }
 .bg--figma-color-bg { background: var(--figma-color-bg); }
 .bg-black { background: black; }
-.bg-pink { background: pink; }
-.bg-red { background: red; }
 .c-white { color: white; }
 .d-f { display: flex; }
 .fd-co { flex-direction: column; }
@@ -28,4 +26,3 @@
 .pos-relative { position: relative; }
 .pt-1rem { padding-top: 1rem; }
 .w-100 { width: 100%; }
-.w-20px { width: 20px; }
