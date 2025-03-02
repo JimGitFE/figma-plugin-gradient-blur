@@ -7,7 +7,7 @@ import Theme from "./components/Theme"
 import useDynamicState from "./hooks/useDynamicState"
 import Input from "./components/Input/input"
 import InputButton from "./components/Input/button"
-import { Reorderable, ReorderableItem } from "./components/Draggable"
+import { Reorderable, useDrag } from "./components/Draggable"
 
 const DEFAULT_RESOLUTION = 5
 const DEFAULT_HANDLES = [
@@ -16,13 +16,15 @@ const DEFAULT_HANDLES = [
    { pos: 100, blur: 0 },
 ]
 
-interface HandleProps extends ReorderableItem {
+interface HandleProps {
    setGrad: any
    grad: any
+   isDrag?: boolean
 }
 
-function HandleRow({ onDragStart, index, grad, setGrad }: HandleProps) {
-   if (!onDragStart) throw new Error("onDragStart is required injection failed")
+function HandleRow({ grad, setGrad }: HandleProps) {
+   const { onDragStart } = useDrag()
+
    return (
       <div
          className="handle d-f gap-6px pt-3px pb-3px"
@@ -35,7 +37,7 @@ function HandleRow({ onDragStart, index, grad, setGrad }: HandleProps) {
       >
          {/* Handle */}
          <div
-            onMouseDown={(e) => onDragStart(e, index)}
+            onMouseDown={onDragStart}
             style={{
                marginLeft: "-1.2rem",
                width: "calc(1.2rem - 6px)",
@@ -182,15 +184,11 @@ function Interface() {
 
                   {/* Inputs Handles */}
                   <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
-                     <Reorderable
-                        onReorder={(newSource) => setGrad("handles", newSource)}
-                        source={grad.handles}
-                        items={[
-                           <HandleRow grad={grad.handles[0]} setGrad={(e) => onHandleChange(e, 0)} />,
-                           <HandleRow grad={grad.handles[1]} setGrad={(e) => onHandleChange(e, 1)} />,
-                           <HandleRow grad={grad.handles[2]} setGrad={(e) => onHandleChange(e, 2)} />,
-                        ]}
-                     ></Reorderable>
+                     <Reorderable onReorder={(newSource) => setGrad("handles", newSource)} sources={grad.handles}>
+                        {grad.handles.map((_, index) => (
+                           <HandleRow grad={grad.handles[index]} setGrad={(e) => onHandleChange(e, index)} />
+                        ))}
+                     </Reorderable>
                   </div>
                </section>
 

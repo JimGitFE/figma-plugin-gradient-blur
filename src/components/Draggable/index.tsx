@@ -1,20 +1,32 @@
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef, useEffect, createContext } from "react"
 import styles from "./draggable.module.scss"
 
-interface Props<T> {
-   items: any[]
-   source: T[]
+// Context
+
+interface DragContextProps {
+   onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+}
+
+const DragContext = createContext<DragContextProps | undefined>(undefined)
+
+/** Custom Drag handle */
+export const useDrag = () => {
+   const context = React.useContext(DragContext)
+   if (!context) throw new Error("useDrag must be used within a DragProvider")
+   return context
+}
+
+// Container
+
+interface Props<T> extends React.HTMLAttributes<HTMLDivElement> {
+   children: React.ReactElement<{ isDrag?: boolean }>[]
+   sources: T[]
    /** reordered data source */
-   onReorder: (dataSource: T[]) => void
+   onReorder: (dataSources: T[]) => void
 }
 
-export interface ReorderableItem {
-   onDragStart?: (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void
-   index?: number
-   children?: React.ReactNode
-}
-
-export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>) => {
+/** Drag Provider */
+export const Reorderable = <T extends {}>({ children, sources, onReorder, ...atts }: Props<T>) => {
    // Draggables
    const [activeIndex, setActiveIndex] = useState(-1)
    const [hoveringIndx, setHoveringIndx] = useState(-1)
@@ -28,6 +40,18 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
    const [downY, setDownY] = useState(0)
 
    const isDragging = activeIndex !== -1
+
+   const recalculateItemRects = () => {
+      itemRefs.current.nodes.forEach((node, i) => node && (itemRefs.current.rects[i] = node.getBoundingClientRect()))
+   }
+
+   const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
+      recalculateItemRects()
+      setDownY(e.clientY)
+      setClientY(e.clientY)
+      setActiveIndex(index)
+      setHoveringIndx(index)
+   }
 
    const onMouseMove = (e) => {
       e.preventDefault()
@@ -45,7 +69,7 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
 
    const onMouseUp = () => {
       //   lastDragged.current = [hoveringIndx, activeIndex, itemsBoundingRect.current] // new indx
-      onReorder(reorder(source))
+      onReorder(reorder(sources))
       setDownY(0)
       setClientY(0)
       setActiveIndex(-1)
@@ -57,10 +81,6 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
       const [movedElement] = sourceCopy.splice(activeIndex, 1)
       sourceCopy.splice(hoveringIndx, 0, movedElement)
       return sourceCopy
-   }
-
-   const recalculateItemRects = () => {
-      itemRefs.current.nodes.forEach((node, i) => node && (itemRefs.current.rects[i] = node.getBoundingClientRect()))
    }
 
    // Listeners
@@ -78,38 +98,27 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
       }
    }, [isDragging, activeIndex, hoveringIndx])
 
-   const onDragStart = (e: MouseEvent, index: number) => {
-      recalculateItemRects()
-      setDownY(e.clientY)
-      setClientY(e.clientY)
-      setActiveIndex(index)
-      setHoveringIndx(index)
-   }
-
    return (
-      <div className="pos-relative">
-         {items.map((item, index) => {
+      <div className="pos-relative" {...atts}>
+         {children.map((item, index) => {
             const [activeRect, itemRect] = [itemRefs.current.rects[activeIndex], itemRefs.current.rects[index]]
 
             // Make room for empty slot (draggable new position)
             const slotDy = activeIndex < index ? -activeRect?.height : activeRect?.height
             const moveY = isBetween(index, activeIndex, hoveringIndx) ? slotDy : 0
 
-            const content =
-               React.isValidElement(item) &&
-               React.cloneElement(item as React.ReactElement<Required<ReorderableItem>>, { onDragStart, index }) // or any prop name you prefer
-
             return (
-               //   {/* Slot */}
+               // Slot Item Container
                <div
                   key={index}
+                  onMouseDown={(e) => item.props.isDrag && onDragStart(e, index)}
                   style={{
                      height: isDragging && itemRect.height,
                      width: isDragging && itemRect.width,
                   }}
                   ref={(node) => (itemRefs.current.nodes[index] = node)}
                >
-                  {/* Draggable */}
+                  {/* Draggable Item */}
                   <div
                      className={`${styles.draggable} ${activeIndex === index && styles.moving} ${isDragging && styles.dragging}`}
                      style={{
@@ -119,8 +128,7 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
                         height: isDragging && itemRect.height,
                      }}
                   >
-                     {/* Item JSX */}
-                     {content}
+                     <DragContext.Provider value={{ onDragStart: (e) => onDragStart(e, index) }}>{item}</DragContext.Provider>
                   </div>
                </div>
             )
