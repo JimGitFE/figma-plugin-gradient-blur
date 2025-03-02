@@ -67,7 +67,7 @@ body {
 
 div,
 span {
-   cursor: default;
+   // cursor: default;
    user-select: none;
 }
 
@@ -103,7 +103,7 @@ textarea {
    border: 0;
    margin: 0;
    -webkit-appearance: none;
-   cursor: default;
+   // cursor: default;
    font: inherit;
    outline: 0;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import "./styles/globals.scss" // Import your CSS file
 // import "./styles/utilities.css" // Import your CSS file
 
@@ -16,27 +16,59 @@ const DEFAULT_HANDLES = [
    { pos: 100, blur: 0 },
 ]
 
-const DEFAULT_ITEMS = [
-   { key: 1, txt: "Asd 1" },
-   { key: 2, txt: "Asd 2" },
-   { key: 3, txt: "Asd 3" },
-   { key: 4, txt: "Asd 4" },
-   { key: 5, txt: "Asd 5" },
-]
+interface HandleProps extends ReorderableItem {
+   setGrad: any
+   grad: any
+}
 
-function RowDrag({ onDragStart, index, children }: ReorderableItem) {
+function HandleRow({ onDragStart, index, grad, setGrad }: HandleProps) {
    if (!onDragStart) throw new Error("onDragStart is required injection failed")
    return (
-      <div className="d-f ai-c gap-6px" onMouseDown={(e) => onDragStart(e, index)}>
-         {children}
+      <div
+         className="handle d-f gap-6px pt-3px pb-3px"
+         style={{
+            marginRight: "-1.2rem",
+            marginLeft: "-1.2rem",
+            paddingLeft: "1.2rem",
+            paddingRight: "1.2rem",
+         }}
+      >
+         {/* Handle */}
+         <div
+            onMouseDown={(e) => onDragStart(e, index)}
+            style={{
+               marginLeft: "-1.2rem",
+               width: "calc(1.2rem - 6px)",
+            }}
+            className={`drag-handle d-f jc-c pl-6px`}
+         >
+            <div className="icon icon--handle icon--white o-70" />
+         </div>
+         <Input
+            inputs={[
+               // blur value
+               {
+                  onChange: setGrad,
+                  value: grad.blur,
+                  placeholder: "Blur in px",
+                  icon: "tidy-up-grid",
+               },
+               // position
+               {
+                  after: <span>%</span>,
+                  value: grad.pos,
+                  placeholder: "Blur in px",
+                  style: { width: 52, flex: 0 },
+               },
+            ]}
+         />
+         <InputButton buttons={[{ value: false, icon: "minus", large: true }]} />
       </div>
    )
 }
 
 function Interface() {
    const [grad, setGrad] = useDynamicState({ resolution: DEFAULT_RESOLUTION, handles: DEFAULT_HANDLES })
-
-   const [handles, setHandles] = useState(DEFAULT_ITEMS)
 
    const onCreate = () => {
       // const count = parseInt(textbox.current.value, 10)
@@ -56,6 +88,18 @@ function Interface() {
          }
       }
    }, [])
+
+   const onHandleChange = (e, rowIndex) => {
+      setGrad("handles", (prev) => {
+         return prev.map((item, index) => {
+            if (index === rowIndex) {
+               // Update the condition to match the specific object you want to update
+               return { ...item, blur: Number((e.target as HTMLInputElement).value) }
+            }
+            return item
+         })
+      })
+   }
 
    return (
       <Theme>
@@ -77,19 +121,6 @@ function Interface() {
                   </div>
                </section>
 
-               <hr className="mt-8px" />
-               <section>
-                  <Reorderable
-                     source={handles}
-                     onReorder={(newSource) => {
-                        setHandles(newSource)
-                        console.log(newSource)
-                     }}
-                     items={handles.map(({ txt }) => (
-                        <RowDrag>{txt}</RowDrag>
-                     ))}
-                  ></Reorderable>
-               </section>
                <hr className="mt-8px" />
 
                <section>
@@ -150,100 +181,16 @@ function Interface() {
                   </div>
 
                   {/* Inputs Handles */}
-                  <div className={`d-f fd-co gap-6px`}>
-                     <div className="d-f gap-6px">
-                        <Input
-                           inputs={[
-                              // blur value
-                              {
-                                 onChange: (e) => {
-                                    setGrad("handles", (prev) => {
-                                       return prev.map((item, index) => {
-                                          if (index === 0) {
-                                             // Update the condition to match the specific object you want to update
-                                             return { ...item, blur: Number((e.target as HTMLInputElement).value) }
-                                          }
-                                          return item
-                                       })
-                                    })
-                                 },
-                                 value: grad.handles[0].blur,
-                                 placeholder: "Blur in px",
-                                 icon: "tidy-up-grid",
-                              },
-                              // position
-                              {
-                                 after: <span>%</span>,
-                                 value: grad.handles[2].blur,
-                                 placeholder: "Blur in px",
-                                 style: { width: 52, flex: 0 },
-                              },
-                           ]}
-                        />
-                        <InputButton buttons={[{ value: false, icon: "minus", large: true }]} />
-                     </div>
-                     <div className="d-f gap-6px">
-                        <Input
-                           inputs={[
-                              // blur value
-                              {
-                                 onChange: (e) => {
-                                    setGrad("handles", (prev) => {
-                                       return prev.map((item, index) => {
-                                          if (index === 1) {
-                                             // Update the condition to match the specific object you want to update
-                                             return { ...item, blur: Number((e.target as HTMLInputElement).value) }
-                                          }
-                                          return item
-                                       })
-                                    })
-                                 },
-                                 value: grad.handles[1].blur,
-                                 placeholder: "Blur in px",
-                                 icon: "tidy-up-grid",
-                              },
-                              // position
-                              {
-                                 after: <span>%</span>,
-                                 value: grad.handles[2].blur,
-                                 placeholder: "Blur in px",
-                                 style: { width: 52, flex: 0 },
-                              },
-                           ]}
-                        />
-                        <InputButton buttons={[{ value: false, icon: "minus", large: true }]} />
-                     </div>
-                     <div className="d-f gap-6px">
-                        <Input
-                           inputs={[
-                              // blur value
-                              {
-                                 onChange: (e) => {
-                                    setGrad("handles", (prev) => {
-                                       return prev.map((item, index) => {
-                                          if (index === 2) {
-                                             // Update the condition to match the specific object you want to update
-                                             return { ...item, blur: Number((e.target as HTMLInputElement).value) }
-                                          }
-                                          return item
-                                       })
-                                    })
-                                 },
-                                 value: grad.handles[2].blur,
-                                 placeholder: "Blur in px",
-                                 icon: "tidy-up-grid",
-                              },
-                              // position
-                              {
-                                 after: <span>%</span>,
-                                 value: grad.handles[2].blur,
-                                 placeholder: "Blur in px",
-                                 style: { width: 52, flex: 0 },
-                              },
-                           ]}
-                        />
-                        <InputButton buttons={[{ value: false, icon: "minus", large: true }]} />
-                     </div>
+                  <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
+                     <Reorderable
+                        onReorder={(newSource) => setGrad("handles", newSource)}
+                        source={grad.handles}
+                        items={[
+                           <HandleRow grad={grad.handles[0]} setGrad={(e) => onHandleChange(e, 0)} />,
+                           <HandleRow grad={grad.handles[1]} setGrad={(e) => onHandleChange(e, 1)} />,
+                           <HandleRow grad={grad.handles[2]} setGrad={(e) => onHandleChange(e, 2)} />,
+                        ]}
+                     ></Reorderable>
                   </div>
                </section>
 

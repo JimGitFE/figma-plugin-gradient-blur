@@ -11,10 +11,10 @@ interface Props<T> {
 export interface ReorderableItem {
    onDragStart?: (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => void
    index?: number
-   children: React.ReactNode
+   children?: React.ReactNode
 }
 
-export const Reorderable = <T extends { key: number }>({ items, source, onReorder }: Props<T>) => {
+export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>) => {
    // Draggables
    const [activeIndex, setActiveIndex] = useState(-1)
    const [hoveringIndx, setHoveringIndx] = useState(-1)

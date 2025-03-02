@@ -734,7 +734,7 @@ body {
 
 .button--tertiary:disabled,
 .button--tertiary-destructive:disabled {
-   cursor: default;
+   /* cursor: default; */
    color: var(--black3);
 }
 
@@ -752,7 +752,7 @@ body {
 
 .checkbox {
    align-items: center;
-   cursor: default;
+   /* cursor: default; */
    display: flex;
    height: var(--size-medium);
    position: relative;
@@ -858,7 +858,7 @@ body {
    line-height: var(--line-height);
    color: var(--black8);
    padding: 0 8px 0 24px;
-   cursor: default;
+   /* cursor: default; */
    -webkit-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
@@ -916,7 +916,7 @@ body {
    display: flex;
    align-items: center;
    justify-content: center;
-   cursor: default;
+   /* cursor: default; */
    width: var(--size-medium);
    height: var(--size-medium);
    font-family: var(--font-stack);
@@ -1508,7 +1508,7 @@ body {
    width: 100%;
    display: flex;
    align-items: center;
-   cursor: default;
+   /* cursor: default; */
    -webkit-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
@@ -1539,7 +1539,7 @@ body {
 
 .radio {
    align-items: center;
-   cursor: default;
+   /* cursor: default; */
    display: flex;
    height: var(--size-medium);
    position: relative;
@@ -1606,7 +1606,7 @@ body {
    width: 100%;
    display: flex;
    align-items: center;
-   cursor: default;
+   /* cursor: default; */
    -webkit-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
@@ -1759,7 +1759,7 @@ select.select-menu {
 .select-menu__item {
    align-items: center;
    color: var(--white);
-   cursor: default;
+   /* cursor: default; */
    display: flex;
    font-family: var(--font-stack);
    font-size: var(--font-size-small);
@@ -1825,7 +1825,7 @@ select.select-menu {
 
 .switch {
    align-items: center;
-   cursor: default;
+   /* cursor: default; */
    display: flex;
    height: var(--size-medium);
    position: relative;
