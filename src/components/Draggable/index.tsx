@@ -18,9 +18,11 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
    // Draggables
    const [activeIndex, setActiveIndex] = useState(-1)
    const [hoveringIndx, setHoveringIndx] = useState(-1)
+
    // Dimensions
-   const itemsBoundingRect = useRef([])
+   const itemRefs = useRef({ nodes: [], rects: [] })
    //    const lastDragged = useRef([-1, -1, itemsBoundingRect.current])
+
    // Mouse
    const [clientY, setClientY] = useState(0)
    const [downY, setDownY] = useState(0)
@@ -36,8 +38,8 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
    const dragItemSlotIndx = (e: MouseEvent) => {
       /** Index of the item currently being hovered */
-      const hoverIdx = itemsBoundingRect.current.findIndex((rect) => rect && e.clientY >= rect.top && e.clientY <= rect.bottom)
-      if (hoverIdx === -1) return itemsBoundingRect.current[0].top >= e.clientY ? 0 : itemsBoundingRect.current.length - 1
+      const hoverIdx = itemRefs.current.rects.findIndex((rect) => rect && e.clientY >= rect.top && e.clientY <= rect.bottom)
+      if (hoverIdx === -1) return itemRefs.current.rects[0].top >= e.clientY ? 0 : itemRefs.current.rects.length - 1
       return hoverIdx
    }
 
@@ -57,6 +59,10 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
       return sourceCopy
    }
 
+   const recalculateItemRects = () => {
+      itemRefs.current.nodes.forEach((node, i) => node && (itemRefs.current.rects[i] = node.getBoundingClientRect()))
+   }
+
    // Listeners
    useEffect(() => {
       if (isDragging) {
@@ -73,6 +79,7 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
    }, [isDragging, activeIndex, hoveringIndx])
 
    const onDragStart = (e: MouseEvent, index: number) => {
+      recalculateItemRects()
       setDownY(e.clientY)
       setClientY(e.clientY)
       setActiveIndex(index)
@@ -82,7 +89,7 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
    return (
       <div className="pos-relative">
          {items.map((item, index) => {
-            const [activeRect, itemRect] = [itemsBoundingRect.current[activeIndex], itemsBoundingRect.current[index]]
+            const [activeRect, itemRect] = [itemRefs.current.rects[activeIndex], itemRefs.current.rects[index]]
 
             // Make room for empty slot (draggable new position)
             const slotDy = activeIndex < index ? -activeRect?.height : activeRect?.height
@@ -100,7 +107,7 @@ export const Reorderable = <T extends {}>({ items, source, onReorder }: Props<T>
                      height: isDragging && itemRect.height,
                      width: isDragging && itemRect.width,
                   }}
-                  ref={(node) => !isDragging && node && (itemsBoundingRect.current[index] = node.getBoundingClientRect())}
+                  ref={(node) => (itemRefs.current.nodes[index] = node)}
                >
                   {/* Draggable */}
                   <div
