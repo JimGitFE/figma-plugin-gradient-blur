@@ -19,13 +19,11 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
    const [isSelected, setIsSelected] = useState(false)
 
    useEffect(() => {
-      const onClick = (e) => itemRef.current && !itemRef.current.contains(e.target) && setIsSelected(false)
-
       if (isSelected) {
+         const onClick = (e) => itemRef.current && !itemRef.current.contains(e.target) && setIsSelected(false)
+
          window.addEventListener("mousedown", onClick)
-      }
-      return () => {
-         window.removeEventListener("mousedown", onClick)
+         return () => window.removeEventListener("mousedown", onClick)
       }
    }, [isSelected])
 
