@@ -2,7 +2,7 @@
 // Dependencies
 import React, { useEffect, useRef, useState } from "react"
 // Components
-import { useDrag } from "@/components/custom"
+import { useCustomDrag } from "@/components/custom"
 import { Inputs, InputButton } from "@/components/figma"
 // Internal
 import styles from "./properties.module.scss"
@@ -15,17 +15,16 @@ interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
-   const { onDragStart, isActive } = useDrag()
+   const { onDragStart, isActive } = useCustomDrag()
    const itemRef = useRef(null)
    const [isSelected, setIsSelected] = useState(false)
 
-   const onMouseDown = (e: MouseEvent) => itemRef.current && !itemRef.current.contains(e.target) && setIsSelected(false)
+   // prettier-ignore
+   useEffect(() => {isActive && setIsSelected(true)}, [isActive])
+
+   const onMouseDown = (e: MouseEvent) => !itemRef.current?.contains(e.target) && setIsSelected(false)
 
    useEventListener("mousedown", onMouseDown, { conditional: isSelected })
-
-   useEffect(() => {
-      if (isActive) setIsSelected(true)
-   }, [isActive])
 
    return (
       <div {...atts} className={`${styles.item} d-f`} ref={itemRef}>

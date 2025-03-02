@@ -19,7 +19,7 @@ export default function useDrag({ axis, callbacks = {} }: DragHookProps) {
 
    const isDragging = typeof clientPos.x === "number" && typeof clientPos.y === "number"
 
-   const onMouseDown = (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+   const onDragStart = (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       e.preventDefault()
       setDownPos({ x: e.clientX, y: e.clientY })
       setClientPos({ x: e.clientX, y: e.clientY })
@@ -28,7 +28,6 @@ export default function useDrag({ axis, callbacks = {} }: DragHookProps) {
 
    const onMouseMove = (e) => {
       e.preventDefault()
-      console.log("asdasd")
       setClientPos({ x: e.clientX, y: e.clientY })
       callbacks.move && callbacks.move(e)
    }
@@ -43,8 +42,10 @@ export default function useDrag({ axis, callbacks = {} }: DragHookProps) {
    useEventListener("mousemove", onMouseMove, { conditional: isDragging })
    useEventListener("mouseup", onMouseUp, { conditional: isDragging })
 
-   if (axis === "x") return { dx: clientPos.x - downPos.x, onDragStart: onMouseDown }
-   if (axis === "y") return { dy: clientPos.y - downPos.y, onDragStart: onMouseDown }
+   const [dx, dy] = isDragging ? [clientPos.x - downPos.x, clientPos.y - downPos.y] : [null, null]
 
-   return { dx: clientPos.x - downPos.x, dy: clientPos.y - downPos.y, onDragStart: onMouseDown }
+   if (axis === "x") return { dx, onDragStart, isDragging }
+   if (axis === "y") return { dy, onDragStart, isDragging }
+
+   return { dx, dy, onDragStart, isDragging }
 }

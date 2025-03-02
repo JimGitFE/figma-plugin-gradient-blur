@@ -67,8 +67,8 @@ export const Reorderable = <T extends {}>({ children, sources, onReorder, ...att
 }
 
 /** Custom Drag handle */
-export const useDrag = () => {
+export const useCustomDrag = () => {
    const context = React.useContext(DragContext)
-   if (!context) throw new Error("useDrag must be used within a DragProvider")
+   if (!context) throw new Error("useCustomDrag must be used within a DragProvider")
    return context
 }

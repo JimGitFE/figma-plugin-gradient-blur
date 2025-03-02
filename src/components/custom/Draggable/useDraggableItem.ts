@@ -37,8 +37,6 @@ export function useDraggableItem<T extends {}>({ sources, onReorder }: Draggable
       setHoveringIndx(-1)
    }
 
-   console.log(hoveringIndx, activeIndex)
-
    // Mouse
    const { dy, onDragStart: dragStartCallback } = useDrag({ axis: "y", callbacks: { move, up } })
 
