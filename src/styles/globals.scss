@@ -2,13 +2,18 @@
 @use "utilities.css";
 // @use "thomas.css";
 
+:root {
+   --props-menu-pad: 1.2rem;
+   --props-menu-pad-r: 1rem;
+}
+
 html {
    background: black;
 }
 
 section {
-   padding-left: 1.2rem;
-   padding-right: 1rem;
+   padding-left: var(--props-menu-pad);
+   padding-right: var(--props-menu-pad-r);
 
    display: flex;
    flex-direction: column;
@@ -17,24 +22,6 @@ section {
 
 .props-panel {
    border-right: 1px solid var(--figma-color-border);
-   padding-top: 1.2rem;
-   padding-bottom: 1.2rem;
-}
-
-// tmp
-.handle {
-   & .drag-handle {
-      opacity: 0;
-   }
-}
-.handle:hover {
-   background: rgba(255, 255, 255, 0.02);
-   & .drag-handle {
-      cursor: grab;
-      opacity: 1;
-   }
-}
-
-.handle .drag-handle:active {
-   cursor: grabbing;
+   padding-top: var(--props-menu-pad);
+   padding-bottom: var(--props-menu-pad);
 }
