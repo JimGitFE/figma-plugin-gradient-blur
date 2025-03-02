@@ -6,6 +6,7 @@ import { useDrag } from "@/components/custom"
 import { Inputs, InputButton } from "@/components/figma"
 // Internal
 import styles from "./properties.module.scss"
+import { useEventListener } from "@/hooks/useEventListener"
 
 interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
    setGrad: any
@@ -18,14 +19,9 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
    const itemRef = useRef(null)
    const [isSelected, setIsSelected] = useState(false)
 
-   useEffect(() => {
-      if (isSelected) {
-         const onClick = (e) => itemRef.current && !itemRef.current.contains(e.target) && setIsSelected(false)
+   const onMouseDown = (e: MouseEvent) => itemRef.current && !itemRef.current.contains(e.target) && setIsSelected(false)
 
-         window.addEventListener("mousedown", onClick)
-         return () => window.removeEventListener("mousedown", onClick)
-      }
-   }, [isSelected])
+   useEventListener("mousedown", onMouseDown, { conditional: isSelected })
 
    useEffect(() => {
       if (isActive) setIsSelected(true)
