@@ -9,6 +9,7 @@ import { Button, InputButton, InputButtons, Input } from "@/components/figma"
 import { HandleInput } from "./HandleInput"
 import styles from "./properties.module.scss"
 import { Heading } from "./Heading"
+import { clamp, modulo } from "@/utils"
 
 const DEFAULT_RESOLUTION = 5
 const DEFAULT_HANDLES = [
@@ -114,17 +115,18 @@ function PanelInputs({ dynamicState }: InputProps) {
                   style={{ flex: 1 }}
                   onChange={(e) =>
                      setGrad("angle", () => {
-                        console.log(e.target.value)
                         return Number(e.target.value.replace("°", ""))
                      })
                   }
                   icon={"angle"}
-                  value={`${grad.angle}°`}
+                  value={grad.angle}
+                  display={(v) => `${modulo(Math.round(Number(v)), 359)}°`}
                   placeholder={"Gradient Angle"}
                />
                <Input
                   style={{ flex: 1 }}
-                  onChange={(e) => setGrad("resolution", e.target.value)}
+                  onChange={(e) => setGrad("resolution", clamp(Number(e.target.value), { min: 1 }))}
+                  display={(v) => `${Math.round(Number(v))}`}
                   icon={"steps"}
                   value={grad.resolution}
                   placeholder={"Resolution Steps"}

@@ -7,6 +7,7 @@ import { Inputs, InputButton } from "@/components/figma"
 // Internal
 import styles from "./properties.module.scss"
 import { useEventListener } from "@/hooks/useEventListener"
+import { clamp } from "@/utils"
 
 interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
    setGrad: any
@@ -34,17 +35,19 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
          </div>
          <Inputs
             inputs={[
-               // blur value
+               // blur value px
                {
-                  onChange: (e) => setGrad({ blur: Number(e.target.value) }),
-                  value: grad.blur,
+                  onChange: (e) => setGrad({ blur: clamp(Number(e.target.value), { min: 0 }) }),
+                  value: String(grad.blur),
+                  display: (v) => `${Math.round(Number(v))}`,
                   placeholder: "Blur in px",
                   icon: "tidy-up-grid",
                },
-               // position
+               // position &
                {
                   onChange: (e) => setGrad({ pos: Number(e.target.value) }),
-                  value: grad.pos,
+                  value: String(grad.pos),
+                  display: (v) => `${Math.round(Number(v))}`,
                   placeholder: "Blur in px",
                   style: { width: 52, flex: 0 },
                   after: <span>%</span>,

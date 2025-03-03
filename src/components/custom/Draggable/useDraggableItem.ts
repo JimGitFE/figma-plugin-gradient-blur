@@ -11,6 +11,7 @@ export interface DraggableProps<T extends {}> {
    onReorder: (dataSources: T[]) => void
 }
 
+/** useDrag extension */
 export function useDraggableItem<T extends {}>({ sources, onReorder }: DraggableProps<T>) {
    // Dimensions
    const itemRefs = useRef({ nodes: [], rects: [] })
