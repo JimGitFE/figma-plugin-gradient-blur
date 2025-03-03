@@ -11,27 +11,36 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    large?: boolean
 }
 
-interface Props extends React.HTMLAttributes<HTMLDivElement> {
-   buttons: ButtonProps[]
-   // value?: string | number
+/** Individual */
+function BtnSmBase({ icon, text, isActive = false, large = false, ...atts }: ButtonProps) {
+   return (
+      <button {...atts} className={`${styles.input} ${large && styles.large} ${numeric.input} ${isActive && styles.active}`}>
+         {icon && <div className={`${styles.icon} icon icon--${icon} icon--${isActive ? "blue" : "white"}`} />}
+         {text && <span className="text type--small type--bold fw-500">{text}</span>}
+      </button>
+   )
 }
 
-function InputButtons({ buttons, ...atts }: Props) {
+interface PluralProps extends React.HTMLAttributes<HTMLDivElement> {
+   buttons: ButtonProps[]
+}
+
+function SmallButtons({ buttons, ...atts }: PluralProps) {
    return (
       <div {...atts} className={`${styles.textbox} d-f gap-1px`}>
-         {buttons.map(({ icon, text, isActive = false, large = false, ...atts }, i) => (
-            <button {...atts} key={i} className={`${styles.input} ${large && styles.large} ${numeric.input} ${isActive && styles.active}`}>
-               {icon && <div className={`${styles.icon} icon icon--${icon} icon--${isActive ? "blue" : "white"}`} />}
-               {text && <span className="text type--small type--bold fw-500">{text}</span>}
-            </button>
+         {buttons.map((props, i) => (
+            <BtnSmBase key={i} {...props} />
          ))}
       </div>
    )
 }
 
-/** Individual */
-function InputButton({ ...atts }: ButtonProps) {
-   return <InputButtons buttons={[{ ...atts }]} />
+function SmallButton({ ...props }: ButtonProps) {
+   return (
+      <div className={`${styles.textbox} d-f gap-1px`}>
+         <BtnSmBase {...props} />
+      </div>
+   )
 }
 
-export { InputButtons, InputButton }
+export { SmallButtons, SmallButton }

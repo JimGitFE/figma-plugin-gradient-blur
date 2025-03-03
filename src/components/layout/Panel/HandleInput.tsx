@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react"
 // Components
 import { useCustomDrag } from "@/components/custom"
-import { Inputs, InputButton } from "@/components/figma"
+import { CombinedInputs, SmallButton } from "@/components/figma"
 // Internal
 import styles from "./properties.module.scss"
 import { useEventListener } from "@/hooks/useEventListener"
@@ -33,7 +33,7 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
          <div onMouseDown={onDragStart} className={`${styles.handle} ${isSelected && styles.active} d-f jc-c pl-6px`}>
             <div className="icon icon--handle icon--white o-70" />
          </div>
-         <Inputs
+         <CombinedInputs
             inputs={[
                // blur value px
                {
@@ -54,7 +54,7 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
                },
             ]}
          />
-         <InputButton isActive={false} icon="minus" large />
+         <SmallButton isActive={false} icon="minus" large />
       </div>
    )
 }

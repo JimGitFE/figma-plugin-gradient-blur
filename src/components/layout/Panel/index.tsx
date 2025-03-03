@@ -4,7 +4,7 @@ import React from "react"
 // Components
 import useDynamicState from "@/hooks/useDynamicState"
 import { Reorderable } from "@/components/custom"
-import { Button, InputButton, InputButtons, Input } from "@/components/figma"
+import { Button, SmallButton, SmallButtons, Input } from "@/components/figma"
 // Internal
 import { HandleInput } from "./HandleInput"
 import styles from "./properties.module.scss"
@@ -98,15 +98,15 @@ function PanelInputs({ dynamicState }: InputProps) {
 
             {/* Gradient Type */}
             <div className={`d-f gap-5px`}>
-               <InputButtons style={{ flex: 1 }} buttons={[{ icon: "rotate" }, { icon: "mirror-y" }, { icon: "mirror-x" }]} />
-               <InputButtons
+               <SmallButtons style={{ flex: 1 }} buttons={[{ icon: "rotate" }, { icon: "mirror-y" }, { icon: "mirror-x" }]} />
+               <SmallButtons
                   style={{ width: "auto", flex: 1 }}
                   buttons={[
                      { isActive: true, text: "Lin" },
                      { isActive: false, text: "Rad" },
                   ]}
                />
-               <InputButton icon="adjust" large disabled /> {/* TODO */}
+               <SmallButton icon="adjust" large disabled /> {/* TODO */}
             </div>
 
             {/* Resolution & Angle */}

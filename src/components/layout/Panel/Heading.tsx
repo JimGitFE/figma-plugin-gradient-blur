@@ -2,11 +2,11 @@
 // Dependencies
 import React from "react"
 // Components
-import { InputButton } from "@/components/figma"
+import { SmallButton } from "@/components/figma"
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
    children?: React.ReactNode
-   buttons?: Omit<React.ComponentProps<typeof InputButton>, "large">[]
+   buttons?: Omit<React.ComponentProps<typeof SmallButton>, "large">[]
 }
 
 function Heading({ children, buttons, ...atts }: Props) {
@@ -15,7 +15,7 @@ function Heading({ children, buttons, ...atts }: Props) {
          {children}
          <div className="d-f">
             {buttons?.map((button, i) => (
-               <InputButton key={i} {...button} large />
+               <SmallButton key={i} {...button} large />
             ))}
          </div>
       </div>
