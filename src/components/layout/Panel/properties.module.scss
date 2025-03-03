@@ -27,11 +27,10 @@
       background: var(--figma-color-bg-brand-tertiary);
 
       :global(.textbox) {
-         border-color: var(--figma-color-border-selected) !important;
+         border-color: var(--figma-color-border-selected) !important; // focus
       }
 
       .handle {
-         cursor: grabbing;
          opacity: 1;
       }
    }

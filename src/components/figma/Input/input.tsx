@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from "react"
+import React, { useRef } from "react"
 
 import numeric from "./numeric.module.css"
 import styles from "./input.module.scss"
 import useDrag from "@/hooks/useDrag"
+import { useCursor } from "@/hooks/useCursor"
 
 /** Single Input */
 interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
@@ -36,13 +37,7 @@ function Base({ display = (v) => String(v), value, icon, onChange: onChange, dis
 
    const { dx, onDragStart, isDragging } = useDrag({ callbacks: { move, up: () => (prevDxRef.current = 0) } })
 
-   // TODO useCursor
-   useEffect(() => {
-      isDragging && document.body.classList.add("force-ew-resize")
-      return () => {
-         document.body.classList.remove("force-ew-resize")
-      }
-   }, [isDragging])
+   useCursor({ initialCursor: "ew-resize", setWhile: isDragging })
 
    return (
       <div
@@ -71,7 +66,7 @@ function Base({ display = (v) => String(v), value, icon, onChange: onChange, dis
                onMouseDown={(e) => {
                   onDragStart(e)
                }}
-               className={`${styles.icon} icon icon--${icon} icon--white4 o-70`}
+               className={`${styles.icon} ${(resize?.after ?? true) && styles.resizer} icon icon--${icon} icon--white4 o-70`}
             />
          )}
          {after && (
@@ -79,7 +74,7 @@ function Base({ display = (v) => String(v), value, icon, onChange: onChange, dis
                onMouseDown={(e) => {
                   onDragStart(e)
                }}
-               className={`ml-6px ${styles.after}`}
+               className={`ml-6px ${styles.after} ${(resize?.after ?? true) && styles.resizer}`}
             >
                {after}
             </div>

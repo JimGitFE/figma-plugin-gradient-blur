@@ -1,6 +1,7 @@
 @use "figma/index.scss";
 @use "utilities.css";
 @use "panel.scss";
+@use "cursors.scss";
 // @use "thomas.css";
 
 :root {
@@ -10,9 +11,4 @@
 
 html {
    background: black;
-}
-
-body.force-ew-resize,
-body.force-ew-resize * {
-   cursor: ew-resize !important;
 }

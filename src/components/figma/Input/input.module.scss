@@ -22,6 +22,12 @@
    cursor: not-allowed;
 }
 
+.resizer {
+   &:hover {
+      cursor: ew-resize;
+   }
+}
+
 // .container {}
 
 // .after {}

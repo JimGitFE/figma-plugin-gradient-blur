@@ -8,6 +8,7 @@ import { CombinedInputs, SmallButton } from "@/components/figma"
 import styles from "./properties.module.scss"
 import { useEventListener } from "@/hooks/useEventListener"
 import { clamp } from "@/utils"
+import { useCursor } from "@/hooks/useCursor"
 
 interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
    setGrad: any
@@ -20,12 +21,14 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
    const itemRef = useRef(null)
    const [isSelected, setIsSelected] = useState(false)
 
+   const onClickOut = (e: MouseEvent) => !itemRef.current?.contains(e.target) && setIsSelected(false)
+
    // prettier-ignore
    useEffect(() => {isActive && setIsSelected(true)}, [isActive])
 
-   const onClickOut = (e: MouseEvent) => !itemRef.current?.contains(e.target) && setIsSelected(false)
-
    useEventListener("mousedown", onClickOut, { conditional: isSelected })
+
+   useCursor({ initialCursor: "grabbing", setWhile: isActive })
 
    return (
       <div {...atts} className={`${styles.item} d-f`} ref={itemRef}>
