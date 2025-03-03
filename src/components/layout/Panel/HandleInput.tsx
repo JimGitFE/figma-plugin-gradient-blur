@@ -22,9 +22,9 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
    // prettier-ignore
    useEffect(() => {isActive && setIsSelected(true)}, [isActive])
 
-   const onMouseDown = (e: MouseEvent) => !itemRef.current?.contains(e.target) && setIsSelected(false)
+   const onClickOut = (e: MouseEvent) => !itemRef.current?.contains(e.target) && setIsSelected(false)
 
-   useEventListener("mousedown", onMouseDown, { conditional: isSelected })
+   useEventListener("mousedown", onClickOut, { conditional: isSelected })
 
    return (
       <div {...atts} className={`${styles.item} d-f`} ref={itemRef}>

@@ -11,3 +11,8 @@
 html {
    background: black;
 }
+
+body.force-ew-resize,
+body.force-ew-resize * {
+   cursor: ew-resize !important;
+}
