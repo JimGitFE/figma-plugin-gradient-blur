@@ -2,16 +2,7 @@ import React, { useEffect } from "react"
 import "./styles/globals.scss" // Import your CSS file
 
 import { Theme } from "@/contexts/useTheme"
-// import useDynamicState from "./hooks/useDynamicState"
-// import { InputButtons, Button } from "@/components/figma"
 import { PropertiesPanel } from "@/components/layout"
-
-// const DEFAULT_RESOLUTION = 5
-// const DEFAULT_HANDLES = [
-//    { pos: 0, blur: 10, id: 1 },
-//    { pos: 75, blur: 4, id: 2 },
-//    { pos: 100, blur: 0, id: 3 },
-// ]
 
 function Interface() {
    useEffect(() => {

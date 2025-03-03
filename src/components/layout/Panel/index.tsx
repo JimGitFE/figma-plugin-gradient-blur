@@ -127,6 +127,7 @@ function PanelInputs({ dynamicState }: InputProps) {
                   style={{ flex: 1 }}
                   onChange={(e) => setGrad("resolution", clamp(Number(e.target.value), { min: 1 }))}
                   display={(v) => `${Math.round(Number(v))}`}
+                  resize={{ strength: 0.1 }}
                   icon={"steps"}
                   value={grad.resolution}
                   placeholder={"Resolution Steps"}

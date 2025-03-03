@@ -51,6 +51,7 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
                   onChange: (e) => setGrad({ pos: Number(e.target.value) }),
                   value: String(grad.pos),
                   display: (v) => `${Math.round(Number(v))}`,
+                  resize: { strength: 0.3 },
                   placeholder: "Blur in px",
                   style: { width: 52, flex: 0 },
                   after: <span>%</span>,
