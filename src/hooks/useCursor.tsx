@@ -4,24 +4,30 @@ type Cursor = (typeof CURSORS)[number]
 
 interface CursorConfig {
    // children: ReactNode
-   setWhile?: boolean
-   initialCursor?: Cursor
+   /** If initial cursor conditional `setWhile` required */
+   initialCursor: Cursor
+   setWhile: boolean
 }
 
 /** Overrides all stylesheet cursors */
-export function useCursor({ initialCursor, setWhile = true }: CursorConfig) {
-   const [cursorClass, setCursorClass] = useState<`force-${Cursor}`>(`force-${initialCursor}`)
+export function useCursor({ initialCursor, setWhile }: CursorConfig | Partial<CursorConfig>) {
+   const [cursorClass, setCursorClass] = useState<`force-${Cursor}` | null>(null)
 
    useEffect(() => {
-      if (cursorClass && setWhile) {
-         document.body.classList.add(cursorClass)
-         return () => {
-            document.body.classList.remove(cursorClass)
-         }
-      }
-   }, [cursorClass, setWhile])
+      if (!setWhile) return
+      setCursorClass(`force-${initialCursor}`)
+      return () => setCursorClass(null)
+   }, [setWhile])
 
-   return { setCursorClass }
+   useEffect(() => {
+      if (!cursorClass) return
+      document.body.classList.add(cursorClass)
+      return () => document.body.classList.remove(cursorClass)
+   }, [cursorClass])
+
+   const unsetGlobalCursor = () => setCursorClass(null)
+
+   return { setGlobalCursor: setCursorClass, unsetGlobalCursor }
 }
 
 const CURSORS = [
