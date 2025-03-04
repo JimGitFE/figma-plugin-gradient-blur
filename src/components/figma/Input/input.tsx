@@ -7,10 +7,10 @@ import { useCursor } from "@/hooks/useCursor"
 
 type InputTypes = string | number
 
+type Decorator = { icon?: string; text?: string } & React.HTMLAttributes<HTMLDivElement>
+
 /** Single Input */
 interface InputProps<V extends InputTypes> extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
-   icon?: string
-   after?: any
    /** Input value display editor */
    state: {
       value: V
@@ -32,14 +32,19 @@ interface InputProps<V extends InputTypes> extends Omit<InputHTMLAttributes<HTML
       after?: boolean
       icon?: boolean
    }
-   disabled?: boolean
+   config?: {
+      /** Icon Before <input */
+      left?: Decorator
+      /** Icon After <input */
+      right?: Decorator
+   } & React.InputHTMLAttributes<HTMLInputElement>
 }
 
 const DISPLAY = { display: (v) => String(v), parse: (d) => (typeof d === "number" ? Number(d) : d) } as InputProps<any>["state"]
 
 /** Individual for plural use */
-function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, icon, after, disabled, ...atts }: InputProps<V>) {
-   const { value, onChange, display, parse } = state
+function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config = {}, ...atts }: InputProps<V>) {
+   const [{ value, onChange, display, parse }, { left, right, ...inputAtts }] = [state, config]
    const inputRef = useRef<HTMLInputElement>(null)
    const prevDxRef = useRef(0) // calculate diff
 
@@ -61,23 +66,27 @@ function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, icon, af
    return (
       <div {...atts} className={`d-f ai-c pos-relative ${styles.input}`} onMouseDown={(e) => onDown(e.target as Node)}>
          <input
+            {...inputAtts}
             ref={inputRef}
             className={`${styles.primitive} ${numeric.input}`}
             value={String(display(value))}
             onChange={(e) => onChange(parse(e.target.value), e)}
             type={"text"}
-            disabled={disabled === true}
+            disabled={inputAtts.disabled === true}
             tabIndex={0}
          />
-         {icon && (
+         {left && (
             <div
+               {...left}
                onMouseDown={onDragStart}
-               className={`${styles.icon} ${(resize?.after ?? true) && styles.resizer} icon icon--${icon} icon--white4 o-70`}
-            />
+               className={`${styles.icon} ${(resize?.after ?? true) && styles.resizer} icon icon--${left.icon} icon--white4 o-70`}
+            >
+               {left.text}
+            </div>
          )}
-         {after && (
+         {right && (
             <div onMouseDown={onDragStart} className={`ml-6px ${styles.after} ${(resize?.after ?? true) && styles.resizer}`}>
-               {after}
+               {right.text}
             </div>
          )}
       </div>

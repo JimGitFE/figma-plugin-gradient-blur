@@ -48,8 +48,10 @@ function HandleInput({ handleIndex, ...atts }: HandleProps) {
                   display: (v) => Math.round(v),
                   onChange: (newVal) => setHandle({ blur: clamp(newVal, { min: 0 }) }),
                }}
-               placeholder={"Blur in px"}
-               icon={"tidy-up-grid"}
+               config={{
+                  placeholder: "Blur in px",
+                  left: { icon: "tidy-up-grid" },
+               }}
             />
             <InputAreaBase
                style={{ width: 52, flex: 0 }}
@@ -59,8 +61,10 @@ function HandleInput({ handleIndex, ...atts }: HandleProps) {
                   onChange: (newVal) => setHandle({ pos: newVal }),
                }}
                resize={{ strength: 0.3 }}
-               placeholder={"Blur in px"}
-               after={<span>%</span>}
+               config={{
+                  placeholder: "Blur in px",
+                  right: { text: "%" },
+               }}
             />
          </InputContainer>
          <ActionButton isActive={false} icon="minus" large />

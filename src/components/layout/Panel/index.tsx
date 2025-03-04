@@ -110,8 +110,10 @@ function PanelInputs({}: InputProps) {
                      parse: (v) => Number(v.replace("°", "")),
                      onChange: (newVal) => setGrad({ angle: newVal }),
                   }}
-                  icon={"angle"}
-                  placeholder={"Gradient Angle"}
+                  config={{
+                     left: { icon: "angle" },
+                     placeholder: "Gradient Angle",
+                  }}
                />
                <InputArea
                   style={{ flex: 1 }}
@@ -121,8 +123,10 @@ function PanelInputs({}: InputProps) {
                      onChange: (newVal) => setGrad({ resolution: clamp(newVal, { min: 1 }) }),
                   }}
                   resize={{ strength: 0.1 }}
-                  icon={"steps"}
-                  placeholder={"Resolution Steps"}
+                  config={{
+                     left: { icon: "steps" },
+                     placeholder: "Resolution Steps",
+                  }}
                />
                <div className="w--space-24" />
             </div>
