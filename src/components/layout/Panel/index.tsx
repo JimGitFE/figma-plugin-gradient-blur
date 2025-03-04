@@ -3,7 +3,7 @@
 import React from "react"
 // Components
 import { Reorderable } from "@/components/custom"
-import { Button, SmallButton, SmallButtons, Input } from "@/components/figma"
+import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
 // Internal
 import { HandleInput } from "./HandleInput"
 import styles from "./properties.module.scss"
@@ -88,28 +88,30 @@ function PanelInputs({}: InputProps) {
 
             {/* Gradient Type */}
             <div className={`d-f gap-5px`}>
-               <SmallButtons style={{ flex: 1 }} buttons={[{ icon: "rotate" }, { icon: "mirror-y" }, { icon: "mirror-x" }]} />
-               <SmallButtons
-                  style={{ width: "auto", flex: 1 }}
-                  buttons={[
-                     { isActive: true, text: "Lin" },
-                     { isActive: false, text: "Rad" },
-                  ]}
-               />
-               <SmallButton icon="adjust" large disabled /> {/* TODO */}
+               <ActionContainer style={{ flex: 1 }}>
+                  <ActionButtonBase icon="rotate" />
+                  <ActionButtonBase icon="mirror-y" />
+                  <ActionButtonBase icon="mirror-x" />
+               </ActionContainer>
+               <ActionContainer style={{ width: "auto", flex: 1 }}>
+                  <ActionButtonBase text="Lin" isActive />
+                  <ActionButtonBase text="Rad" />
+               </ActionContainer>
+               <ActionButton icon="adjust" large disabled /> {/* TODO */}
             </div>
 
             {/* Resolution & Angle */}
             <div className={`d-f gap-5px`}>
-               <Input
+               <InputArea
                   style={{ flex: 1 }}
                   value={angle}
-                  display={(v) => `${modulo(Math.round(v), 359)}°`}
-                  onChange={(newVal) => setGrad({ angle: Number(newVal.replace("°", "")) })}
+                  display={(v) => String(`${modulo(Math.round(v), 359)}°`)}
+                  parse={(v) => Number(v.replace("°", ""))}
+                  onChange={(newVal) => setGrad({ angle: newVal })}
                   icon={"angle"}
                   placeholder={"Gradient Angle"}
                />
-               <Input
+               <InputArea
                   style={{ flex: 1 }}
                   value={resolution}
                   display={(v) => Math.round(v)}

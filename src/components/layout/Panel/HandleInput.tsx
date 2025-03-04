@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react"
 // Components
 import { useCustomDrag } from "@/components/custom"
-import { CombinedInputs, SmallButton } from "@/components/figma"
+import { InputContainer, InputAreaBase, ActionButton } from "@/components/figma"
 // Internal
 import styles from "./properties.module.scss"
 import { useEventListener } from "@/hooks/useEventListener"
@@ -36,29 +36,25 @@ function HandleInput({ handle, setHandle, ...atts }: HandleProps) {
          <div onMouseDown={onDragStart} className={`${styles.handle} ${isSelected && styles.active} d-f jc-c pl-6px`}>
             <div className="icon icon--handle icon--white o-70" />
          </div>
-         <CombinedInputs
-            inputs={[
-               // blur value px
-               {
-                  value: handle.blur,
-                  display: (v: number) => Math.round(v),
-                  onChange: (newVal) => setHandle({ blur: clamp(newVal, { min: 0 }) }),
-                  placeholder: "Blur in px",
-                  icon: "tidy-up-grid",
-               },
-               // position &
-               {
-                  value: handle.pos,
-                  display: (v: number) => Math.round(v),
-                  onChange: (newVal) => setHandle({ pos: newVal }),
-                  resize: { strength: 0.3 },
-                  placeholder: "Blur in px",
-                  style: { width: 52, flex: 0 },
-                  after: <span>%</span>,
-               },
-            ]}
-         />
-         <SmallButton isActive={false} icon="minus" large />
+         <InputContainer>
+            <InputAreaBase
+               value={handle.blur}
+               display={(v) => Math.round(v)}
+               onChange={(newVal) => setHandle({ blur: clamp(newVal, { min: 0 }) })}
+               placeholder={"Blur in px"}
+               icon={"tidy-up-grid"}
+            />
+            <InputAreaBase
+               style={{ width: 52, flex: 0 }}
+               value={handle.pos}
+               display={(v) => Math.round(v)}
+               onChange={(newVal) => setHandle({ pos: newVal })}
+               resize={{ strength: 0.3 }}
+               placeholder={"Blur in px"}
+               after={<span>%</span>}
+            />
+         </InputContainer>
+         <ActionButton isActive={false} icon="minus" large />
       </div>
    )
 }
