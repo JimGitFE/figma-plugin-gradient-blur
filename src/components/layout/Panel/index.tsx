@@ -2,7 +2,6 @@
 // Dependencies
 import React from "react"
 // Components
-import useDynamicState from "@/hooks/useDynamicState"
 import { Reorderable } from "@/components/custom"
 import { Button, SmallButton, SmallButtons, Input } from "@/components/figma"
 // Internal
@@ -10,24 +9,16 @@ import { HandleInput } from "./HandleInput"
 import styles from "./properties.module.scss"
 import { Heading } from "./Heading"
 import { clamp, modulo } from "@/utils"
-
-const DEFAULT_RESOLUTION = 5
-const DEFAULT_HANDLES = [
-   { pos: 0, blur: 10, id: 1 },
-   { pos: 75, blur: 4, id: 2 },
-   { pos: 100, blur: 0, id: 3 },
-]
+import { useProperties } from "@/store"
 
 interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {
    children?: React.ReactNode
 }
 
 export function PropertiesPanel({ children, ...atts }: PanelProps) {
-   const [grad, setGrad] = useDynamicState({ angle: 0, resolution: DEFAULT_RESOLUTION, handles: DEFAULT_HANDLES })
-
    const onCreate = () => {
       // const count = parseInt(textbox.current.value, 10)
-      parent.postMessage({ pluginMessage: { type: "create", grad } }, "*")
+      parent.postMessage({ pluginMessage: { type: "create", grad: "grad" } }, "*")
    }
 
    const onCancel = () => {
@@ -47,7 +38,7 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
 
          {/* Properties */}
          <div className={styles.container}>
-            <PanelInputs dynamicState={[grad, setGrad]} />
+            <PanelInputs />
          </div>
 
          <hr className="" />
@@ -77,16 +68,15 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
 }
 
 interface InputProps {
-   dynamicState: any
+   // dynamicState: any
 }
 
-/** Adjustable Properties of Panel (No actions / header ) */
-function PanelInputs({ dynamicState }: InputProps) {
-   const [grad, setGrad] = dynamicState
+import { useShallow } from "zustand/shallow"
 
-   const onHandleChange = (newProp, rowIndex) => {
-      setGrad("handles", (prev) => prev.map((item, index) => (index === rowIndex ? { ...item, ...newProp } : item)))
-   }
+/** Adjustable Properties of Panel (No actions / header ) */
+function PanelInputs({}: InputProps) {
+   const [setGrad, updateHandle] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
+   const { angle, resolution, handles } = useProperties((state) => state.grad)
 
    return (
       <>
@@ -113,23 +103,19 @@ function PanelInputs({ dynamicState }: InputProps) {
             <div className={`d-f gap-5px`}>
                <Input
                   style={{ flex: 1 }}
-                  onChange={(e) =>
-                     setGrad("angle", () => {
-                        return Number(e.target.value.replace("°", ""))
-                     })
-                  }
+                  onChange={(e) => setGrad({ angle: Number(e.target.value.replace("°", "")) })}
                   icon={"angle"}
-                  value={grad.angle}
+                  value={angle}
                   display={(v) => `${modulo(Math.round(Number(v)), 359)}°`}
                   placeholder={"Gradient Angle"}
                />
                <Input
                   style={{ flex: 1 }}
-                  onChange={(e) => setGrad("resolution", clamp(Number(e.target.value), { min: 1 }))}
+                  onChange={(e) => setGrad({ resolution: clamp(Number(e.target.value), { min: 1 }) })}
                   display={(v) => `${Math.round(Number(v))}`}
                   resize={{ strength: 0.1 }}
                   icon={"steps"}
-                  value={grad.resolution}
+                  value={resolution}
                   placeholder={"Resolution Steps"}
                />
                <div className="w--space-24" />
@@ -147,9 +133,9 @@ function PanelInputs({ dynamicState }: InputProps) {
 
             {/* Inputs Handles */}
             <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
-               <Reorderable onReorder={(newSource) => setGrad("handles", newSource)} sources={grad.handles}>
-                  {grad.handles.map((handle, index) => (
-                     <HandleInput id={handle.id} grad={grad.handles[index]} setGrad={(prop) => onHandleChange(prop, index)} />
+               <Reorderable onReorder={(newSource) => setGrad({ handles: newSource })} sources={handles}>
+                  {handles.map((handle, index) => (
+                     <HandleInput id={String(handle.id)} grad={handles[index]} setGrad={(prop) => updateHandle(index, prop)} />
                   ))}
                </Reorderable>
             </div>
