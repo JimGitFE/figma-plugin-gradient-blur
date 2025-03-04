@@ -1,44 +1,61 @@
 {
-  "name": "gradient-blur",
-  "version": "1.0.0",
-  "description": "Your Figma Plugin",
-  "main": "code.js",
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
-    "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
-    "watch": "npm run build -- --watch"
-  },
-  "author": "",
-  "license": "",
-  "devDependencies": {
-    "@figma/eslint-plugin-figma-plugins": "*",
-    "@figma/plugin-typings": "*",
-    "@typescript-eslint/eslint-plugin": "^6.12.0",
-    "@typescript-eslint/parser": "^6.12.0",
-    "eslint": "^8.54.0",
-    "typescript": "^5.3.2"
-  },
-  "eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@figma/figma-plugins/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "project": "./tsconfig.json"
-    },
-    "root": true,
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_",
-          "caughtErrorsIgnorePattern": "^_"
-        }
-      ]
-    }
-  }
+   "name": "gradient-blur",
+   "version": "1.0.0",
+   "description": "Your Figma Plugin",
+   "scripts": {
+      "dev": "concurrently \"npm:watch\" \"npm:utils\"",
+      "build": "webpack --mode=production",
+      "watch": "webpack --mode=development --watch",
+      "lint": "eslint --ext .ts,.tsx --ignore-pattern node_modules .",
+      "lint:fix": "eslint --ext .ts,.tsx --ignore-pattern node_modules --fix .",
+      "utils": "css-utils watch"
+   },
+   "dependencies": {
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+   },
+   "devDependencies": {
+      "@figma/plugin-typings": "^1.50.0",
+      "@types/react": "^18.0.17",
+      "@types/react-dom": "^18.0.6",
+      "concurrently": "^9.1.2",
+      "css-loader": "^6.7.1",
+      "css-utilities-generator": "^1.6.2",
+      "html-webpack-plugin": "^5.5.0",
+      "husky": "^8.0.1",
+      "lint-staged": "^13.0.3",
+      "prettier": "^2.8.8",
+      "react-dev-utils": "^12.0.1",
+      "sass": "^1.85.1",
+      "sass-loader": "^16.0.5",
+      "style-loader": "^3.3.1",
+      "ts-loader": "^9.3.1",
+      "tsconfig-paths-webpack-plugin": "^4.2.0",
+      "typescript": "^4.7.4",
+      "url-loader": "^4.1.1",
+      "webpack": "^5.74.0",
+      "webpack-cli": "^4.10.0"
+   },
+   "eslintConfig": {
+      "extends": [
+         "eslint:recommended",
+         "plugin:@typescript-eslint/recommended",
+         "plugin:@figma/figma-plugins/recommended"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+         "project": "./tsconfig.json"
+      },
+      "root": true,
+      "rules": {
+         "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+               "argsIgnorePattern": "^_",
+               "varsIgnorePattern": "^_",
+               "caughtErrorsIgnorePattern": "^_"
+            }
+         ]
+      }
+   }
 }

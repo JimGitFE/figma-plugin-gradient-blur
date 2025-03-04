@@ -1,0 +1,10 @@
+.floating:not(.active) {
+   transition: transform 120ms linear;
+}
+.active {
+   z-index: 89;
+}
+
+// .last {
+//    transition: transform 1120ms linear;
+// }

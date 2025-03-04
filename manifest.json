@@ -1,18 +1,8 @@
 {
-  "name": "gradient-blur",
-  "id": "1477126473765179908",
-  "api": "1.0.0",
-  "main": "code.js",
-  "capabilities": [],
-  "enableProposedApi": false,
-  "documentAccess": "dynamic-page",
-  "editorType": [
-    "figma"
-  ],
-  "ui": "ui.html",
-  "networkAccess": {
-    "allowedDomains": [
-      "none"
-    ]
-  }
+   "name": "Gradient Blurs & CSS Exports",
+   "id": "figma-plugin",
+   "api": "1.0.0",
+   "main": "dist/controller.js",
+   "ui": "dist/ui.html",
+   "editorType": ["figma", "figjam"]
 }
