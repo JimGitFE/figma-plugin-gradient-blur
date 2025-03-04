@@ -14,10 +14,18 @@ interface InputProps<V extends InputTypes> extends Omit<InputHTMLAttributes<HTML
    /** Input value display editor */
    state: {
       value: V
-      display?: (value: V) => InputTypes
-      parse?: (value: string) => V
       onChange?: (newValue: V, originalEvent?: Partial<React.ChangeEvent<HTMLInputElement>>) => void
-   }
+   } & (
+      | {
+           display?: (value: V) => string
+           parse: (value: string) => V
+        }
+      // Default Number(string) will throw an error thus parse is required
+      | {
+           display?: (value: V) => number
+           parse?: (value: string) => V
+        }
+   )
    /** Drag to resize input value */
    resize?: {
       strength?: number
@@ -27,13 +35,7 @@ interface InputProps<V extends InputTypes> extends Omit<InputHTMLAttributes<HTML
    disabled?: boolean
 }
 
-const DISPLAY = {
-   display: (v) => String(v),
-   parse: (d) => {
-      console.log(d)
-      return typeof d === "number" ? Number(d) : d
-   },
-} as InputProps<any>["state"]
+const DISPLAY = { display: (v) => String(v), parse: (d) => (typeof d === "number" ? Number(d) : d) } as InputProps<any>["state"]
 
 /** Individual for plural use */
 function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, icon, after, disabled, ...atts }: InputProps<V>) {
