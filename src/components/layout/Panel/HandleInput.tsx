@@ -38,17 +38,21 @@ function HandleInput({ handle, setHandle, ...atts }: HandleProps) {
          </div>
          <InputContainer>
             <InputAreaBase
-               value={handle.blur}
-               display={(v) => Math.round(v)}
-               onChange={(newVal) => setHandle({ blur: clamp(newVal, { min: 0 }) })}
+               state={{
+                  value: handle.blur,
+                  display: (v) => Math.round(v),
+                  onChange: (newVal) => setHandle({ blur: clamp(newVal, { min: 0 }) }),
+               }}
                placeholder={"Blur in px"}
                icon={"tidy-up-grid"}
             />
             <InputAreaBase
                style={{ width: 52, flex: 0 }}
-               value={handle.pos}
-               display={(v) => Math.round(v)}
-               onChange={(newVal) => setHandle({ pos: newVal })}
+               state={{
+                  value: handle.pos,
+                  display: (v) => Math.round(v),
+                  onChange: (newVal) => setHandle({ pos: newVal }),
+               }}
                resize={{ strength: 0.3 }}
                placeholder={"Blur in px"}
                after={<span>%</span>}

@@ -104,18 +104,22 @@ function PanelInputs({}: InputProps) {
             <div className={`d-f gap-5px`}>
                <InputArea
                   style={{ flex: 1 }}
-                  value={angle}
-                  display={(v) => String(`${modulo(Math.round(v), 359)}°`)}
-                  parse={(v) => Number(v.replace("°", ""))}
-                  onChange={(newVal) => setGrad({ angle: newVal })}
+                  state={{
+                     value: angle,
+                     display: (v) => String(`${modulo(Math.round(v), 359)}°`),
+                     parse: (v) => Number(v.replace("°", "")),
+                     onChange: (newVal) => setGrad({ angle: newVal }),
+                  }}
                   icon={"angle"}
                   placeholder={"Gradient Angle"}
                />
                <InputArea
                   style={{ flex: 1 }}
-                  value={resolution}
-                  display={(v) => Math.round(v)}
-                  onChange={(newVal) => setGrad({ resolution: clamp(newVal, { min: 1 }) })}
+                  state={{
+                     value: resolution,
+                     display: (v) => Math.round(v),
+                     onChange: (newVal) => setGrad({ resolution: clamp(newVal, { min: 1 }) }),
+                  }}
                   resize={{ strength: 0.1 }}
                   icon={"steps"}
                   placeholder={"Resolution Steps"}

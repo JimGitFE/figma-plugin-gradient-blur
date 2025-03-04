@@ -8,17 +8,16 @@ import { useCursor } from "@/hooks/useCursor"
 type InputTypes = string | number
 
 /** Single Input */
-interface InputProps<V extends InputTypes, D extends InputTypes = string>
-   extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
+interface InputProps<V extends InputTypes> extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
    icon?: string
    after?: any
-   value: V
    /** Input value display editor */
-   // Display value
-   display?: (value: V) => D
-   parse?: (value: D) => V
-
-   onChange?: (newValue: V, originalEvent?: Partial<React.ChangeEvent<HTMLInputElement>>) => void
+   state: {
+      value: V
+      display?: (value: V) => InputTypes
+      parse?: (value: string) => V
+      onChange?: (newValue: V, originalEvent?: Partial<React.ChangeEvent<HTMLInputElement>>) => void
+   }
    /** Drag to resize input value */
    resize?: {
       strength?: number
@@ -28,21 +27,19 @@ interface InputProps<V extends InputTypes, D extends InputTypes = string>
    disabled?: boolean
 }
 
+const DISPLAY = {
+   display: (v) => String(v),
+   parse: (d) => {
+      console.log(d)
+      return typeof d === "number" ? Number(d) : d
+   },
+} as InputProps<any>["state"]
+
 /** Individual for plural use */
-function InputAreaBase<V extends InputTypes, D extends InputTypes = string>({
-   value,
-   display = (v) => (typeof v === "number" ? Number(v) : String(v)) as D,
-   parse = (v) => (typeof v === "number" ? Number(v) : String(v)) as V,
-   onChange = console.log,
-   resize,
-   icon,
-   after,
-   disabled,
-   ...atts
-}: InputProps<V, D>) {
+function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, icon, after, disabled, ...atts }: InputProps<V>) {
+   const { value, onChange, display, parse } = state
    const inputRef = useRef<HTMLInputElement>(null)
    const prevDxRef = useRef(0) // calculate diff
-   const displayValue = display ? display(value) : value
 
    /** Drag resize input value (trigger callback) */
    const move = () => {
@@ -56,26 +53,19 @@ function InputAreaBase<V extends InputTypes, D extends InputTypes = string>({
 
    useCursor({ initialCursor: "ew-resize", setWhile: isDragging })
 
+   /** Focus input if click coords outside input but inside container */
+   const onDown = (target: Node) => inputRef.current && !inputRef.current?.contains(target) && inputRef.current?.focus()
+
    return (
-      <div
-         {...atts}
-         className={`d-f ai-c pos-relative ${styles.input}`}
-         onMouseDown={(e) => {
-            // Focus if not already focusing (clicking on input) (makes text selectable)
-            if (inputRef.current && !inputRef.current?.contains(e.target as Node)) {
-               e.preventDefault()
-               inputRef.current?.focus()
-            }
-         }}
-      >
+      <div {...atts} className={`d-f ai-c pos-relative ${styles.input}`} onMouseDown={(e) => onDown(e.target as Node)}>
          <input
-            value={displayValue}
-            ref={(ref) => (inputRef.current = ref)}
-            type={typeof displayValue === "number" ? "number" : "text"}
+            ref={inputRef}
+            className={`${styles.primitive} ${numeric.input}`}
+            value={String(display(value))}
+            onChange={(e) => onChange(parse(e.target.value), e)}
+            type={"text"}
             disabled={disabled === true}
             tabIndex={0}
-            onChange={(e) => onChange(parse(e.target.value as D), e)}
-            className={`${styles.primitive} ${numeric.input}`}
          />
          {icon && (
             <div
@@ -100,7 +90,7 @@ function InputContainer({ ...atts }: ContainerProps) {
    return <div {...atts} className={`d-f ai-c gap-1px ${styles.textbox} textbox`} />
 }
 
-function InputArea<V extends InputTypes, D extends InputTypes = string>({ ...props }: InputProps<V, D>) {
+function InputArea<V extends InputTypes>({ ...props }: InputProps<V>) {
    return (
       <InputContainer>
          <InputAreaBase {...props} />
