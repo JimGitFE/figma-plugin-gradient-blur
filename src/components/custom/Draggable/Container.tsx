@@ -1,84 +1,103 @@
 // Dependencies
-import React, { createContext, HTMLAttributes, ReactElement, ReactNode } from "react"
+import React, { useRef, useState, createContext, HTMLAttributes, ReactElement } from "react"
 // Internal
-import { isBetween } from "./utils"
-import { DraggableProps, useDraggableItem } from "./useDraggableItem"
-import styles from "./draggable.module.scss"
+import { reorder } from "./utils"
+import useDrag from "@/hooks/useDrag"
+import { type ItemProps, Item } from "./Item"
 
-interface DragContextProps {
-   onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
-   /** Item being dragged */
-   isActive: boolean
-}
-
-/** Individual item drag context */
-const DragContext = createContext<DragContextProps | undefined>(undefined)
-
-// Container
-
-interface ContainerProps<T> extends HTMLAttributes<HTMLDivElement>, DraggableProps<T> {
+interface ContainerProps<T> extends HTMLAttributes<HTMLDivElement> {
    children: ReactElement<ItemProps, typeof Item>[]
+   sources: T[]
+   /** reordered data source */
+   onReorder: (dataSources: T[]) => void
 }
 
-/** Drag Provider */
-export function Container<T extends {}>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
-   const { dy, activeIndex, hoveringIndx, onDragStart, itemRefs } = useDraggableItem({ sources, onReorder })
+/** Drag Reorder & Provider */
+function Container<T extends {}>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
+   // Dimensions
+   const itemsRef = useRef({ nodes: [], rects: [] })
+   //    const lastDragged = useRef([-1, -1, itemsBoundingRect.current])
 
-   const isDragging = activeIndex !== -1
+   // Draggables
+   const [activeIndx, setActiveIndx] = useState(-1)
+   const [hoveringIndx, setHoveringIndx] = useState(-1) // hovering slot index
+
+   const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
+      recalculateItemRects()
+      setActiveIndx(index)
+      setHoveringIndx(index)
+      dragStartCallback(e)
+   }
+
+   const move = (e: MouseEvent) => {
+      setHoveringIndx(mouseOverSlotIndx(e))
+   }
+
+   const up = () => {
+      onReorder(reorder(sources, activeIndx, hoveringIndx))
+      setActiveIndx(-1)
+      setHoveringIndx(-1)
+   }
+
+   // Mouse
+   const { dy, onDragStart: dragStartCallback } = useDrag({ axis: "y", callbacks: { move, up } })
+
+   const recalculateItemRects = () => {
+      itemsRef.current.nodes.forEach((node, i) => node && (itemsRef.current.rects[i] = node.getBoundingClientRect()))
+   }
+
+   /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
+   const mouseOverSlotIndx = (e: MouseEvent) => {
+      /** Index of the item currently being hovered */
+      const hoverIdx = itemsRef.current.rects.findIndex((rect) => rect && e.clientY >= rect.top && e.clientY <= rect.bottom)
+      if (hoverIdx === -1) return itemsRef.current.rects[0].top >= e.clientY ? 0 : itemsRef.current.rects.length - 1
+      return hoverIdx
+   }
 
    return (
       <div className="pos-relative" {...atts}>
-         {children.map((item, index) => {
-            const [activeRect, itemRect] = [itemRefs.current.rects[activeIndex], itemRefs.current.rects[index]]
-            const isActive = activeIndex === index
-
-            // Make room for empty slot (draggable new position)
-            const slotDy = activeIndex < index ? -activeRect?.height : activeRect?.height
-            const moveY = isBetween(index, activeIndex, hoveringIndx) ? slotDy : 0
-
-            return (
-               // Slot Item Container
-               <div
-                  key={item.props.uniqueId}
-                  onMouseDown={(e) => item.props.draggable && onDragStart(e, index)}
-                  style={{
-                     height: isDragging && itemRect.height,
-                     width: isDragging && itemRect.width,
-                  }}
-                  ref={(node) => (itemRefs.current.nodes[index] = node)}
-               >
-                  {/* Draggable Item */}
-                  <div
-                     className={`${isActive && styles.active} ${isDragging && styles.floating}`}
-                     style={{
-                        position: isDragging ? "absolute" : "relative",
-                        transform: `translateY(${isActive ? dy : moveY}px)`,
-                        width: isDragging && itemRect.width,
-                        height: isDragging && itemRect.height,
-                     }}
-                  >
-                     <DragContext.Provider value={{ onDragStart: (e) => onDragStart(e, index), isActive }}>{item}</DragContext.Provider>
-                  </div>
-               </div>
-            )
-         })}
+         {children.map((item, index) => (
+            <ReorderContext.Provider
+               key={item.props.uniqueId ?? index}
+               value={{
+                  item: {
+                     isActive: activeIndx === index,
+                     index: index,
+                     onDragStart: (e) => onDragStart(e, index),
+                  },
+                  state: {
+                     hoveringIndx,
+                     activeIndx,
+                     activeDy: dy,
+                  },
+                  itemsRef,
+               }}
+            >
+               {item}
+            </ReorderContext.Provider>
+         ))}
       </div>
    )
 }
 
-interface ItemProps {
-   children: ReactNode
-   uniqueId: number
-   draggable?: boolean
+interface ReorderContextProps {
+   item: {
+      index: number
+      /** Item being dragged */
+      isActive: boolean
+      onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+   }
+   state: {
+      /** hovering slot index */
+      hoveringIndx: number
+      activeIndx: number
+      /** travelled Y distance for active item */
+      activeDy: number
+   }
+   itemsRef: React.MutableRefObject<{ nodes: any[]; rects: any[] }>
 }
 
-export function Item({ ...props }: ItemProps) {
-   return <div {...props} />
-}
+/** Reorder Internal Context */
+const ReorderContext = createContext<ReorderContextProps | undefined>(undefined)
 
-/** Custom Drag handle */
-export const useDragHandle = () => {
-   const context = React.useContext(DragContext)
-   if (!context) throw new Error("useCustomDrag must be used within a DragProvider")
-   return context
-}
+export { Container, ReorderContext }
