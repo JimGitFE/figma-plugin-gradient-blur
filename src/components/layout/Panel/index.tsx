@@ -2,7 +2,7 @@
 // Dependencies
 import React from "react"
 // Components
-import { ItemWrap, Reorderable } from "@/components/custom"
+import { Reorder } from "@/components/custom"
 import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
 // Internal
 import { HandleInput } from "./HandleInput"
@@ -139,13 +139,13 @@ function PanelInputs({}: InputProps) {
 
             {/* Inputs Handles */}
             <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
-               <Reorderable onReorder={(newSource) => setGrad({ handles: newSource })} sources={handles}>
+               <Reorder.Container onReorder={(newSource) => setGrad({ handles: newSource })} sources={handles}>
                   {handles.map((handle, index) => (
-                     <ItemWrap uniqueId={handle.uniqueId}>
+                     <Reorder.Item uniqueId={handle.uniqueId}>
                         <HandleInput handleIndex={index} />
-                     </ItemWrap>
+                     </Reorder.Item>
                   ))}
-               </Reorderable>
+               </Reorder.Container>
             </div>
          </section>
       </>

@@ -1,5 +1,5 @@
 // Dependencies
-import React, { createContext } from "react"
+import React, { createContext, HTMLAttributes, ReactElement, ReactNode } from "react"
 // Internal
 import { isBetween } from "./utils"
 import { DraggableProps, useDraggableItem } from "./useDraggableItem"
@@ -16,12 +16,12 @@ const DragContext = createContext<DragContextProps | undefined>(undefined)
 
 // Container
 
-interface Props<T> extends React.HTMLAttributes<HTMLDivElement>, DraggableProps<T> {
-   children: React.ReactElement<RequiredChildProps, typeof ItemWrap>[]
+interface ContainerProps<T> extends HTMLAttributes<HTMLDivElement>, DraggableProps<T> {
+   children: ReactElement<ItemProps, typeof Item>[]
 }
 
 /** Drag Provider */
-export function Reorderable<T extends {}>({ children, sources, onReorder, ...atts }: Props<T>) {
+export function Container<T extends {}>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
    const { dy, activeIndex, hoveringIndx, onDragStart, itemRefs } = useDraggableItem({ sources, onReorder })
 
    const isDragging = activeIndex !== -1
@@ -66,18 +66,18 @@ export function Reorderable<T extends {}>({ children, sources, onReorder, ...att
    )
 }
 
-interface RequiredChildProps {
-   children: React.ReactNode
+interface ItemProps {
+   children: ReactNode
    uniqueId: number
    draggable?: boolean
 }
 
-export function ItemWrap({ ...props }: RequiredChildProps) {
+export function Item({ ...props }: ItemProps) {
    return <div {...props} />
 }
 
 /** Custom Drag handle */
-export const useCustomDrag = () => {
+export const useDragHandle = () => {
    const context = React.useContext(DragContext)
    if (!context) throw new Error("useCustomDrag must be used within a DragProvider")
    return context

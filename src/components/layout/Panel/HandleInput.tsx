@@ -2,7 +2,7 @@
 // Dependencies
 import React, { useEffect, useRef, useState } from "react"
 // Components
-import { useCustomDrag } from "@/components/custom"
+import { Reorder } from "@/components/custom"
 import { InputContainer, InputAreaBase, ActionButton } from "@/components/figma"
 // Internal
 import styles from "./properties.module.scss"
@@ -24,7 +24,7 @@ interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
 
 function HandleInput({ handleIndex, ...atts }: HandleProps) {
    const [handle, setHandle] = useHandle(handleIndex)
-   const { onDragStart, isActive } = useCustomDrag()
+   const { onDragStart, isActive } = Reorder.useDragHandle()
    useCursor({ initialCursor: "grabbing", setWhile: isActive })
 
    /* Item Selection */
