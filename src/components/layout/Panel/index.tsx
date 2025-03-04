@@ -104,8 +104,8 @@ function PanelInputs({}: InputProps) {
                <Input
                   style={{ flex: 1 }}
                   value={angle}
-                  display={(v) => `${modulo(Math.round(Number(v)), 359)}°`}
-                  onChange={(newVal) => setGrad({ angle: Number(newVal) })}
+                  display={(v) => `${modulo(Math.round(v), 359)}°`}
+                  onChange={(newVal) => setGrad({ angle: Number(newVal.replace("°", "")) })}
                   icon={"angle"}
                   placeholder={"Gradient Angle"}
                />
