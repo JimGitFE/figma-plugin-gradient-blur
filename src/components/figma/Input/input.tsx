@@ -1,18 +1,20 @@
-import React, { useRef } from "react"
+import React, { useRef, InputHTMLAttributes } from "react"
 
 import numeric from "./numeric.module.css"
 import styles from "./input.module.scss"
 import useDrag from "@/hooks/useDrag"
 import { useCursor } from "@/hooks/useCursor"
 
+type InputTypes = string | number
+
 /** Single Input */
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
+interface InputProps<V extends InputTypes, D extends InputTypes> extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
    icon?: string
    after?: any
-   value: string | number
-   onChange?: (e: Partial<React.ChangeEvent<HTMLInputElement>>) => void
+   value: V
    /** Input value display editor */
-   display?: (value: string | number) => string
+   display: (value: V) => D
+   onChange?: (newValue: D, originalEvent?: Partial<React.ChangeEvent<HTMLInputElement>>) => void
    /** Drag to resize input value */
    resize?: {
       strength?: number
@@ -22,22 +24,38 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "
    disabled?: boolean
 }
 
-function Base({ display = (v) => String(v), value, icon, onChange: onChange, disabled, resize, after, style, ...atts }: InputProps) {
+function Base<V extends InputTypes, D extends number | string>({
+   value,
+   display,
+   icon,
+   onChange,
+   disabled,
+   resize,
+   after,
+   style,
+   ...atts
+}: InputProps<V, D>) {
    const inputRef = useRef<HTMLInputElement>(null)
    const prevDxRef = useRef(0) // calculate diff
+   const displayValue = display ? display(value) : value
 
-   /** Drag resize input value  */
-   const move = (e: MouseEvent) => {
-      const fakeEvent = (value: any) => ({ target: { ...(e.target as HTMLInputElement), value: value.toString() } })
-      const newValue = Number(value) + (dx - prevDxRef.current) * (resize?.strength ?? 0.5)
+   /** Drag resize input value (trigger callback) */
+   const move = () => {
+      if (typeof display(value) !== "number") return
+      const newValue = (Number(value) + (dx - prevDxRef.current) * (resize?.strength ?? 0.5)) as D
+      onChange && onChange(newValue, undefined)
       prevDxRef.current = dx
-
-      onChange(fakeEvent(newValue.toString()))
    }
 
    const { dx, onDragStart, isDragging } = useDrag({ callbacks: { move, up: () => (prevDxRef.current = 0) } })
 
    useCursor({ initialCursor: "ew-resize", setWhile: isDragging })
+
+   /** Safely Guarded onChange callback */
+   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = (typeof displayValue === "number" ? Number(e.target.value) : e.target.value) as D
+      onChange && onChange(newValue, e)
+   }
 
    return (
       <div
@@ -53,12 +71,12 @@ function Base({ display = (v) => String(v), value, icon, onChange: onChange, dis
       >
          <input
             {...atts}
-            value={display(value)}
+            value={displayValue}
             ref={(ref) => (inputRef.current = ref)}
-            type="text"
+            type={typeof displayValue === "number" ? "number" : "text"}
             disabled={disabled === true}
             tabIndex={0}
-            onChange={(e) => onChange(e)}
+            onChange={handleChange}
             className={`${styles.primitive} ${numeric.input}`}
          />
          {icon && (
@@ -84,11 +102,11 @@ function Base({ display = (v) => String(v), value, icon, onChange: onChange, dis
 }
 
 /** Multiple Inputs */
-interface PluralProps extends React.HTMLAttributes<HTMLDivElement> {
-   inputs: InputProps[]
+interface PluralProps<V extends InputTypes, D extends InputTypes> extends React.HTMLAttributes<HTMLDivElement> {
+   inputs: InputProps<V, D>[] // expected to be homogeneous—all items are of the same type !TODO: use Container and Base[] as children
 }
 
-function CombinedInputs({ inputs, ...atts }: PluralProps) {
+function CombinedInputs<V extends InputTypes, D extends InputTypes>({ inputs, ...atts }: PluralProps<V, D>) {
    return (
       <div {...atts} className={`d-f ai-c gap-1px ${styles.textbox} textbox`}>
          {inputs.map((input, index) => (
@@ -98,7 +116,7 @@ function CombinedInputs({ inputs, ...atts }: PluralProps) {
    )
 }
 
-function Input({ ...props }: InputProps) {
+function Input<V extends InputTypes, R extends number | string>({ ...props }: InputProps<V, R>) {
    return (
       <div className={`d-f ai-c gap-1px ${styles.textbox} textbox`}>
          <Base {...props} />

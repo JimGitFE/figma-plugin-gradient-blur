@@ -7,24 +7,6 @@ const DEFAULT_HANDLES = [
    { pos: 100, blur: 0, uniqueId: 3 },
 ]
 
-interface GradientStep {
-   blur: number
-   pos: number
-   uniqueId: number
-}
-
-interface Gradient {
-   angle: number
-   resolution: number
-   handles: GradientStep[]
-}
-
-interface Properties {
-   grad: Gradient
-   setGrad: (grad: Partial<Gradient>) => void
-   updateHandle: (index: number, handle: Partial<GradientStep>) => void
-}
-
 /** Gradient User Inputted Config */
 const useProperties = create<Properties>((set) => ({
    grad: {

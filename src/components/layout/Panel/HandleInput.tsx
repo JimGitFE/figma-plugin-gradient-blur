@@ -11,12 +11,12 @@ import { clamp } from "@/utils"
 import { useCursor } from "@/hooks/useCursor"
 
 interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
-   setGrad: any
-   grad: any
+   setHandle: (handle: Partial<GradientStep>) => void
+   handle: GradientStep
    isDrag?: boolean
 }
 
-function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
+function HandleInput({ handle, setHandle, ...atts }: HandleProps) {
    const { onDragStart, isActive } = useCustomDrag()
    const itemRef = useRef(null)
    const [isSelected, setIsSelected] = useState(false)
@@ -40,17 +40,17 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
             inputs={[
                // blur value px
                {
-                  onChange: (e) => setGrad({ blur: clamp(Number(e.target.value), { min: 0 }) }),
-                  value: String(grad.blur),
-                  display: (v) => `${Math.round(Number(v))}`,
+                  value: handle.blur,
+                  display: (v: number) => Math.round(v),
+                  onChange: (newVal) => setHandle({ blur: clamp(newVal, { min: 0 }) }),
                   placeholder: "Blur in px",
                   icon: "tidy-up-grid",
                },
                // position &
                {
-                  onChange: (e) => setGrad({ pos: Number(e.target.value) }),
-                  value: String(grad.pos),
-                  display: (v) => `${Math.round(Number(v))}`,
+                  value: handle.pos,
+                  display: (v: number) => Math.round(v),
+                  onChange: (newVal) => setHandle({ pos: newVal }),
                   resize: { strength: 0.3 },
                   placeholder: "Blur in px",
                   style: { width: 52, flex: 0 },

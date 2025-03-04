@@ -103,19 +103,19 @@ function PanelInputs({}: InputProps) {
             <div className={`d-f gap-5px`}>
                <Input
                   style={{ flex: 1 }}
-                  onChange={(e) => setGrad({ angle: Number(e.target.value.replace("°", "")) })}
-                  icon={"angle"}
                   value={angle}
                   display={(v) => `${modulo(Math.round(Number(v)), 359)}°`}
+                  onChange={(newVal) => setGrad({ angle: Number(newVal) })}
+                  icon={"angle"}
                   placeholder={"Gradient Angle"}
                />
                <Input
                   style={{ flex: 1 }}
-                  onChange={(e) => setGrad({ resolution: clamp(Number(e.target.value), { min: 1 }) })}
-                  display={(v) => `${Math.round(Number(v))}`}
+                  value={resolution}
+                  display={(v) => Math.round(v)}
+                  onChange={(newVal) => setGrad({ resolution: clamp(newVal, { min: 1 }) })}
                   resize={{ strength: 0.1 }}
                   icon={"steps"}
-                  value={resolution}
                   placeholder={"Resolution Steps"}
                />
                <div className="w--space-24" />
@@ -135,7 +135,7 @@ function PanelInputs({}: InputProps) {
             <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
                <Reorderable onReorder={(newSource) => setGrad({ handles: newSource })} sources={handles}>
                   {handles.map((handle, index) => (
-                     <HandleInput id={String(handle.uniqueId)} grad={handles[index]} setGrad={(prop) => updateHandle(index, prop)} />
+                     <HandleInput id={String(handle.uniqueId)} handle={handles[index]} setHandle={(patch) => updateHandle(index, patch)} />
                   ))}
                </Reorderable>
             </div>
