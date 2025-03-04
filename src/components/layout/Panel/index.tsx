@@ -2,7 +2,7 @@
 // Dependencies
 import React from "react"
 // Components
-import { Reorderable } from "@/components/custom"
+import { ItemWrap, Reorderable } from "@/components/custom"
 import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
 // Internal
 import { HandleInput } from "./HandleInput"
@@ -75,7 +75,7 @@ import { useShallow } from "zustand/shallow"
 
 /** Adjustable Properties of Panel (No actions / header ) */
 function PanelInputs({}: InputProps) {
-   const [setGrad, updateHandle] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
+   const [setGrad] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
    const { angle, resolution, handles } = useProperties((state) => state.grad)
 
    return (
@@ -141,7 +141,9 @@ function PanelInputs({}: InputProps) {
             <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
                <Reorderable onReorder={(newSource) => setGrad({ handles: newSource })} sources={handles}>
                   {handles.map((handle, index) => (
-                     <HandleInput id={String(handle.uniqueId)} handle={handles[index]} setHandle={(patch) => updateHandle(index, patch)} />
+                     <ItemWrap uniqueId={handle.uniqueId}>
+                        <HandleInput handleIndex={index} />
+                     </ItemWrap>
                   ))}
                </Reorderable>
             </div>

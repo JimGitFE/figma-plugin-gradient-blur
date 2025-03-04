@@ -17,11 +17,11 @@ const DragContext = createContext<DragContextProps | undefined>(undefined)
 // Container
 
 interface Props<T> extends React.HTMLAttributes<HTMLDivElement>, DraggableProps<T> {
-   children: React.ReactElement<{ draggable?: boolean; id: number }>[]
+   children: React.ReactElement<RequiredChildProps, typeof ItemWrap>[]
 }
 
 /** Drag Provider */
-export const Reorderable = <T extends {}>({ children, sources, onReorder, ...atts }: Props<T>) => {
+export function Reorderable<T extends {}>({ children, sources, onReorder, ...atts }: Props<T>) {
    const { dy, activeIndex, hoveringIndx, onDragStart, itemRefs } = useDraggableItem({ sources, onReorder })
 
    const isDragging = activeIndex !== -1
@@ -39,7 +39,7 @@ export const Reorderable = <T extends {}>({ children, sources, onReorder, ...att
             return (
                // Slot Item Container
                <div
-                  key={item.props.id}
+                  key={item.props.uniqueId}
                   onMouseDown={(e) => item.props.draggable && onDragStart(e, index)}
                   style={{
                      height: isDragging && itemRect.height,
@@ -64,6 +64,16 @@ export const Reorderable = <T extends {}>({ children, sources, onReorder, ...att
          })}
       </div>
    )
+}
+
+interface RequiredChildProps {
+   children: React.ReactNode
+   uniqueId: number
+   draggable?: boolean
+}
+
+export function ItemWrap({ ...props }: RequiredChildProps) {
+   return <div {...props} />
 }
 
 /** Custom Drag handle */

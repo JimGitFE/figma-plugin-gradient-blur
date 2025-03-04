@@ -9,26 +9,31 @@ import styles from "./properties.module.scss"
 import { useEventListener } from "@/hooks/useEventListener"
 import { clamp } from "@/utils"
 import { useCursor } from "@/hooks/useCursor"
+import { useProperties } from "@/store"
+import { useShallow } from "zustand/shallow"
 
-interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
-   setHandle: (handle: Partial<GradientStep>) => void
-   handle: GradientStep
-   isDrag?: boolean
+/** Store Hook */
+const useHandle = (handleIndex: number) => {
+   const [handle, updateHandle] = useProperties(useShallow((state) => [state.grad.handles[handleIndex], state.updateHandle]))
+   return [handle, (patch: Partial<GradientStep>) => updateHandle(handleIndex, patch)] as const
 }
 
-function HandleInput({ handle, setHandle, ...atts }: HandleProps) {
+interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
+   handleIndex: number
+}
+
+function HandleInput({ handleIndex, ...atts }: HandleProps) {
+   const [handle, setHandle] = useHandle(handleIndex)
    const { onDragStart, isActive } = useCustomDrag()
+   useCursor({ initialCursor: "grabbing", setWhile: isActive })
+
+   /* Item Selection */
    const itemRef = useRef(null)
    const [isSelected, setIsSelected] = useState(false)
-
    const onClickOut = (e: MouseEvent) => !itemRef.current?.contains(e.target) && setIsSelected(false)
-
    // prettier-ignore
    useEffect(() => {isActive && setIsSelected(true)}, [isActive])
-
    useEventListener("mousedown", onClickOut, { conditional: isSelected })
-
-   useCursor({ initialCursor: "grabbing", setWhile: isActive })
 
    return (
       <div {...atts} className={`${styles.item} d-f`} ref={itemRef}>
