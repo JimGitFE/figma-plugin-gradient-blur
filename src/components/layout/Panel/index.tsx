@@ -34,14 +34,14 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
             </Heading>
          </section>
 
-         <hr className="" />
+         <hr />
 
          {/* Properties */}
          <div className={styles.container}>
             <PanelInputs />
          </div>
 
-         <hr className="" />
+         <hr />
 
          {/* Submit */}
          <section>
@@ -51,7 +51,7 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
             </div>
          </section>
 
-         <hr className="" />
+         <hr />
 
          {/* Caption */}
          <section>
@@ -135,7 +135,7 @@ function PanelInputs({}: InputProps) {
             <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
                <Reorderable onReorder={(newSource) => setGrad({ handles: newSource })} sources={handles}>
                   {handles.map((handle, index) => (
-                     <HandleInput id={String(handle.id)} grad={handles[index]} setGrad={(prop) => updateHandle(index, prop)} />
+                     <HandleInput id={String(handle.uniqueId)} grad={handles[index]} setGrad={(prop) => updateHandle(index, prop)} />
                   ))}
                </Reorderable>
             </div>

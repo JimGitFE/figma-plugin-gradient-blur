@@ -2,15 +2,15 @@ import { create } from "zustand"
 
 const DEFAULT_RESOLUTION = 5
 const DEFAULT_HANDLES = [
-   { pos: 0, blur: 10, id: 1 },
-   { pos: 75, blur: 4, id: 2 },
-   { pos: 100, blur: 0, id: 3 },
+   { pos: 0, blur: 10, uniqueId: 1 },
+   { pos: 75, blur: 4, uniqueId: 2 },
+   { pos: 100, blur: 0, uniqueId: 3 },
 ]
 
 interface GradientStep {
    blur: number
    pos: number
-   id: number // unique id
+   uniqueId: number
 }
 
 interface Gradient {
