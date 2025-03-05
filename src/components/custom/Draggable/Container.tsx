@@ -23,7 +23,7 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
    const [hoveringIndx, setHoveringIndx] = useState(-1) // hovering slot index
 
    const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
-      setPrevState((prev) => ({ ...prev, activeUniqueId: sources[index].uniqueId }))
+      setPrevState({ activeDy: null, activeUniqueId: sources[index].uniqueId })
       recalculateItemRects()
       setActiveIndx(index)
       setHoveringIndx(index)
