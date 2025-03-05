@@ -1,11 +1,11 @@
 /** Properties Panel Input sections */
 // Dependencies
-import React from "react"
+import React, { useState } from "react"
 // Components
 import { Reorder } from "@/components/custom"
 import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
 // Internal
-import { HandleInput } from "./HandleInput"
+// import { HandleInput } from "./HandleInput"
 import styles from "./properties.module.scss"
 import { Heading } from "./Heading"
 import { clamp, modulo } from "@/utils"
@@ -73,10 +73,28 @@ interface InputProps {
 
 import { useShallow } from "zustand/shallow"
 
+const SAMPLE_REORDER = [
+   { uniqueId: 4, jsx: <p>Asd id 2</p> },
+   {
+      uniqueId: 1,
+      jsx: (
+         <div>
+            <p>Sample 1</p>
+            <p>
+               <small>label</small>
+            </p>
+         </div>
+      ),
+   },
+   { uniqueId: 8, jsx: <h1>Asd id 8</h1> },
+]
+
 /** Adjustable Properties of Panel (No actions / header ) */
 function PanelInputs({}: InputProps) {
    const [setGrad] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
-   const { angle, resolution, handles } = useProperties((state) => state.grad)
+   const { angle, resolution } = useProperties((state) => state.grad)
+
+   const [sampleState, setSampleState] = useState(SAMPLE_REORDER)
 
    return (
       <>
@@ -143,11 +161,9 @@ function PanelInputs({}: InputProps) {
 
             {/* Inputs Handles */}
             <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
-               <Reorder.Container onReorder={(newSource) => setGrad({ handles: newSource })} sources={handles}>
-                  {handles.map((handle, index) => (
-                     <Reorder.Item uniqueId={handle.uniqueId}>
-                        <HandleInput handleIndex={index} />
-                     </Reorder.Item>
+               <Reorder.Container onReorder={(newSample) => setSampleState(newSample)} sources={sampleState}>
+                  {sampleState.map((item) => (
+                     <Reorder.Item uniqueId={item.uniqueId}>{item.jsx}</Reorder.Item>
                   ))}
                </Reorder.Container>
             </div>

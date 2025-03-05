@@ -15,29 +15,42 @@ interface ContainerProps<T extends { uniqueId: number }> extends HTMLAttributes<
 /** Drag Reorder & Provider */
 function Container<T extends { uniqueId: number }>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
    // Dimensions
-   const itemsRef = useRef({ nodes: [], rects: [] })
+   const itemsRef = useRef({ nodes: [], rects: [], uniqueIds: [], indexes: [] }) // sorted by uniqueId
+   const slotsRef = useRef({ nodes: [], rects: [], uniqueIds: [], indexes: [] }) // sorted by uniqueId
    const [prevState, setPrevState] = useState({ activeDy: null, activeUniqueId: -1 })
 
    // Draggables
+   const [activeId, setActiveId] = useState(-1)
    const [activeIndx, setActiveIndx] = useState(-1)
+   const [hoveringId, setHoveringId] = useState(-1) // hovering slot index
    const [hoveringIndx, setHoveringIndx] = useState(-1) // hovering slot index
 
-   const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
-      setPrevState({ activeDy: null, activeUniqueId: sources[index].uniqueId })
+   const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => {
+      // setPrevState({ activeDy: null, activeUniqueId: sources[uniqueId].uniqueId })
+      console.log("onDragStart", uniqueId)
       recalculateItemRects()
-      setActiveIndx(index)
-      setHoveringIndx(index)
+      setActiveId(uniqueId)
+      setActiveIndx(children.findIndex((it) => it.props.uniqueId === uniqueId))
+      setHoveringId(uniqueId)
+      setHoveringIndx(children.findIndex((it) => it.props.uniqueId === uniqueId))
       dragStartCallback(e)
    }
 
    const move = (e: MouseEvent) => {
       setPrevState((prev) => ({ ...prev, activeDy: dy }))
-      setHoveringIndx(mouseOverSlotIndx(e))
+      const hoverId = mouseOverSlotIndx(e)
+      setHoveringId(hoverId)
+      setHoveringIndx(children.findIndex((it) => it.props.uniqueId === hoverId))
    }
 
    const up = () => {
+      console.log("drop")
+      console.log(sources)
       onReorder(reorder(sources, activeIndx, hoveringIndx))
+      console.log("new sources ", reorder(sources, activeIndx, hoveringIndx))
+      setActiveId(-1)
       setActiveIndx(-1)
+      setHoveringId(-1)
       setHoveringIndx(-1)
    }
 
@@ -46,6 +59,7 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
 
    const recalculateItemRects = () => {
       itemsRef.current.nodes.forEach((node, i) => node && (itemsRef.current.rects[i] = node.getBoundingClientRect()))
+      slotsRef.current.nodes.forEach((node, i) => node && (slotsRef.current.rects[i] = node.getBoundingClientRect()))
    }
 
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
@@ -56,6 +70,16 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
       return hoverIdx
    }
 
+   const rectsByIndx = itemsRef.current.nodes
+      .map((node, uniqueId) => {
+         return {
+            node,
+            rect: node ? node.getBoundingClientRect() : null,
+            index: children.findIndex((it) => it.props.uniqueId === uniqueId),
+         }
+      })
+      .sort((a, b) => a.index - b.index)
+
    return (
       <div {...atts} className="pos-relative">
          {children.map((item, index) => (
@@ -64,17 +88,23 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
                // Context
                value={{
                   item: {
-                     isActive: activeIndx === index,
-                     index: index,
+                     isActive: activeId === item.props.uniqueId,
+                     /** Handles display order */
+                     index: children.findIndex((it) => it.props.uniqueId === item.props.uniqueId),
+                     /** state key control */
                      uniqueId: item.props.uniqueId ?? index,
-                     onDragStart: (e) => onDragStart(e, index),
+                     onDragStart,
                   },
                   state: {
+                     hoveringId,
                      hoveringIndx,
+                     activeId,
                      activeIndx,
                      activeDy: dy,
                   },
                   itemsRef,
+                  slotsRef,
+                  rectsByIndx: rectsByIndx ?? [],
                   prevState,
                }}
                // Children
@@ -91,16 +121,20 @@ interface ReorderContextProps {
       uniqueId: number
       /** Item being dragged */
       isActive: boolean
-      onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+      onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => void
    }
    state: {
       /** hovering slot index */
+      hoveringId: number
       hoveringIndx: number
+      activeId: number
       activeIndx: number
       /** travelled Y distance for active item */
       activeDy: number
    }
-   itemsRef: React.MutableRefObject<{ nodes: any[]; rects: any[] }>
+   itemsRef: React.MutableRefObject<{ nodes: any[]; rects: any[]; uniqueIds: number[]; indexes: number[] }>
+   slotsRef: React.MutableRefObject<{ nodes: any[]; rects: any[]; uniqueIds: number[]; indexes: number[] }>
+   rectsByIndx: { node: any; rect: DOMRect }[]
    prevState: {
       activeDy?: number
       activeUniqueId: number

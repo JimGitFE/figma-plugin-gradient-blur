@@ -1,6 +1,7 @@
 .ai-c { align-items: center; }
 .bg--figma-color-bg { background: var(--figma-color-bg); }
 .bg-black { background: black; }
+.bg-red2 { background: red2; }
 .c-white { color: white; }
 .d-f { display: flex; }
 .fd-co { flex-direction: column; }
@@ -26,3 +27,4 @@
 .pt-1rem { padding-top: 1rem; }
 .w--space-24 { width: var(--space-24); }
 .w-100 { width: 100%; }
+.z-6 { z-index: 6; }
