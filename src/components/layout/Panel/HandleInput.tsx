@@ -13,18 +13,19 @@ import { useProperties } from "@/store"
 import { useShallow } from "zustand/shallow"
 
 /** Store Hook */
-const useHandle = (handleIndex: number) => {
-   const [handle, updateHandle] = useProperties(useShallow((state) => [state.grad.handles[handleIndex], state.updateHandle]))
-   return [handle, (patch: Partial<GradientStep>) => updateHandle(handleIndex, patch)] as const
+const useHandle = (handleId: number) => {
+   const updateHandle = useProperties(useShallow((state) => state.updateHandle))
+   return (patch: Partial<GradientStep>) => updateHandle(handleId, patch)
 }
 
 interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
-   handleIndex: number
+   handleId: number
+   handle: GradientStep
 }
 
-function HandleInput({ handleIndex, ...atts }: HandleProps) {
+function HandleInput({ handle, handleId, ...atts }: HandleProps) {
    const sortHandles = useProperties((state) => state.sortHandles)
-   const [handle, setHandle] = useHandle(handleIndex)
+   const setHandle = useHandle(handleId)
 
    // Drag resize input
    const { onDragStart, isActive } = Reorder.useDragHandle()

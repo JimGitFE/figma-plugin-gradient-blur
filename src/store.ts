@@ -15,8 +15,9 @@ const useProperties = create<Properties>((set) => ({
       handles: DEFAULT_HANDLES,
    },
    setGrad: (grad) => set((state) => ({ grad: { ...state.grad, ...grad } })),
-   updateHandle: (index, handle) =>
+   updateHandle: (uniqueId, handle) =>
       set((state) => {
+         const index = state.grad.handles.findIndex((h) => h.uniqueId === uniqueId)
          const newHandles = [...state.grad.handles]
          newHandles[index] = { ...newHandles[index], ...handle }
          return { grad: { ...state.grad, handles: newHandles } }
