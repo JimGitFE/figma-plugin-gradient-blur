@@ -51,8 +51,8 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
    const hoveringItemId = (e: MouseEvent) => {
       /** Index of the item currently being hovered */
-      const index = itemRefs.current.findIndex((ref) => ref.rect && e.clientY >= ref.rect.top && e.clientY <= ref.rect.bottom)
-      if (index === -1) return itemRefs.current[indexFromId(0)].rect.top >= e.clientY ? 0 : itemRefs.current.length - 1
+      let index = itemRefs.current.findIndex((ref) => ref?.rect && e.clientY >= ref.rect.top && e.clientY <= ref.rect.bottom)
+      if (index === -1) index = itemRefs.current[indexFromId(1)]?.rect.top >= e.clientY ? 0 : itemRefs.current.length - 1
       return children[index].props.uniqueId
    }
 
