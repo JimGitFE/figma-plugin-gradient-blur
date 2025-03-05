@@ -1,9 +1,9 @@
 // Dependencies
 import React, { useRef, useState, createContext, HTMLAttributes, ReactElement } from "react"
 // Internal
-import { reorder } from "./utils"
 import useDrag from "@/hooks/useDrag"
 import { type ItemProps, Item } from "./Item"
+import { reorder } from "./utils"
 
 interface ContainerProps<T extends { uniqueId: number }> extends HTMLAttributes<HTMLDivElement> {
    children: ReactElement<ItemProps, typeof Item>[]

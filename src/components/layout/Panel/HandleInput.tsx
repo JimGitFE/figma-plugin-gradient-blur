@@ -23,7 +23,10 @@ interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 function HandleInput({ handleIndex, ...atts }: HandleProps) {
+   const sortHandles = useProperties((state) => state.sortHandles)
    const [handle, setHandle] = useHandle(handleIndex)
+
+   // Drag resize input
    const { onDragStart, isActive } = Reorder.useDragHandle()
    useCursor({ initialCursor: "grabbing", setWhile: isActive })
 
@@ -34,6 +37,11 @@ function HandleInput({ handleIndex, ...atts }: HandleProps) {
    // prettier-ignore
    useEffect(() => {isActive && setIsSelected(true)}, [isActive])
    useEventListener("mousedown", onClickOut, { conditional: isSelected })
+
+   const posChange = (newPos: number) => {
+      setHandle({ pos: newPos })
+      sortHandles()
+   }
 
    return (
       <div {...atts} className={`${styles.item} d-f`} ref={itemRef}>
@@ -58,7 +66,7 @@ function HandleInput({ handleIndex, ...atts }: HandleProps) {
                state={{
                   value: handle.pos,
                   display: (v) => Math.round(v),
-                  onChange: (newVal) => setHandle({ pos: newVal }),
+                  onChange: posChange,
                }}
                resize={{ strength: 0.3 }}
                config={{

@@ -21,6 +21,11 @@ const useProperties = create<Properties>((set) => ({
          newHandles[index] = { ...newHandles[index], ...handle }
          return { grad: { ...state.grad, handles: newHandles } }
       }),
+   sortHandles: () =>
+      set((state) => {
+         const sortedHandles = [...state.grad.handles].sort((a, b) => a.pos - b.pos)
+         return { grad: { ...state.grad, handles: sortedHandles } }
+      }),
 }))
 
 export { useProperties }

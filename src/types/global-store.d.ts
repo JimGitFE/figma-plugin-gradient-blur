@@ -14,4 +14,5 @@ interface Properties {
    grad: Gradient
    setGrad: (grad: Partial<Gradient>) => void
    updateHandle: (index: number, handle: Partial<GradientStep>) => void
+   sortHandles: () => void
 }
