@@ -15,11 +15,8 @@ interface ContainerProps<T extends { uniqueId: number }> extends HTMLAttributes<
 /** Drag Reorder & Provider */
 function Container<T extends { uniqueId: number }>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
    // Dimensions
-   const containerRef = useRef<DOMRect>(null)
-   const [prevState, setPrevState] = useState({ activeDy: null, activeUniqueId: -1 })
-
    const itemsRef = useRef({ nodes: [], rects: [] })
-   //    const lastDragged = useRef([-1, -1, itemsBoundingRect.current])
+   const [prevState, setPrevState] = useState({ activeDy: null, activeUniqueId: -1 })
 
    // Draggables
    const [activeIndx, setActiveIndx] = useState(-1)
@@ -60,10 +57,11 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
    }
 
    return (
-      <div {...atts} className="pos-relative" ref={(node) => node && (containerRef.current = node.getBoundingClientRect())}>
+      <div {...atts} className="pos-relative">
          {children.map((item, index) => (
             <ReorderContext.Provider
                key={item.props.uniqueId ?? index}
+               // Context
                value={{
                   item: {
                      isActive: activeIndx === index,
@@ -78,11 +76,10 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
                   },
                   itemsRef,
                   prevState,
-                  // containerRect: containerRef.current,
                }}
-            >
-               {item}
-            </ReorderContext.Provider>
+               // Children
+               children={item}
+            />
          ))}
       </div>
    )
@@ -108,7 +105,6 @@ interface ReorderContextProps {
       activeDy?: number
       activeUniqueId: number
    }
-   // containerRect: DOMRect
 }
 
 /** Reorder Internal Context */

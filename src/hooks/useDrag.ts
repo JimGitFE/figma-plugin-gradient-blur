@@ -47,3 +47,5 @@ export default function useDrag({ axis, callbacks = {} }: DragHookProps = {}) {
 
    return { dx, dy, onDragStart, isDragging }
 }
+
+// TODO: while dragging, disable onDragStart until mouseup

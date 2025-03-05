@@ -17,18 +17,14 @@ function Item({ children, draggable }: ItemProps) {
    const [{ onDragStart, isActive, index, uniqueId }, { activeIndx, hoveringIndx, activeDy }] = [context.item, context.state]
    const [activeRect, itemRect] = [context.itemsRef.current.rects[activeIndx], context.itemsRef.current.rects[index]]
 
+   const wrapRef = React.useRef<HTMLDivElement>(null)
+   const prevIndexRef = React.useRef<number>(uniqueId - 1)
+
    // Make room for empty slot (draggable new position)
    const slotDy = activeIndx < index ? -activeRect?.height : activeRect?.height
    const moveY = isBetween(index, activeIndx, hoveringIndx) ? slotDy : 0
 
-   const prevIndexRef = React.useRef<number>(uniqueId - 1)
    const isDragging = activeIndx !== -1
-
-   const wrapRef = React.useRef<HTMLDivElement>(null)
-
-   const itemWasLastActive = context.prevState.activeUniqueId === uniqueId
-
-   console.log(uniqueId, itemWasLastActive)
 
    // onDrop fake smooth positioning to new slot
    useEffect(() => {
@@ -65,7 +61,7 @@ function Item({ children, draggable }: ItemProps) {
          <div
             className={`${isActive && styles.active} ${isDragging && styles.floating}`}
             style={{
-               zIndex: itemWasLastActive && 87,
+               zIndex: context.prevState.activeUniqueId === uniqueId && 87,
                position: isDragging ? "absolute" : "relative",
                transform: `translateY(${isActive ? activeDy : moveY}px)`,
                width: isDragging && itemRect.width,
