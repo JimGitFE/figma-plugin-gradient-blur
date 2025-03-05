@@ -41,7 +41,7 @@ function Item({ children, draggable }: ItemProps) {
 
          // Force a reflow
          requestAnimationFrame(() => {
-            wrapper.style.transition = `transform 70ms linear`
+            wrapper.style.transition = `transform 70ms linear` // v = d/t (distance on drop is at most avgHeight/2)
             wrapper.style.transform = `translateY(${0}px)`
          })
       }
