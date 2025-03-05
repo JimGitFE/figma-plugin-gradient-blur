@@ -44,7 +44,7 @@ const DISPLAY = { display: (v) => String(v), parse: (d) => (typeof d === "number
 
 /** Individual for plural use */
 function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config = {}, ...atts }: InputProps<V>) {
-   const [{ value, onChange, display, parse }, { left, right, ...inputAtts }] = [state, config]
+   const [{ value, onChange, display, parse }, { left, right, ...inputAtts }] = [{ ...DISPLAY, ...state }, config]
    const inputRef = useRef<HTMLInputElement>(null)
    const prevDxRef = useRef(0) // calculate diff
 
