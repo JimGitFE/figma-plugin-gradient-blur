@@ -5,7 +5,7 @@ import { reorder } from "./utils"
 import useDrag from "@/hooks/useDrag"
 import { type ItemProps, Item } from "./Item"
 
-interface ContainerProps<T> extends HTMLAttributes<HTMLDivElement> {
+interface ContainerProps<T extends { uniqueId: number }> extends HTMLAttributes<HTMLDivElement> {
    children: ReactElement<ItemProps, typeof Item>[]
    sources: T[]
    /** reordered data source */
@@ -13,8 +13,11 @@ interface ContainerProps<T> extends HTMLAttributes<HTMLDivElement> {
 }
 
 /** Drag Reorder & Provider */
-function Container<T extends {}>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
+function Container<T extends { uniqueId: number }>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
    // Dimensions
+   const containerRef = useRef<DOMRect>(null)
+   const [prevState, setPrevState] = useState({ activeDy: null, activeUniqueId: -1 })
+
    const itemsRef = useRef({ nodes: [], rects: [] })
    //    const lastDragged = useRef([-1, -1, itemsBoundingRect.current])
 
@@ -23,6 +26,7 @@ function Container<T extends {}>({ children, sources, onReorder, ...atts }: Cont
    const [hoveringIndx, setHoveringIndx] = useState(-1) // hovering slot index
 
    const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) => {
+      setPrevState((prev) => ({ ...prev, activeUniqueId: sources[index].uniqueId }))
       recalculateItemRects()
       setActiveIndx(index)
       setHoveringIndx(index)
@@ -30,6 +34,7 @@ function Container<T extends {}>({ children, sources, onReorder, ...atts }: Cont
    }
 
    const move = (e: MouseEvent) => {
+      setPrevState((prev) => ({ ...prev, activeDy: dy }))
       setHoveringIndx(mouseOverSlotIndx(e))
    }
 
@@ -55,7 +60,7 @@ function Container<T extends {}>({ children, sources, onReorder, ...atts }: Cont
    }
 
    return (
-      <div className="pos-relative" {...atts}>
+      <div {...atts} className="pos-relative" ref={(node) => node && (containerRef.current = node.getBoundingClientRect())}>
          {children.map((item, index) => (
             <ReorderContext.Provider
                key={item.props.uniqueId ?? index}
@@ -63,6 +68,7 @@ function Container<T extends {}>({ children, sources, onReorder, ...atts }: Cont
                   item: {
                      isActive: activeIndx === index,
                      index: index,
+                     uniqueId: item.props.uniqueId ?? index,
                      onDragStart: (e) => onDragStart(e, index),
                   },
                   state: {
@@ -71,6 +77,8 @@ function Container<T extends {}>({ children, sources, onReorder, ...atts }: Cont
                      activeDy: dy,
                   },
                   itemsRef,
+                  prevState,
+                  // containerRect: containerRef.current,
                }}
             >
                {item}
@@ -83,6 +91,7 @@ function Container<T extends {}>({ children, sources, onReorder, ...atts }: Cont
 interface ReorderContextProps {
    item: {
       index: number
+      uniqueId: number
       /** Item being dragged */
       isActive: boolean
       onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
@@ -95,6 +104,11 @@ interface ReorderContextProps {
       activeDy: number
    }
    itemsRef: React.MutableRefObject<{ nodes: any[]; rects: any[] }>
+   prevState: {
+      activeDy?: number
+      activeUniqueId: number
+   }
+   // containerRect: DOMRect
 }
 
 /** Reorder Internal Context */
