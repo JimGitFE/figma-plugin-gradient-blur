@@ -21,7 +21,6 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
    const itemRefs = useRef([]) // sorted by index
 
    /** Drag Tracker (resets on container resize) */
-   // const milestoneRef = useRef<number>(0) // 0: idle (item rect might shift), 1: drag start (nodes settled), 2: moved
    const [milestone, setMilestone] = useState(0)
    const assignOnce = [milestone === 0, milestone === 1]
 
@@ -41,6 +40,7 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
    const [active, setActive] = useState({ uniqueId: -1, index: -1 })
    const [hovering, setHovering] = useState({ uniqueId: -1, index: -1 }) // hovering slot index
 
+   // Mouse
    const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => {
       recalculateItemRects() // new hover slots relative positions
       if (assignOnce[0]) setMilestone(1) // define item dimensions
@@ -48,25 +48,17 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
       dragStartCallback(e)
    }
-
    const move = (e: MouseEvent) => {
       if (assignOnce[1]) setMilestone(2) // define item transition
       const uniqueId = hoveringItemId(e)
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
    }
-
    const up = () => {
       onReorder(reorder(sources, active.index, hovering.index))
       setActive({ uniqueId: -1, index: -1 })
       setHovering({ uniqueId: -1, index: -1 })
    }
-
-   // Mouse
    const { dy, onDragStart: dragStartCallback } = useDrag({ axis: "y", callbacks: { move, up } })
-
-   const recalculateItemRects = () => {
-      itemRefs.current.forEach((ref, i) => ref.node && (itemRefs.current[i].rect = ref.node.getBoundingClientRect()))
-   }
 
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
    const hoveringItemId = (e: MouseEvent) => {
@@ -74,6 +66,10 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
       let index = itemRefs.current.findIndex((ref) => ref?.rect && e.clientY >= ref.rect.top && e.clientY <= ref.rect.bottom)
       if (index === -1) index = itemRefs.current[indexFromId(1)]?.rect.top >= e.clientY ? 0 : itemRefs.current.length - 1
       return children[index].props.uniqueId
+   }
+
+   const recalculateItemRects = () => {
+      itemRefs.current.forEach((ref, i) => ref.node && (itemRefs.current[i].rect = ref.node.getBoundingClientRect()))
    }
 
    // Util
