@@ -81,40 +81,42 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
 
    return (
       <div {...atts} ref={containerRef} className="pos-relative">
-         {children.map((item, index) => (
-            <ReorderContext.Provider
-               key={item.props.uniqueId ?? index}
-               // Context
-               value={[
-                  // Item
-                  {
-                     /** Handles display order */
-                     index: indexFromId(item.props.uniqueId),
-                     /** state key control */
-                     uniqueId: item.props.uniqueId ?? index,
-                     /** DOM rect dimensions */
-                     rect: itemRefs.current[indexFromId(item.props.uniqueId)]?.rect,
-                     /** drag handle Init */
-                     onDragStart,
-                     isActive: active.uniqueId === item.props.uniqueId,
-                  },
-                  // State
-                  {
-                     hovering,
-                     active,
-                     activeDy: dy,
-                  },
-                  // Internal
-                  {
-                     itemRefs,
-                     recalculateRects: recalculateItemRects,
-                     milestone,
-                  },
-               ]}
-               // Children
-               children={item}
-            />
-         ))}
+         {[...children]
+            .sort((a, b) => a.props.uniqueId - b.props.uniqueId)
+            .map((item, index) => (
+               <ReorderContext.Provider
+                  key={item.props.uniqueId ?? index}
+                  // Context
+                  value={[
+                     // Item
+                     {
+                        /** Handles display order */
+                        index: indexFromId(item.props.uniqueId),
+                        /** state key control */
+                        uniqueId: item.props.uniqueId ?? index,
+                        /** DOM rect dimensions */
+                        rect: itemRefs.current[indexFromId(item.props.uniqueId)]?.rect,
+                        /** drag handle Init */
+                        onDragStart,
+                        isActive: active.uniqueId === item.props.uniqueId,
+                     },
+                     // State
+                     {
+                        hovering,
+                        active,
+                        activeDy: dy,
+                     },
+                     // Internal
+                     {
+                        itemRefs,
+                        recalculateRects: recalculateItemRects,
+                        milestone,
+                     },
+                  ]}
+                  // Children
+                  children={item}
+               />
+            ))}
       </div>
    )
 }
