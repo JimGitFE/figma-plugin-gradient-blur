@@ -40,11 +40,12 @@ interface InputProps<V extends InputTypes> extends Omit<InputHTMLAttributes<HTML
    } & React.InputHTMLAttributes<HTMLInputElement>
 }
 
-const DISPLAY = { display: (v) => String(v), parse: (d) => (typeof d === "number" ? Number(d) : d) } as InputProps<any>["state"]
+const DISPLAY = { display: (v) => String(v) } as InputProps<any>["state"]
 
 /** Individual for plural use */
 function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config = {}, ...atts }: InputProps<V>) {
-   const [{ value, onChange, display, parse }, { left, right, ...inputAtts }] = [{ ...DISPLAY, ...state }, config]
+   const defaultParse = ((d: string) => (typeof state.value === "number" ? Number(d) : d)) as (display: string) => V
+   const [{ value, onChange, display, parse }, { left, right, ...inputAtts }] = [{ ...DISPLAY, parse: defaultParse, ...state }, config]
    const inputRef = useRef<HTMLInputElement>(null)
    const prevDxRef = useRef(0) // calculate diff
 
@@ -69,7 +70,7 @@ function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config =
             {...inputAtts}
             ref={inputRef}
             className={`${styles.primitive} ${numeric.input}`}
-            value={String(display(value))}
+            value={display(value)}
             onChange={(e) => onChange(parse(e.target.value), e)}
             type={"text"}
             disabled={inputAtts.disabled === true}
