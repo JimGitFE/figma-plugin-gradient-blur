@@ -25,6 +25,7 @@ const useProperties = create<Properties>((set) => ({
    sortHandles: () =>
       set((state) => {
          const sortedHandles = [...state.grad.handles].sort((a, b) => a.pos - b.pos)
+         console.log(sortedHandles)
          return { grad: { ...state.grad, handles: sortedHandles } }
       }),
 }))

@@ -55,7 +55,7 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
 
          {/* Caption */}
          <section>
-            <div className="d-f ai-c mt-4px gap-12px o-60">
+            <div className="d-f ai-c mt-4px gap-12px o-60 mw-100">
                {/* <div className="icon icon--warning icon--white8 o-80" /> */} {/* On Frame with children */}
                <div className="icon icon--resolve icon--white8 o-80" />
                <p>
@@ -77,8 +77,6 @@ import { useShallow } from "zustand/shallow"
 function PanelInputs({}: InputProps) {
    const [setGrad] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
    const { angle, resolution, handles } = useProperties((state) => state.grad)
-
-   console.log(handles)
 
    return (
       <>
