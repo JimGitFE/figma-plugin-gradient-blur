@@ -62,10 +62,15 @@ function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config =
    useCursor({ initialCursor: "ew-resize", setWhile: isDragging })
 
    /** Focus input if click coords outside input but inside container */
-   const onDown = (target: Node) => inputRef.current && !inputRef.current?.contains(target) && inputRef.current?.focus()
+   const onDown = (e) => {
+      if (inputRef.current && !inputRef.current?.contains(e.target as Node)) {
+         e.preventDefault()
+         inputRef.current?.focus()
+      }
+   }
 
    return (
-      <div {...atts} className={`d-f ai-c pos-relative ${styles.input}`} onMouseDown={(e) => onDown(e.target as Node)}>
+      <div {...atts} className={`d-f ai-c pos-relative ${styles.input}`} onMouseDown={onDown}>
          <input
             {...inputAtts}
             ref={inputRef}
