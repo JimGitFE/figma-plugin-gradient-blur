@@ -5,7 +5,6 @@ import useDrag from "@/hooks/useDrag"
 import { type ItemProps, Item } from "./Item"
 import { reorder } from "./utils"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
-import { useEventListener } from "@/hooks/useEventListener"
 
 type ItemRepresentation = { uniqueId: number; index: number }
 
@@ -18,31 +17,33 @@ interface ContainerProps<T extends { uniqueId: number }> extends HTMLAttributes<
 
 /** Drag Reorder & Provider */
 function Container<T extends { uniqueId: number }>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
-   // Dimensions
+   // Items Dimension
    const itemRefs = useRef([]) // sorted by index
 
-   /** Drag Tracker (resets on container resize) */
-   const [milestone, setMilestone] = useState<0 | 1 | 2>(0)
+   /*
+    * Item lifecycle
+    * - `0` Standard document flow - Compute bounding rect
+    * - `1` Explicitly positioned - Moves to index position
+    * - `2` Floating - Enables Transition
+    */
+   // prettier-ignore
+   const [lifecycle, setLifecycle] = useState<(0 | 1 | 2)>(0)
 
-   const containerRef = useRef<HTMLDivElement>(null)
+   // Container (attach observer)
+   const ref = useRef<HTMLDivElement>(null)
    // prettier-ignore
    /* Resize Observer - calc hover slots relative positions */
-   useResizeObserver({ref: containerRef, callback: () => {recalculateItemRects(), setMilestone(0)}})
-
-   // prettier-ignore
-   /* Initialize - define item dimensions / item transition  */
-   useEventListener("mousemove", () => {setMilestone(1), requestAnimationFrame(() => setMilestone(2))}, { conditional: milestone === 0 })
+   useResizeObserver({ref, callback: () => {setLifecycle(0), requestAnimationFrame(() => {recalculateItemRects(), setLifecycle(1), requestAnimationFrame(() => setLifecycle(2))})}})
 
    // Draggables
    const [active, setActive] = useState({ uniqueId: -1, index: -1 })
    const [hovering, setHovering] = useState({ uniqueId: -1, index: -1 }) // hovering slot index
 
    // Mouse
-   const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => {
-      // recalculateItemRects() // new hover slots relative positions
+   const down = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => {
       setActive({ uniqueId, index: indexFromId(uniqueId) })
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
-      dragStartCallback(e)
+      onDragStart(e)
    }
    const move = (e: MouseEvent) => {
       const uniqueId = hoveringItemId(e)
@@ -53,7 +54,7 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
       setActive({ uniqueId: -1, index: -1 })
       setHovering({ uniqueId: -1, index: -1 })
    }
-   const { dy, onDragStart: dragStartCallback } = useDrag({ axis: "y", callbacks: { move, up } })
+   const { dy, onDragStart } = useDrag({ axis: "y", callbacks: { move, up } })
 
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
    const hoveringItemId = (e: MouseEvent) => {
@@ -70,16 +71,16 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
    const indexFromId = (uniqueId: number) => children.findIndex((it) => it.props.uniqueId === uniqueId)
 
    return (
-      <div {...atts} ref={containerRef} className="pos-relative">
+      <div {...atts} ref={ref} className="pos-relative">
          {[...children]
             .sort((a, b) => a.props.uniqueId - b.props.uniqueId)
             .map((item, sortedIndex) => (
                <ReorderContext.Provider
-                  // If uniqueId sequential then sortedIndex === uniqueId - 1
+                  /* If uniqueId sequential then sortedIndex === uniqueId - 1 */
                   key={item.props.uniqueId ?? sortedIndex}
-                  // Context
+                  /* Context */
                   value={[
-                     // Item
+                     /* Item */
                      {
                         /** Handles display order */
                         index: indexFromId(item.props.uniqueId),
@@ -88,26 +89,27 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
                         /** DOM rect dimensions */
                         rect: itemRefs.current[indexFromId(item.props.uniqueId)]?.rect,
                         /** drag handle Init */
-                        onDragStart,
+                        onDragStart: down,
                         isActive: active.uniqueId === item.props.uniqueId,
                      },
-                     // State
+                     /* State */
                      {
                         hovering,
                         active,
                         activeDy: dy,
                      },
-                     // Internal
+                     /* Internal */
                      {
                         itemRefs,
                         recalculateRects: recalculateItemRects,
-                        milestone,
+                        lifecycle,
                      },
                   ]}
-                  // Children
+                  /* Children */
                   children={item}
                />
             ))}
+         <p>{lifecycle}</p>
       </div>
    )
 }
@@ -135,7 +137,7 @@ type ReorderContextProps = [
       itemRefs: React.MutableRefObject<{ rect: DOMRect; node: HTMLDivElement }[]>
       recalculateRects: () => void
       /**  0: idle, 1: drag start, 2: moved */
-      milestone: number
+      lifecycle: number
    }
 ]
 

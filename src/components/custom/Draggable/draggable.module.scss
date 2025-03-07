@@ -1,6 +1,4 @@
-.floating:not(.active) {
+.floating:not(:active) {
    transition: transform 130ms linear;
-}
-.active {
-   z-index: 89;
+   z-index: 4;
 }
