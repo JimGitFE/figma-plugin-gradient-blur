@@ -72,7 +72,7 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
                resize={{ strength: 0.3 }}
                config={{
                   placeholder: "Blur in px",
-                  right: { text: "%" },
+                  right: { child: <span className="ml-2px">%</span> },
                }}
             />
          </InputContainer>

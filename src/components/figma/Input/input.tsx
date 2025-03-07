@@ -1,4 +1,4 @@
-import React, { useRef, InputHTMLAttributes } from "react"
+import React, { useRef, InputHTMLAttributes, ReactNode } from "react"
 
 import numeric from "./numeric.module.css"
 import styles from "./input.module.scss"
@@ -7,7 +7,7 @@ import { useCursor } from "@/hooks/useCursor"
 
 type InputTypes = string | number
 
-type Decorator = { icon?: string; text?: string } & React.HTMLAttributes<HTMLDivElement>
+type Decorator = { icon?: string; child?: ReactNode } & React.HTMLAttributes<HTMLDivElement>
 
 /** Single Input */
 interface InputProps<V extends InputTypes> extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "value"> {
@@ -29,7 +29,8 @@ interface InputProps<V extends InputTypes> extends Omit<InputHTMLAttributes<HTML
    /** Drag to resize input value */
    resize?: {
       strength?: number
-      after?: boolean
+      left?: boolean
+      right?: boolean
       icon?: boolean
    }
    config?: {
@@ -69,6 +70,8 @@ function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config =
       }
    }
 
+   const iconClass = (icon: string) => icon && `icon icon--${icon} icon--white4 o-70`
+
    return (
       <div {...atts} className={`d-f ai-c pos-relative ${styles.input}`} onMouseDown={onDown}>
          <input
@@ -84,15 +87,19 @@ function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config =
          {left && (
             <div
                {...left}
-               onMouseDown={initDrag}
-               className={`${styles.icon} ${(resize?.after ?? true) && styles.resizer} icon icon--${left.icon} icon--white4 o-70`}
+               onMouseDown={(resize?.left ?? true) && initDrag}
+               className={`${(resize?.left ?? true) && styles.resizer} ${styles.left} ${left.className} ${iconClass(left.icon)}`}
             >
-               {left.text}
+               {left.child}
             </div>
          )}
          {right && (
-            <div onMouseDown={initDrag} className={`ml-6px ${styles.after} ${(resize?.after ?? true) && styles.resizer}`}>
-               {right.text}
+            <div
+               {...right}
+               onMouseDown={(resize?.right ?? true) && initDrag}
+               className={`${(resize?.right ?? true) && styles.resizer} ${styles.right} ${right.className} ${iconClass(right.icon)}`}
+            >
+               {right.child}
             </div>
          )}
       </div>

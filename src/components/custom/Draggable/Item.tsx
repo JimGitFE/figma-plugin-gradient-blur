@@ -1,5 +1,5 @@
 // Dependencies
-import React, { act, createContext, ReactNode, useEffect, useRef, useState } from "react"
+import React, { createContext, ReactNode, useEffect, useRef, useState } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
