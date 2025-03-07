@@ -5,6 +5,8 @@ const DEFAULT_HANDLES = [
    { pos: 0, blur: 10, uniqueId: 1 },
    { pos: 75, blur: 4, uniqueId: 2 },
    { pos: 100, blur: 0, uniqueId: 3 },
+   { pos: 120, blur: 3, uniqueId: 5 },
+   { pos: 130, blur: 8, uniqueId: 6 },
 ]
 
 /** Gradient User Inputted Config */

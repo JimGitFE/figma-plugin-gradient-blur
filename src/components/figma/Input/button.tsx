@@ -22,7 +22,7 @@ function ActionButtonBase({ icon, text, isActive = false, large = false, ...atts
 }
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-   children: React.ReactElement<typeof ActionButtonBase>[] | React.ReactElement<typeof ActionButtonBase>
+   children: Component<typeof ActionButtonBase>[] | Component<typeof ActionButtonBase>
 }
 
 function ActionContainer({ ...atts }: ContainerProps) {

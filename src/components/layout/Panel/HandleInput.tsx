@@ -34,7 +34,7 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
    /* Item Selection */
    const itemRef = useRef(null)
    const [isSelected, setIsSelected] = useState(false)
-   const onClickOut = (e: MouseEvent) => !itemRef.current?.contains(e.target) && setIsSelected(false)
+   const onClickOut = (e: EventFor<MouseEvent>) => !itemRef.current?.contains(e.target) && setIsSelected(false)
    // prettier-ignore
    useEffect(() => {isActive && setIsSelected(true)}, [isActive])
    useEventListener("mousedown", onClickOut, { conditional: isSelected })

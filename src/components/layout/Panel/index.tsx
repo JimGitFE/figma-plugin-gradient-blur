@@ -148,7 +148,7 @@ function PanelInputs({}: InputProps) {
             </Heading>
 
             {/* Inputs Handles */}
-            <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
+            <div className={`d-f fd-co gap-6px ${styles.handles}`} style={{ marginTop: -3, marginBottom: -3 }}>
                <Reorder.Container onReorder={(newHandles) => setGrad({ handles: newHandles })} sources={handles}>
                   {handles.map((handle) => (
                      <Reorder.Item uniqueId={handle.uniqueId}>

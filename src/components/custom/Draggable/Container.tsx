@@ -1,13 +1,13 @@
 // Dependencies
-import React, { useRef, useState, createContext, HTMLAttributes, ReactElement } from "react"
+import React, { useRef, useState, createContext, HTMLAttributes } from "react"
 // Internal
 import useDrag from "@/hooks/useDrag"
-import { type ItemProps, type SourceProps, Item } from "./Item"
+import { type SourceProps, Item } from "./Item"
 import { reorder } from "./utils"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
 
 interface ContainerProps<T extends SourceProps> extends HTMLAttributes<HTMLDivElement> {
-   children: ReactElement<ItemProps, typeof Item>[]
+   children: Component<typeof Item>[]
    sources: T[]
    /** reordered data source */
    onReorder: (dataSources: T[]) => void
@@ -52,14 +52,14 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
          },
       },
    })
-   const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => {
+   const onDragStart = (e: EventFor<MouseEvent>, uniqueId: number) => {
       setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0 })
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
       initDrag(e)
    }
 
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
-   const hoveringItemId = (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+   const hoveringItemId = (e: EventFor<MouseEvent>) => {
       /** Index of the item currently being hovered */
       let index = itemRefs.current.findIndex((ref) => ref?.rect && e.clientY >= ref.rect.top && e.clientY <= ref.rect.bottom)
       if (index === -1) index = itemRefs.current[indexFromId(1)]?.rect.top >= e.clientY ? 0 : itemRefs.current.length - 1
@@ -110,7 +110,6 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
                   children={item}
                />
             ))}
-         <p>{lifecycle}</p>
       </div>
    )
 }
@@ -125,7 +124,7 @@ type ReorderContextProps = [
       rect: DOMRect
       /** Item being dragged */
       isActive: boolean
-      onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => void
+      onDragStart: (e: EventFor<MouseEvent>, uniqueId: number) => void
    },
    /** State */
    {

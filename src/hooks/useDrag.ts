@@ -5,7 +5,7 @@ type Axes = "x" | "y"
 type Pos = { x?: number; y?: number }
 
 // callback send event and distance traveled
-type Callback<A extends Axes> = (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>, distance: DistanceFor<A>) => void
+type Callback<A extends Axes> = (e: EventFor<MouseEvent>, distance: DistanceFor<A>) => void
 
 interface Props<A extends Axes> {
    /** Safe use singe axis */
@@ -23,7 +23,7 @@ type DistanceFor<A extends Axes, O = {}> = A extends undefined
    : { dx: number } & O
 
 type Return = {
-   initDrag: (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+   initDrag: (e: EventFor<MouseEvent>) => void
    isDragging: boolean
 }
 
@@ -35,7 +35,7 @@ export default function useDrag<A extends Axes = undefined>({ callbacks = {} }: 
 
    const [dx, dy] = isDragging ? [clientPos.x - downPos.x, clientPos.y - downPos.y] : [null, null]
 
-   const initDrag = (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+   const initDrag = (e: EventFor<MouseEvent>) => {
       setDownPos({ x: e.clientX, y: e.clientY })
       setClientPos({ x: e.clientX, y: e.clientY })
       callbacks.down && callbacks.down(e, { dx, dy } as DistanceFor<A>)

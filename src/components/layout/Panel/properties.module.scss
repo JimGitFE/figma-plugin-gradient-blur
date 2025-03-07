@@ -1,8 +1,14 @@
+.handles {
+   max-height: 130px;
+   overflow-y: scroll;
+   // overflow-x: visible;
+   margin: 0 calc(var(--props-menu-pad) * -1);
+   margin-right: calc(var(--props-menu-pad-r) * -1);
+}
+
 // Gradient Handles Reorderables
 .item {
    --gap: 6px;
-   margin: 0 calc(var(--props-menu-pad) * -1);
-   margin-right: calc(var(--props-menu-pad-r) * -1);
    padding: 3px var(--props-menu-pad);
    padding-right: var(--props-menu-pad-r);
    gap: var(--gap);

@@ -77,7 +77,7 @@ function Item({ draggable, children }: ItemProps) {
 }
 
 interface DragContextProps {
-   onDragStart: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+   onDragStart: (e: EventFor<MouseEvent>) => void
    /** Item being dragged */
    isActive: boolean
 }

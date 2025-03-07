@@ -107,7 +107,7 @@ function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config =
 }
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-   children: React.ReactElement<typeof InputAreaBase>[] | React.ReactElement<typeof InputAreaBase>
+   children: Component<typeof InputAreaBase>[] | Component<typeof InputAreaBase>
 }
 
 function InputContainer({ ...atts }: ContainerProps) {
