@@ -108,7 +108,6 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
                   children={item}
                />
             ))}
-         <p>{milestone}</p>
       </div>
    )
 }
