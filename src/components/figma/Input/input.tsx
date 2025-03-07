@@ -57,7 +57,7 @@ function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config =
       prevDxRef.current = dx // reset
    }
 
-   const { dx, onDragStart, isDragging } = useDrag({ callbacks: { move, up: () => (prevDxRef.current = 0) } })
+   const { dx, initDrag, isDragging } = useDrag<"x">({ callbacks: { move, up: () => (prevDxRef.current = 0) } })
 
    useCursor({ initialCursor: "ew-resize", setWhile: isDragging })
 
@@ -84,14 +84,14 @@ function InputAreaBase<V extends InputTypes>({ state = DISPLAY, resize, config =
          {left && (
             <div
                {...left}
-               onMouseDown={onDragStart}
+               onMouseDown={initDrag}
                className={`${styles.icon} ${(resize?.after ?? true) && styles.resizer} icon icon--${left.icon} icon--white4 o-70`}
             >
                {left.text}
             </div>
          )}
          {right && (
-            <div onMouseDown={onDragStart} className={`ml-6px ${styles.after} ${(resize?.after ?? true) && styles.resizer}`}>
+            <div onMouseDown={initDrag} className={`ml-6px ${styles.after} ${(resize?.after ?? true) && styles.resizer}`}>
                {right.text}
             </div>
          )}

@@ -2,13 +2,11 @@
 import React, { useRef, useState, createContext, HTMLAttributes, ReactElement } from "react"
 // Internal
 import useDrag from "@/hooks/useDrag"
-import { type ItemProps, Item } from "./Item"
+import { type ItemProps, type SourceProps, Item } from "./Item"
 import { reorder } from "./utils"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
 
-type ItemRepresentation = { uniqueId: number; index: number }
-
-interface ContainerProps<T extends { uniqueId: number }> extends HTMLAttributes<HTMLDivElement> {
+interface ContainerProps<T extends SourceProps> extends HTMLAttributes<HTMLDivElement> {
    children: ReactElement<ItemProps, typeof Item>[]
    sources: T[]
    /** reordered data source */
@@ -16,7 +14,7 @@ interface ContainerProps<T extends { uniqueId: number }> extends HTMLAttributes<
 }
 
 /** Drag Reorder & Provider */
-function Container<T extends { uniqueId: number }>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
+function Container<T extends SourceProps>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
    // Items Dimension
    const itemRefs = useRef([]) // sorted by index
 
@@ -36,39 +34,43 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
    useResizeObserver({ref, callback: () => {setLifecycle(0), requestAnimationFrame(() => {recalculateItemRects(), setLifecycle(1), requestAnimationFrame(() => setLifecycle(2))})}})
 
    // Draggables
-   const [active, setActive] = useState({ uniqueId: -1, index: -1 })
+   const [active, setActive] = useState({ uniqueId: -1, index: -1, dy: null })
    const [hovering, setHovering] = useState({ uniqueId: -1, index: -1 }) // hovering slot index
 
-   // Mouse
-   const down = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => {
-      setActive({ uniqueId, index: indexFromId(uniqueId) })
+   /** Reorderable Items State - Handles dragging active item, hovering over item, dragStart callback, & traveled drag distance */
+   const { initDrag } = useDrag({
+      callbacks: {
+         move: (e, { dy }) => {
+            const uniqueId = hoveringItemId(e)
+            setActive((act) => ({ ...act, dy }))
+            setHovering({ uniqueId, index: indexFromId(uniqueId) })
+         },
+         up: () => {
+            onReorder(reorder(sources, active.index, hovering.index))
+            setActive({ uniqueId: -1, index: -1, dy: null })
+            setHovering({ uniqueId: -1, index: -1 })
+         },
+      },
+   })
+   const onDragStart = (e: React.MouseEvent<HTMLDivElement, MouseEvent>, uniqueId: number) => {
+      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0 })
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
-      onDragStart(e)
+      initDrag(e)
    }
-   const move = (e: MouseEvent) => {
-      const uniqueId = hoveringItemId(e)
-      setHovering({ uniqueId, index: indexFromId(uniqueId) })
-   }
-   const up = () => {
-      onReorder(reorder(sources, active.index, hovering.index))
-      setActive({ uniqueId: -1, index: -1 })
-      setHovering({ uniqueId: -1, index: -1 })
-   }
-   const { dy, onDragStart } = useDrag({ axis: "y", callbacks: { move, up } })
 
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
-   const hoveringItemId = (e: MouseEvent) => {
+   const hoveringItemId = (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
       /** Index of the item currently being hovered */
       let index = itemRefs.current.findIndex((ref) => ref?.rect && e.clientY >= ref.rect.top && e.clientY <= ref.rect.bottom)
       if (index === -1) index = itemRefs.current[indexFromId(1)]?.rect.top >= e.clientY ? 0 : itemRefs.current.length - 1
-      return children[index].props.uniqueId
+      return sources[index].uniqueId
    }
 
    // Utils
    const recalculateItemRects = () => {
       itemRefs.current.forEach((ref, i) => ref.node && (itemRefs.current[i].rect = ref.node.getBoundingClientRect()))
    }
-   const indexFromId = (uniqueId: number) => children.findIndex((it) => it.props.uniqueId === uniqueId)
+   const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
       <div {...atts} ref={ref} className="pos-relative">
@@ -89,14 +91,13 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
                         /** DOM rect dimensions */
                         rect: itemRefs.current[indexFromId(item.props.uniqueId)]?.rect,
                         /** drag handle Init */
-                        onDragStart: down,
+                        onDragStart,
                         isActive: active.uniqueId === item.props.uniqueId,
                      },
                      /* State */
                      {
                         hovering,
                         active,
-                        activeDy: dy,
                      },
                      /* Internal */
                      {
@@ -114,6 +115,8 @@ function Container<T extends { uniqueId: number }>({ children, sources, onReorde
    )
 }
 
+type ItemRef = React.MutableRefObject<{ rect: DOMRect; node: HTMLDivElement }[]>
+
 type ReorderContextProps = [
    /** Item */
    {
@@ -126,15 +129,13 @@ type ReorderContextProps = [
    },
    /** State */
    {
+      active: { uniqueId: number; index: number; dy: number }
       /** hovering slot index */
-      hovering: ItemRepresentation
-      active: ItemRepresentation
-      /** travelled Y distance for active item */
-      activeDy: number
+      hovering: { uniqueId: number; index: number }
    },
    /** Internal */
    {
-      itemRefs: React.MutableRefObject<{ rect: DOMRect; node: HTMLDivElement }[]>
+      itemRefs: ItemRef
       recalculateRects: () => void
       /**  0: idle, 1: drag start, 2: moved */
       lifecycle: number

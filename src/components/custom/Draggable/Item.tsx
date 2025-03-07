@@ -6,16 +6,20 @@ import styles from "./draggable.module.scss"
 import { useReorder } from "./Container"
 import { isNum } from "@/utils"
 
-interface ItemProps {
-   children: ReactNode
+/** Required props */
+interface SourceProps {
    uniqueId: number
+}
+
+interface ItemProps extends SourceProps {
+   children: ReactNode
    draggable?: boolean
 }
 
 // Misconception uniqueId might have empty steps, index represents the actual position
 /** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
 function Item({ draggable, children }: ItemProps) {
-   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering, activeDy }, { lifecycle, ...internal }] = useReorder()
+   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, ...internal }] = useReorder()
    const [posY, setPosY] = useState(null) // makes posY controlled (double render)
 
    // TODO: observe resizes of items
@@ -31,8 +35,8 @@ function Item({ draggable, children }: ItemProps) {
       const offsetTop = internal.itemRefs.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect?.height, 0)
       // console.log("Item calc posY for ", uniqueId, lifecycle, offsetTop)
 
-      setPosY(isActive ? activeDy + offsetTop : offsetTop + slotDy)
-   }, [index, active, activeDy, lifecycle])
+      setPosY(isActive ? active.dy + offsetTop : offsetTop + slotDy)
+   }, [index, active, lifecycle])
 
    // console.log("Item", uniqueId, lifecycle, posY)
 
@@ -47,7 +51,7 @@ function Item({ draggable, children }: ItemProps) {
                top: 0,
                transform: isNum(posY) && `translateY(${posY}px)`,
             }}
-            className={`z-6 w-100 ${lifecycle >= 2 && styles.floating}`}
+            className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating}`}
             onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
             ref={(node) => node && (internal.itemRefs.current[index] = { ...internal.itemRefs.current[index], node })}
          >
@@ -82,5 +86,5 @@ const useDragHandle = () => {
    return context
 }
 
-export type { ItemProps }
+export type { ItemProps, SourceProps }
 export { Item, useDragHandle }
