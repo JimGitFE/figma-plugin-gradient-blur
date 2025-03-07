@@ -1,5 +1,5 @@
 // Dependencies
-import React, { createContext, ReactNode, useEffect, useState } from "react"
+import React, { act, createContext, ReactNode, useEffect, useRef, useState } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
@@ -21,6 +21,11 @@ interface ItemProps extends SourceProps {
 function Item({ draggable, children }: ItemProps) {
    const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, ...internal }] = useReorder()
    const [posY, setPosY] = useState(null) // makes posY controlled (double render)
+
+   /* keep item z on top after drop */
+   const wasPrevActiveRef = useRef(false)
+   // prettier-ignore
+   useEffect(() => {active.index !== -1 && (wasPrevActiveRef.current = isActive)}, [active.index])
 
    // TODO: observe resizes of items
 
@@ -50,6 +55,7 @@ function Item({ draggable, children }: ItemProps) {
                height: isNum(posY) && rect?.height,
                top: 0,
                transform: isNum(posY) && `translateY(${posY}px)`,
+               zIndex: wasPrevActiveRef.current && 5,
             }}
             className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating}`}
             onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
