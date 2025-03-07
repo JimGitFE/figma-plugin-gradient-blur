@@ -12,13 +12,15 @@ interface ItemProps {
 }
 
 // Misconception uniqueId might have empty steps, index represents the actual position
-/** Reorder Item */
+/** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
 function Item({ draggable, children }: ItemProps) {
    const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering, activeDy }, { milestone, ...internal }] = useReorder()
    const [posY, setPosY] = useState(null) // makes posY controlled (double render)
 
+   // TODO: observe resizes of items
+
    useEffect(() => {
-      if (!rect) internal.recalculateRects() // runs on mount (makes posY available)
+      if (!rect) internal.recalculateRects() // observer will compute rects after <Item> mounts
 
       const activeRef = internal.itemRefs.current[active.index]
       // Make room for empty slot (draggable new position)
@@ -28,7 +30,7 @@ function Item({ draggable, children }: ItemProps) {
       const offsetTop = internal.itemRefs.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect?.height, 0)
 
       setPosY(isActive ? activeDy + offsetTop : offsetTop + slotDy)
-   }, [index, active, activeDy])
+   }, [index, active, activeDy, milestone])
 
    return (
       <>

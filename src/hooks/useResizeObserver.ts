@@ -6,7 +6,7 @@ interface Props {
 }
 
 /** div ref Resize Observer */
-function useResizeRect({ ref, callback }: Props) {
+function useResizeObserver({ ref, callback }: Props) {
    const [rect, setRect] = useState<DOMRect>(null)
    const [unmount, setUnmount] = useState(false)
 
@@ -34,4 +34,4 @@ function useResizeRect({ ref, callback }: Props) {
    return { rect, unmount: () => setUnmount(true) }
 }
 
-export { useResizeRect }
+export { useResizeObserver }
