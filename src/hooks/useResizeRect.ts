@@ -3,7 +3,6 @@ import { useEffect, useState } from "react"
 interface Props {
    ref: React.MutableRefObject<HTMLDivElement>
    callback?: (rect: DOMRect, unmount: () => void) => void
-   //  unmount?: () => void
 }
 
 /** div ref Resize Observer */
@@ -15,7 +14,6 @@ function useResizeRect({ ref, callback }: Props) {
       const container = ref.current
       if (!container) return
       if (unmount) return
-
       const resizeObserver = new ResizeObserver((entries) => {
          for (let entry of entries) {
             setRect(entry.contentRect)

@@ -63,7 +63,7 @@ type EventMapOf<E> = Fallback<
  * @template E - The type of the DOM element (default is `Window`).
  * @template K - The type of event name, Key of an EventMap (match for DOM element).
  * @param {K} eventName - The name of the event to listen for.
- * @param {(event: Fallback<M, EventMapOf<E>>[K]) => void} handler - The event handler function.
+ * @param {(event: Fallback<M, EventMapOf<E>>[K]) => void} callback - The event callback function.
  * @param {RefObject<T>} config.element - A reference that specifies the DOM element to attach the event listener to.
  * @param {boolean | AddEventListenerOptions} config.options - Event listener Options.
  * @public
@@ -97,7 +97,7 @@ function useEventListener<
    K extends keyof Fallback<M, EventMapOf<E>> = keyof Fallback<M, EventMapOf<E>>
 >(
    eventName: K & string,
-   handler: (event: Fallback<M, EventMapOf<E>>[K]) => void,
+   callback: (event: Fallback<M, EventMapOf<E>>[K]) => void,
    config: {
       /** Litening Target (defaults to window) (supports, ref or plain Element) */
       element?: RefObject<E> | E
@@ -108,11 +108,11 @@ function useEventListener<
    } = {}
 ) {
    // Create a ref that stores handler
-   const savedHandler = useRef(handler)
+   const savedHandlerRef = useRef(callback)
 
    useIsomorphicLayoutEffect(() => {
-      savedHandler.current = handler
-   }, [handler])
+      savedHandlerRef.current = callback
+   }, [callback])
 
    useEffect(() => {
       // Define the listening target
@@ -126,7 +126,7 @@ function useEventListener<
       if (config.conditional === false) return
 
       // Create event listener that calls handler function stored in ref
-      const listener: EventListener = (event) => savedHandler.current(event as Parameters<typeof handler>[0])
+      const listener: EventListener = (event) => savedHandlerRef.current(event as Parameters<typeof callback>[0])
 
       targetElement.addEventListener(eventName, listener, config.options)
 
