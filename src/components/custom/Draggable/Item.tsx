@@ -67,7 +67,8 @@ function Item({ draggable, children }: ItemProps) {
             style={{
                display: lifecycle >= 1 ? "block" : "none",
                height: rect?.height,
-               opacity: uniqueId / 10,
+               // opacity: uniqueId / 10,
+               opacity: 0,
             }}
             className={`w-100 bg-red`}
          />

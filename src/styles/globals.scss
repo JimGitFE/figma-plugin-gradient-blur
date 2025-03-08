@@ -2,6 +2,7 @@
 @use "utilities.css";
 @use "panel.scss";
 @use "cursors.scss";
+@use "scrollbar.scss";
 // @use "thomas.css";
 
 :root {
@@ -14,19 +15,6 @@ html {
    max-height: 100vh;
    max-width: 100vw;
    overflow: hidden;
-}
-
-// Custom Scrollbar
-
-.track {
-   width: 11px;
-   padding: 2px;
-   border-left: 1px solid var(--figma-color-border);
-}
-
-.thumb {
-   background: var(--figma-color-text-tertiary);
-   border-radius: 3px;
 }
 
 * {

@@ -1,0 +1,36 @@
+// Custom Scrollbar
+
+.scrollable {
+   .track {
+      opacity: 0;
+   }
+
+   &:has(.thumb:active),
+   &:hover {
+      .track {
+         opacity: 1;
+      }
+   }
+}
+
+.track {
+   width: 11px;
+   padding: 2px;
+   border-left: 1px solid transparent;
+
+   &:has(.thumb:active),
+   &:hover {
+      border-color: var(--figma-color-border);
+   }
+}
+
+.thumb {
+   background: var(--figma-color-text-tertiary);
+   border-radius: 3px;
+   opacity: 0.9;
+
+   &:hover,
+   &:active {
+      opacity: 1;
+   }
+}
