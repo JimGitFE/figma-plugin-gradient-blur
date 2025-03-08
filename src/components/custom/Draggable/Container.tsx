@@ -5,16 +5,20 @@ import useDrag from "@/hooks/useDrag"
 import { type SourceProps, Item } from "./Item"
 import { reorder } from "./utils"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
+import { ScrollBar } from "./ScrollBar"
+import styles from "./scrollbar.module.scss"
 
 interface ContainerProps<T extends SourceProps> extends HTMLAttributes<HTMLDivElement> {
    children: Component<typeof Item>[]
    sources: T[]
    /** reordered data source */
    onReorder: (dataSources: T[]) => void
+   /** scrollbar config */
+   scrollbar?: Partial<React.ComponentProps<typeof ScrollBar>>
 }
 
 /** Drag Reorder & Provider */
-function Container<T extends SourceProps>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
+function Container<T extends SourceProps>({ scrollbar = {}, children, sources, onReorder, ...atts }: ContainerProps<T>) {
    // Items Dimension
    const itemRefs = useRef([]) // sorted by index
 
@@ -27,6 +31,8 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    // prettier-ignore
    const [lifecycle, setLifecycle] = useState<(0 | 1 | 2)>(0)
 
+   const wrapRef = useRef<HTMLDivElement>(null) // defines scroll
+   const contentRef = useRef<HTMLDivElement>(null) // overflowed content
    // Container (attach observer)
    const ref = useRef<HTMLDivElement>(null)
    // prettier-ignore
@@ -73,43 +79,50 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
-      <div {...atts} ref={ref} className="pos-relative">
-         {[...children]
-            .sort((a, b) => a.props.uniqueId - b.props.uniqueId)
-            .map((item, sortedIndex) => (
-               <ReorderContext.Provider
-                  /* If uniqueId sequential then sortedIndex === uniqueId - 1 */
-                  key={item.props.uniqueId ?? sortedIndex}
-                  /* Context */
-                  value={[
-                     /* Item */
-                     {
-                        /** Handles display order */
-                        index: indexFromId(item.props.uniqueId),
-                        /** state key control */
-                        uniqueId: item.props.uniqueId ?? sortedIndex,
-                        /** DOM rect dimensions */
-                        rect: itemRefs.current[indexFromId(item.props.uniqueId)]?.rect,
-                        /** drag handle Init */
-                        onDragStart,
-                        isActive: active.uniqueId === item.props.uniqueId,
-                     },
-                     /* State */
-                     {
-                        hovering,
-                        active,
-                     },
-                     /* Internal */
-                     {
-                        itemRefs,
-                        recalculateRects: recalculateItemRects,
-                        lifecycle,
-                     },
-                  ]}
-                  /* Children */
-                  children={item}
-               />
-            ))}
+      <div {...atts} ref={ref} className={`${styles.reorderables} pos-relative`}>
+         {/* Scroll contianer */}
+         <div ref={wrapRef} className={`${styles.container} pos-relative`}>
+            <div ref={contentRef}>
+               {[...children]
+                  .filter((child) => child.type === Item)
+                  .sort((a, b) => a.props.uniqueId - b.props.uniqueId)
+                  .map((item, sortedIndex) => (
+                     <ReorderContext.Provider
+                        /* If uniqueId sequential then sortedIndex === uniqueId - 1 */
+                        key={item.props.uniqueId ?? sortedIndex}
+                        /* Context */
+                        value={[
+                           /* Item */
+                           {
+                              /** Handles display order */
+                              index: indexFromId(item.props.uniqueId),
+                              /** state key control */
+                              uniqueId: item.props.uniqueId ?? sortedIndex,
+                              /** DOM rect dimensions */
+                              rect: itemRefs.current[indexFromId(item.props.uniqueId)]?.rect,
+                              /** drag handle Init */
+                              onDragStart,
+                              isActive: active.uniqueId === item.props.uniqueId,
+                           },
+                           /* State */
+                           {
+                              hovering,
+                              active,
+                           },
+                           /* Internal */
+                           {
+                              itemRefs,
+                              recalculateRects: recalculateItemRects,
+                              lifecycle,
+                           },
+                        ]}
+                        /* Children */
+                        children={item}
+                     />
+                  ))}
+            </div>
+         </div>
+         <ScrollBar wrapRef={wrapRef} contentRef={contentRef} />
       </div>
    )
 }

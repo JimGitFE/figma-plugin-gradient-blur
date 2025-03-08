@@ -1,0 +1,36 @@
+// Scrollbar
+.reorderables {
+   height: inherit;
+   width: inherit;
+   max-height: inherit;
+   max-width: inherit;
+}
+
+.container {
+   width: inherit;
+   height: inherit;
+   max-height: inherit;
+   max-width: inherit;
+   overflow: hidden;
+}
+
+.track {
+   position: absolute;
+   top: 0;
+   bottom: 0;
+   right: 0;
+   z-index: 28;
+
+   // Opts
+   width: 10px;
+   background: black;
+}
+
+.thumb {
+   background-color: pink;
+   margin: 2px;
+
+   &:not(:active) {
+      transition: transform 70ms linear;
+   }
+}

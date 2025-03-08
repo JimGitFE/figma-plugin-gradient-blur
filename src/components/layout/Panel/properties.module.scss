@@ -1,7 +1,5 @@
 .handles {
    max-height: 130px;
-   overflow-y: scroll;
-   // overflow-x: visible;
    margin: 0 calc(var(--props-menu-pad) * -1);
    margin-right: calc(var(--props-menu-pad-r) * -1);
 }
