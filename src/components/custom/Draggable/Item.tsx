@@ -51,10 +51,10 @@ function Item({ draggable, children }: ItemProps) {
          <div
             style={{
                // Apply Floating layout once refs have settled
-               position: isNum(posY) ? "absolute" : "relative",
-               height: isNum(posY) && rect?.height,
+               position: lifecycle >= 1 ? "absolute" : "relative",
+               height: lifecycle >= 1 && rect?.height,
                top: 0,
-               transform: isNum(posY) && `translateY(${posY}px)`,
+               transform: lifecycle >= 1 && `translateY(${posY}px)`,
                zIndex: wasPrevActiveRef.current && 5,
             }}
             className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating}`}
@@ -66,7 +66,7 @@ function Item({ draggable, children }: ItemProps) {
          {/* 2 display block representation of item */}
          <div
             style={{
-               display: isNum(posY) ? "block" : "none",
+               display: lifecycle >= 1 ? "block" : "none",
                height: rect?.height,
                opacity: uniqueId / 10,
             }}

@@ -24,6 +24,10 @@
    // Opts
    width: 10px;
    background: black;
+
+   &.disabled {
+      display: none;
+   }
 }
 
 .thumb {

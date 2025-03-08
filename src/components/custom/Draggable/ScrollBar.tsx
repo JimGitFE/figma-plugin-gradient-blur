@@ -1,5 +1,5 @@
 // Dependencies
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 // Components
 import { useEventListener } from "@/hooks/useEventListener"
 import { clamp } from "@/utils"
@@ -23,12 +23,12 @@ function ScrollBar({ thumb, track, contentRef, wrapRef }: Props) {
    const [emptySpace, setEmptySpace] = useState(0)
 
    /* Initialize thumb height */
-   useEffect(() => {
+   useLayoutEffect(() => {
       if (contentRef.current && trackRef.current) {
          const thumbHeight = trackRef.current.clientHeight / contentRef.current.clientHeight
          setThumbHeight(thumbHeight)
          const emptySpace = trackRef.current.clientHeight * (1 - thumbHeight)
-         setEmptySpace(emptySpace)
+         setEmptySpace(emptySpace || undefined)
       }
    }, [contentRef])
 
@@ -74,7 +74,7 @@ function ScrollBar({ thumb, track, contentRef, wrapRef }: Props) {
 
    return (
       // Track
-      <div {...track} ref={trackRef} className={styles.track}>
+      <div {...track} ref={trackRef} className={`${styles.track} ${emptySpace === undefined && styles.disabled}`}>
          {/* Thumb */}
          <div
             {...thumb}
