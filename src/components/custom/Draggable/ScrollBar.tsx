@@ -36,7 +36,7 @@ const ScrollBar = forwardRef<HTMLDivElement, Props>(
          if (!contentRef.current || !containerRef.current) return
 
          const hiddenHeight = contentRef.current.clientHeight - containerRef.current.clientHeight
-         const normal = clamp(thumb.y, { min: 0, max: 1 }) // normalised value
+         const normal = clamp(thumb.y / hiddenHeight, { min: 0, max: 1 }) // normalised value
 
          wrapRef.current.scrollTo({ top: normal * hiddenHeight, behavior: (isDragging ? "instant" : "smooth") as ScrollBehavior })
       }, [thumb])
