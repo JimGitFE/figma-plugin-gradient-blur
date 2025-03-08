@@ -1,24 +1,22 @@
 // Dependencies
-import React, { useRef, useState, createContext, HTMLAttributes } from "react"
+import React, { useRef, useState, createContext } from "react"
 // Internal
 import useDrag from "@/hooks/useDrag"
 import { type SourceProps, Item } from "./Item"
 import { reorder } from "./utils"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
 import { ScrollBar } from "./ScrollBar"
-import styles from "./scrollbar.module.scss"
 
-interface ContainerProps<T extends SourceProps> extends HTMLAttributes<HTMLDivElement> {
+/** extends scrollbar config */
+interface ContainerProps<T extends SourceProps> extends Partial<React.ComponentProps<typeof ScrollBar>> {
    children: Component<typeof Item>[]
    sources: T[]
    /** reordered data source */
    onReorder: (dataSources: T[]) => void
-   /** scrollbar config */
-   scrollbar?: Partial<React.ComponentProps<typeof ScrollBar>>
 }
 
 /** Drag Reorder & Provider */
-function Container<T extends SourceProps>({ scrollbar = {}, children, sources, onReorder, ...atts }: ContainerProps<T>) {
+function Container<T extends SourceProps>({ children, sources, onReorder, ...atts }: ContainerProps<T>) {
    // Items Dimension
    const itemRefs = useRef([]) // sorted by index
 
@@ -77,8 +75,7 @@ function Container<T extends SourceProps>({ scrollbar = {}, children, sources, o
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
-      // <div {...atts} ref={ref} className={`${styles.reorderables} pos-relative scrollable-parent`}>
-      <ScrollBar ref={ref} track={{ className: "track" }} thumb={{ className: "thumb" }} className="pos-relative scrollable-parent">
+      <ScrollBar {...atts} className={`${atts.className} ${atts.className} pos-relative`} ref={ref}>
          {/* Scroll contianer */}
          {[...children]
             .filter((child) => child.type === Item)

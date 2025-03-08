@@ -1,6 +1,6 @@
 // Custom Scrollbar
 
-.scrollable-parent {
+.custom-scroll-parent {
    .track {
       opacity: 0;
    }
@@ -13,7 +13,7 @@
    }
 }
 
-.track {
+.custom-scroll-track {
    width: 11px;
    padding: 2px;
    border-left: 1px solid transparent;
@@ -24,7 +24,7 @@
    }
 }
 
-.thumb {
+.custom-scroll-thumb {
    background: var(--figma-color-text-tertiary);
    border-radius: 3px;
    opacity: 0.9;

@@ -17,26 +17,80 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /** Wrapper */
-const ScrollBar = forwardRef<HTMLDivElement, Props>(({ thumb, track, children, ...atts }, fwdContainerRef: FwdRef) => {
-   /** Container */
-   const intContainerRef = useRef<HTMLDivElement>(null)
-   const containerRef = fwdContainerRef || intContainerRef
+const ScrollBar = forwardRef<HTMLDivElement, Props>(
+   ({ thumb: thumbAtts, track: trackAtts, children, ...atts }, fwdContainerRef: FwdRef) => {
+      /** Container */
+      const intContainerRef = useRef<HTMLDivElement>(null)
+      const containerRef = fwdContainerRef || intContainerRef
+      /** Scrollable content wrapper */
+      const wrapRef = useRef<HTMLDivElement>(null) // defines scroll
+      /** Overflowed content */
+      const contentRef = useRef<HTMLDivElement>(null) // overflowed content
+      /** Scroll Track */
+      const trackRef = useRef<HTMLDivElement>(null)
 
-   /** Scrollable content wrapper */
-   const wrapRef = useRef<HTMLDivElement>(null) // defines scroll
-   /** Overflowed content */
-   const contentRef = useRef<HTMLDivElement>(null) // overflowed content
+      const { thumb, isDragging, initDrag } = useScrollThumb({ containerRef, contentRef, trackRef })
 
-   // Dimensions
-   const trackRef = useRef<HTMLDivElement>(null)
-   const [thumbHeight, setThumbHeight] = useState(0)
+      /* Controlled scrollable container top  */
+      useEffect(() => {
+         if (!contentRef.current || !containerRef.current) return
+
+         const hiddenHeight = contentRef.current.clientHeight - containerRef.current.clientHeight
+         const normal = clamp(thumb.y, { min: 0, max: 1 }) // normalised value
+
+         wrapRef.current.scrollTo({ top: normal * hiddenHeight, behavior: isDragging ? "instant" : "smooth" })
+      }, [thumb])
+
+      return (
+         <div {...atts} ref={fwdContainerRef ?? intContainerRef} className={`custom-scroll-parent ${styles.container} ${atts.className}`}>
+            <div ref={wrapRef} className={`${styles.wrap} pos-relative`}>
+               <div ref={contentRef}>{children}</div>
+            </div>
+            {/* ScrollBar */}
+            {true && (
+               <div {...trackAtts} className={`${styles.track} ${trackAtts.className} custom-scroll-track`}>
+                  {/* Track */}
+                  <div ref={trackRef} className={`${styles["thumb-track"]}`}>
+                     {/* Thumb */}
+                     <div
+                        onMouseDown={initDrag}
+                        style={{
+                           transform: `translateY(${thumb.y}px)`,
+                           height: `${thumb.height * 100}%`,
+                        }}
+                        className={styles.thumb}
+                     >
+                        {/* User Thumb style */}
+                        <div {...thumbAtts} className={`${styles.handle} ${thumbAtts.className} custom-scroll-thumb`} />
+                     </div>
+                  </div>
+               </div>
+            )}
+         </div>
+      )
+   }
+)
+
+interface HookProps {
+   containerRef: FwdRef
+   contentRef: FwdRef
+   trackRef: FwdRef
+}
+
+/** Calculates thumb height relative to scrollable content, handles clamped dragging position */
+function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
+   const [thumb, setThumb] = useState({ y: 0, height: 0 })
+   // Internal State
    const [emptySpace, setEmptySpace] = useState(0)
+   const prevDyRef = useRef(0)
+   /** Thumb Y max */
+   const clampThumbY = (value) => clamp(value, { min: 0, max: emptySpace })
 
    /* Initialize thumb height */
    useLayoutEffect(() => {
       if (contentRef.current && trackRef.current) {
          const thumbHeight = trackRef.current.clientHeight / contentRef.current.clientHeight
-         setThumbHeight(thumbHeight)
+         setThumb((prev) => ({ ...prev, height: thumbHeight }))
          const emptySpace = trackRef.current.clientHeight * (1 - thumbHeight)
          setEmptySpace(emptySpace || undefined)
       }
@@ -44,22 +98,17 @@ const ScrollBar = forwardRef<HTMLDivElement, Props>(({ thumb, track, children, .
 
    /* Controlled thumb position  */
 
-   const [thumbY, setThumbY] = useState(0)
-   const prevDyRef = useRef(0)
-   /** Thumb Y max */
-   const clampThumbY = (value) => clamp(value, { min: 0, max: emptySpace })
-
    // 1 Drag Event
    const { initDrag, isDragging } = useDrag({
       callbacks: {
          move: (_, { dy }) => {
             const diffDy = dy - prevDyRef.current
-            setThumbY(clampThumbY(thumbY + diffDy))
+            setThumb((prev) => ({ ...prev, y: clampThumbY(prev.y + diffDy) }))
             prevDyRef.current = dy
          },
          up: (_, { dy }) => {
             const diffDy = dy - prevDyRef.current
-            setThumbY(clampThumbY(thumbY + diffDy))
+            setThumb((prev) => ({ ...prev, y: clampThumbY(prev.y + diffDy) }))
             prevDyRef.current = 0
          },
       },
@@ -68,49 +117,11 @@ const ScrollBar = forwardRef<HTMLDivElement, Props>(({ thumb, track, children, .
    // 2 Wheel Event
    const onWheel = (e: WheelEvent) => {
       e.preventDefault()
-      setThumbY(clampThumbY(thumbY + e.deltaY))
+      setThumb((prev) => ({ ...prev, y: clampThumbY(prev.y + e.deltaY) }))
    }
    useEventListener("wheel", onWheel, { element: containerRef.current })
 
-   /* Controlled scrollable container top  */
-   useEffect(() => {
-      if (!contentRef.current || !containerRef.current) return
-
-      const hiddenHeight = contentRef.current.clientHeight - containerRef.current.clientHeight
-      const normal = clamp(thumbY / emptySpace, { min: 0, max: 1 }) // normalised value
-
-      wrapRef.current.scrollTo({ top: normal * hiddenHeight, behavior: isDragging ? "instant" : "smooth" })
-   }, [thumbY])
-
-   return (
-      <div {...atts} ref={fwdContainerRef ?? intContainerRef} className={`${styles.reorderables} ${atts.className}`}>
-         <div ref={wrapRef} className={`${styles.wrap} pos-relative`}>
-            <div ref={contentRef}>{children}</div>
-         </div>
-         {/* ScrollBar */}
-         <div
-            {...track}
-            style={{ display: emptySpace === undefined && "none" }}
-            className={`${styles.track} ${track?.className ?? styles.default}`}
-         >
-            {/* Track */}
-            <div ref={trackRef} className={`${styles["thumb-track"]}`}>
-               {/* Thumb */}
-               <div
-                  onMouseDown={initDrag}
-                  style={{
-                     transform: `translateY(${thumbY}px)`,
-                     height: `${thumbHeight * 100}%`,
-                  }}
-                  className={styles.thumb}
-               >
-                  {/* User Thumb style */}
-                  <div {...thumb} className={`${styles.handle} ${thumb?.className ?? styles.default}`} />
-               </div>
-            </div>
-         </div>
-      </div>
-   )
-})
+   return { thumb, isDragging, initDrag }
+}
 
 export { ScrollBar }
