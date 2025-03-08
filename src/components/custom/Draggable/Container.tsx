@@ -81,7 +81,7 @@ function Container<T extends SourceProps>({ scrollbar = {}, children, sources, o
    return (
       <div {...atts} ref={ref} className={`${styles.reorderables} pos-relative`}>
          {/* Scroll contianer */}
-         <div ref={wrapRef} className={`${styles.container} pos-relative`}>
+         <div ref={wrapRef} className={`${styles.wrap} pos-relative`}>
             <div ref={contentRef}>
                {[...children]
                   .filter((child) => child.type === Item)
@@ -122,7 +122,13 @@ function Container<T extends SourceProps>({ scrollbar = {}, children, sources, o
                   ))}
             </div>
          </div>
-         <ScrollBar wrapRef={wrapRef} contentRef={contentRef} />
+         <ScrollBar
+            track={{ className: "track" }}
+            thumb={{ className: "thumb" }}
+            containerRef={ref}
+            wrapRef={wrapRef}
+            contentRef={contentRef}
+         />
       </div>
    )
 }

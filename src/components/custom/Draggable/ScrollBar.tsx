@@ -8,6 +8,8 @@ import useDrag from "@/hooks/useDrag"
 import styles from "./scrollbar.module.scss"
 
 interface Props {
+   /** Includes wrap & track (attach wheel listener) */
+   containerRef: React.RefObject<HTMLDivElement>
    /** Scrollable content wrapper */
    wrapRef: React.RefObject<HTMLDivElement>
    /** Overflowed content */
@@ -16,7 +18,7 @@ interface Props {
    thumb?: React.HTMLAttributes<HTMLDivElement>
 }
 
-function ScrollBar({ thumb, track, contentRef, wrapRef }: Props) {
+function ScrollBar({ thumb, track, contentRef, wrapRef, containerRef }: Props) {
    // Dimensions
    const trackRef = useRef<HTMLDivElement>(null)
    const [thumbHeight, setThumbHeight] = useState(0)
@@ -60,33 +62,40 @@ function ScrollBar({ thumb, track, contentRef, wrapRef }: Props) {
       e.preventDefault()
       setThumbY(clampThumbY(thumbY + e.deltaY))
    }
-
-   useEventListener("wheel", onWheel, { element: wrapRef.current })
-   useEventListener("wheel", onWheel, { element: trackRef.current })
+   useEventListener("wheel", onWheel, { element: containerRef.current })
 
    /* Controlled scrollable container top  */
    useEffect(() => {
-      if (!contentRef.current || !trackRef.current) return
+      if (!contentRef.current || !containerRef.current) return
 
-      const hiddenHeight = contentRef.current.clientHeight - trackRef.current.clientHeight
+      const hiddenHeight = contentRef.current.clientHeight - containerRef.current.clientHeight
       const normal = clamp(thumbY / emptySpace, { min: 0, max: 1 }) // normalised value
 
       wrapRef.current.scrollTo({ top: normal * hiddenHeight, behavior: isDragging ? "instant" : "smooth" })
    }, [thumbY])
 
    return (
-      // Track
-      <div {...track} ref={trackRef} className={`${styles.track} ${emptySpace === undefined && styles.disabled}`}>
-         {/* Thumb */}
-         <div
-            {...thumb}
-            onMouseDown={initDrag}
-            style={{
-               transform: `translateY(${thumbY}px)`,
-               height: `${thumbHeight * 100}%`,
-            }}
-            className={styles.thumb}
-         />
+      // Track User Style
+      <div
+         {...track}
+         style={{ display: emptySpace === undefined && "none" }}
+         className={`${styles.track} ${track?.className ?? styles.default}`}
+      >
+         {/* Track */}
+         <div ref={trackRef} className={`${styles["thumb-track"]}`}>
+            {/* Thumb */}
+            <div
+               onMouseDown={initDrag}
+               style={{
+                  transform: `translateY(${thumbY}px)`,
+                  height: `${thumbHeight * 100}%`,
+               }}
+               className={styles.thumb}
+            >
+               {/* User Thumb style */}
+               <div {...thumb} className={`${styles.handle} ${thumb?.className ?? styles.default}`} />
+            </div>
+         </div>
       </div>
    )
 }

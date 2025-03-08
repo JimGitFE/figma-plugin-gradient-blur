@@ -6,7 +6,8 @@
    max-width: inherit;
 }
 
-.container {
+// overflowed content wrap (scrollable)
+.wrap {
    width: inherit;
    height: inherit;
    max-height: inherit;
@@ -14,27 +15,46 @@
    overflow: hidden;
 }
 
+// User styles
 .track {
-   position: absolute;
-   top: 0;
-   bottom: 0;
-   right: 0;
-   z-index: 28;
+   position: absolute !important;
+   top: 0 !important;
+   bottom: 0 !important;
+   right: 0 !important;
+   z-index: 28 !important;
 
-   // Opts
-   width: 10px;
-   background: black;
+   & .thumb-track {
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+   }
 
-   &.disabled {
-      display: none;
+   // If no user style
+   &.default {
+      // Opts
+      width: 10px;
+      background: black;
+      padding: 2px;
+      padding-top: 10px;
+      padding-bottom: 4px;
    }
 }
 
 .thumb {
-   background-color: pink;
-   margin: 2px;
-
    &:not(:active) {
       transition: transform 70ms linear;
+   }
+
+   // User styles
+   & .handle {
+      height: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      margin: 0 !important; // use padding at track
+
+      // If no user style
+      &.default {
+         background-color: pink;
+      }
    }
 }

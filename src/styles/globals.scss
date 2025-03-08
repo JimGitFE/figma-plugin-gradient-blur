@@ -16,6 +16,19 @@ html {
    overflow: hidden;
 }
 
+// Custom Scrollbar
+
+.track {
+   width: 11px;
+   padding: 2px;
+   border-left: 1px solid var(--figma-color-border);
+}
+
+.thumb {
+   background: var(--figma-color-text-tertiary);
+   border-radius: 3px;
+}
+
 * {
    &::-webkit-scrollbar-track {
       padding: 4px;
