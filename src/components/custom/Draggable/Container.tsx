@@ -79,7 +79,7 @@ function Container<T extends SourceProps>({ scrollbar = {}, children, sources, o
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
-      <div {...atts} ref={ref} className={`${styles.reorderables} pos-relative scrollable`}>
+      <div {...atts} ref={ref} className={`${styles.reorderables} pos-relative scrollable-parent`}>
          {/* Scroll contianer */}
          <div ref={wrapRef} className={`${styles.wrap} pos-relative`}>
             <div ref={contentRef}>
