@@ -48,7 +48,7 @@ const ScrollBar = forwardRef<HTMLDivElement, Props>(
             </div>
             {/* ScrollBar */}
             {true && (
-               <div {...trackAtts} className={`${styles.track} ${trackAtts.className} custom-scroll-track`}>
+               <div {...trackAtts} className={`${styles.track} ${trackAtts?.className} custom-scroll-track`}>
                   {/* Track */}
                   <div ref={trackRef} className={`${styles["thumb-track"]}`}>
                      {/* Thumb */}
@@ -61,7 +61,7 @@ const ScrollBar = forwardRef<HTMLDivElement, Props>(
                         className={styles.thumb}
                      >
                         {/* User Thumb style */}
-                        <div {...thumbAtts} className={`${styles.handle} ${thumbAtts.className} custom-scroll-thumb`} />
+                        <div {...thumbAtts} className={`${styles.handle} ${thumbAtts?.className} custom-scroll-thumb`} />
                      </div>
                   </div>
                </div>
