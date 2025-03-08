@@ -60,7 +60,9 @@ function ScrollBar({ thumb, track, contentRef, wrapRef }: Props) {
       e.preventDefault()
       setThumbY(clampThumbY(thumbY + e.deltaY))
    }
+
    useEventListener("wheel", onWheel, { element: wrapRef.current })
+   useEventListener("wheel", onWheel, { element: trackRef.current })
 
    /* Controlled scrollable container top  */
    useEffect(() => {
