@@ -25,6 +25,7 @@ type DistanceFor<A extends Axes, O = {}> = A extends undefined
 type Return = {
    initDrag: (e: EventFor<MouseEvent>) => void
    isDragging: boolean
+   downPos: Pos
 }
 
 export default function useDrag<A extends Axes = undefined>({ callbacks = {} }: Props<A> = {}): DistanceFor<A, Return> {
@@ -56,7 +57,7 @@ export default function useDrag<A extends Axes = undefined>({ callbacks = {} }: 
    useEventListener("mousemove", onMouseMove, { conditional: isDragging })
    useEventListener("mouseup", onMouseUp, { conditional: isDragging })
 
-   return { dx, dy, initDrag, isDragging } as DistanceFor<A, Return>
+   return { dx, dy, initDrag, isDragging, downPos } as DistanceFor<A, Return>
 }
 
 // TODO: while dragging, disable initDrag until mouseup

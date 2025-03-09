@@ -1,5 +1,5 @@
 // Dependencies
-import React, { useRef, useState, createContext } from "react"
+import React, { useRef, useState, createContext, useEffect } from "react"
 // Internal
 import useDrag from "@/hooks/useDrag"
 import { type SourceProps, Item } from "./Item"
@@ -38,24 +38,18 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    // Draggables
    const [active, setActive] = useState({ uniqueId: -1, index: -1, dy: null })
    const [hovering, setHovering] = useState({ uniqueId: -1, index: -1 }) // hovering slot index
-   const [dragEvent, setDragEvent] = useState<MouseEvent | undefined>(undefined) // while dragging
-   const [scrollTop, setScrollTop] = useState(0) // current scroll top
+   const [scrolledTop, setScrolledTop] = useState(0) // current scroll top
 
    /** Reorderable Items State - Handles dragging active item, hovering over item, dragStart callback, & traveled drag distance */
-   const { initDrag } = useDrag({
+   const { downPos, initDrag } = useDrag({
       callbacks: {
-         down: (e) => setDragEvent(e),
-         move: (e, { dy }) => {
-            const uniqueId = hoveringItemId(e, scrollTop)
+         move: (_, { dy }) => {
             setActive((act) => ({ ...act, dy }))
-            setHovering({ uniqueId, index: indexFromId(uniqueId) })
-            setDragEvent(e)
          },
          up: () => {
             onReorder(reorder(sources, active.index, hovering.index))
             setActive({ uniqueId: -1, index: -1, dy: null })
             setHovering({ uniqueId: -1, index: -1 })
-            setDragEvent(undefined)
          },
       },
    })
@@ -66,27 +60,23 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    }
 
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
-   const hoveringItemId = (e: EventFor<MouseEvent>, scrollPosY) => {
-      const mouseY = scrollPosY + e.clientY
-      /** Index of the item currently being hovered */
+   useEffect(() => {
+      if (!itemRefs.current || active.index === -1) return
+
+      // Account for scroll and drag distance
+      const mouseY = scrolledTop + downPos.y + active.dy
+      // Index of the item currently being hovered
       let index = itemRefs.current.findIndex((ref) => ref?.rect && mouseY >= ref.rect.top && mouseY <= ref.rect.bottom)
       if (index === -1) index = itemRefs.current[indexFromId(1)]?.rect.top >= mouseY ? 0 : itemRefs.current.length - 1
-      return sources[index].uniqueId
-   }
 
-   // On scroll recalculate hovering slot
-   const scrollCallback = (scrolledY) => {
-      setScrollTop(scrolledY)
-      if (dragEvent) {
-         const uniqueId = hoveringItemId(dragEvent, scrolledY)
-         setHovering({ uniqueId, index: indexFromId(uniqueId) })
-      }
-   }
+      setHovering({ uniqueId: sources[index].uniqueId, index })
+   }, [active, scrolledTop])
+
+   /* On scroll recalculate hovering slot */
+   const scrollCallback = (scrolledY) => setScrolledTop(scrolledY)
 
    // Utils
-   const recalculateItemRects = () => {
-      itemRefs.current.forEach((ref, i) => ref.node && (itemRefs.current[i].rect = ref.node.getBoundingClientRect()))
-   }
+   const recalculateItemRects = () => itemRefs.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
