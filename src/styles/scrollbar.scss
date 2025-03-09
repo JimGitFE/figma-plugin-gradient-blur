@@ -1,13 +1,13 @@
 // Custom Scrollbar
 
 .custom-scroll-parent {
-   .track {
+   .custom-scroll-track {
       opacity: 0;
    }
 
-   &:has(.thumb:active),
+   &:has(.custom-scroll-thumb:active),
    &:hover {
-      .track {
+      .custom-scroll-track {
          opacity: 1;
       }
    }
@@ -18,7 +18,9 @@
    padding: 2px;
    border-left: 1px solid transparent;
 
-   &:has(.thumb:active),
+   transition: opacity 60ms ease-out;
+
+   &:has(.custom-scroll-thumb:active),
    &:hover {
       border-color: var(--figma-color-border);
    }

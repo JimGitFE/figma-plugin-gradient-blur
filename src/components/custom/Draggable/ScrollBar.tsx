@@ -119,7 +119,18 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
       e.preventDefault()
       setThumb((prev) => ({ ...prev, y: clampThumbY(prev.y + e.deltaY) }))
    }
+
    useEventListener("wheel", onWheel, { element: containerRef.current })
+
+   // 3 Track Click Event
+   const onTrackClick = (e: MouseEvent) => {
+      if (!trackRef.current || e.target !== trackRef.current) return
+      /* Place thumb at center of event */
+      const { top } = trackRef.current.getBoundingClientRect()
+      setThumb((prev) => ({ ...prev, y: clampThumbY(e.clientY - top - (prev.height / 2) * 100) }))
+   }
+
+   useEventListener("mousedown", onTrackClick, { element: trackRef.current })
 
    return { thumb, isDragging, initDrag }
 }
