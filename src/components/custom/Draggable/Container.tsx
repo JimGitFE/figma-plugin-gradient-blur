@@ -38,19 +38,24 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    // Draggables
    const [active, setActive] = useState({ uniqueId: -1, index: -1, dy: null })
    const [hovering, setHovering] = useState({ uniqueId: -1, index: -1 }) // hovering slot index
+   const [dragEvent, setDragEvent] = useState<MouseEvent | undefined>(undefined) // while dragging
+   const [scrollTop, setScrollTop] = useState(0) // current scroll top
 
    /** Reorderable Items State - Handles dragging active item, hovering over item, dragStart callback, & traveled drag distance */
    const { initDrag } = useDrag({
       callbacks: {
+         down: (e) => setDragEvent(e),
          move: (e, { dy }) => {
-            const uniqueId = hoveringItemId(e)
+            const uniqueId = hoveringItemId(e, scrollTop)
             setActive((act) => ({ ...act, dy }))
             setHovering({ uniqueId, index: indexFromId(uniqueId) })
+            setDragEvent(e)
          },
          up: () => {
             onReorder(reorder(sources, active.index, hovering.index))
             setActive({ uniqueId: -1, index: -1, dy: null })
             setHovering({ uniqueId: -1, index: -1 })
+            setDragEvent(undefined)
          },
       },
    })
@@ -61,11 +66,21 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    }
 
    /** Placeholder that should activate to accomodate dragged item (always represents an index of item[]) */
-   const hoveringItemId = (e: EventFor<MouseEvent>) => {
+   const hoveringItemId = (e: EventFor<MouseEvent>, scrollPosY) => {
+      const mouseY = scrollPosY + e.clientY
       /** Index of the item currently being hovered */
-      let index = itemRefs.current.findIndex((ref) => ref?.rect && e.clientY >= ref.rect.top && e.clientY <= ref.rect.bottom)
-      if (index === -1) index = itemRefs.current[indexFromId(1)]?.rect.top >= e.clientY ? 0 : itemRefs.current.length - 1
+      let index = itemRefs.current.findIndex((ref) => ref?.rect && mouseY >= ref.rect.top && mouseY <= ref.rect.bottom)
+      if (index === -1) index = itemRefs.current[indexFromId(1)]?.rect.top >= mouseY ? 0 : itemRefs.current.length - 1
       return sources[index].uniqueId
+   }
+
+   // On scroll recalculate hovering slot
+   const scrollCallback = (scrolledY) => {
+      setScrollTop(scrolledY)
+      if (dragEvent) {
+         const uniqueId = hoveringItemId(dragEvent, scrolledY)
+         setHovering({ uniqueId, index: indexFromId(uniqueId) })
+      }
    }
 
    // Utils
@@ -75,7 +90,7 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
-      <CustomScroll {...atts} className={`${atts.className} ${atts.className} pos-relative`} ref={ref}>
+      <CustomScroll {...atts} onScroll={scrollCallback} className={`${atts.className} ${atts.className} pos-relative`} ref={ref}>
          {/* Scroll contianer */}
          {[...children]
             .filter((child) => child.type === Item)
