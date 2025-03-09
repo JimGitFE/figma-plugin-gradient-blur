@@ -17,7 +17,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /** Wrapper */
-const ScrollBar = forwardRef<HTMLDivElement, Props>(
+const CustomScroll = forwardRef<HTMLDivElement, Props>(
    ({ thumb: thumbAtts, track: trackAtts, children, ...atts }, fwdContainerRef: FwdRef) => {
       /** Container */
       const intContainerRef = useRef<HTMLDivElement>(null)
@@ -134,4 +134,4 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
    return { thumb, isDragging, initDrag }
 }
 
-export { ScrollBar }
+export { CustomScroll }

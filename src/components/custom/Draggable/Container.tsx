@@ -5,10 +5,10 @@ import useDrag from "@/hooks/useDrag"
 import { type SourceProps, Item } from "./Item"
 import { reorder } from "./utils"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
-import { ScrollBar } from "./ScrollBar"
+import { CustomScroll } from "./CustomScroll"
 
-/** extends scrollbar config */
-interface ContainerProps<T extends SourceProps> extends Partial<React.ComponentProps<typeof ScrollBar>> {
+/** extends CustomScroll config */
+interface ContainerProps<T extends SourceProps> extends Partial<React.ComponentProps<typeof CustomScroll>> {
    children: Component<typeof Item>[]
    sources: T[]
    /** reordered data source */
@@ -75,7 +75,7 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
-      <ScrollBar {...atts} className={`${atts.className} ${atts.className} pos-relative`} ref={ref}>
+      <CustomScroll {...atts} className={`${atts.className} ${atts.className} pos-relative`} ref={ref}>
          {/* Scroll contianer */}
          {[...children]
             .filter((child) => child.type === Item)
@@ -114,7 +114,7 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
                   children={item}
                />
             ))}
-      </ScrollBar>
+      </CustomScroll>
    )
 }
 
