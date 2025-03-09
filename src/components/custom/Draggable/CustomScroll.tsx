@@ -19,6 +19,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 /** Wrapper */
 const CustomScroll = forwardRef<HTMLDivElement, Props>(
    ({ thumb: thumbAtts, track: trackAtts, children, ...atts }, fwdContainerRef: FwdRef) => {
+      /* Mutable JSX Scroll objects */
       /** Container */
       const intContainerRef = useRef<HTMLDivElement>(null)
       const containerRef = fwdContainerRef || intContainerRef
@@ -29,9 +30,10 @@ const CustomScroll = forwardRef<HTMLDivElement, Props>(
       /** Scroll Track */
       const trackRef = useRef<HTMLDivElement>(null)
 
+      /* Scoll Hook (thumb clamped dragging position) */
       const { thumb, isDragging, initDrag } = useScrollThumb({ containerRef, contentRef, trackRef })
 
-      /* Controlled scrollable container top  */
+      /* Container controlled scroll (top, depends on thumb.y)  */
       useEffect(() => {
          if (!contentRef.current || !containerRef.current) return
 
@@ -47,7 +49,7 @@ const CustomScroll = forwardRef<HTMLDivElement, Props>(
                <div ref={contentRef}>{children}</div>
             </div>
             {/* ScrollBar */}
-            {true && (
+            {thumb.height !== 100 && (
                <div {...trackAtts} className={`${styles.track} ${trackAtts?.className} custom-scroll-track`}>
                   {/* Track */}
                   <div ref={trackRef} className={`${styles["thumb-track"]}`}>
@@ -56,7 +58,7 @@ const CustomScroll = forwardRef<HTMLDivElement, Props>(
                         onMouseDown={initDrag}
                         style={{
                            transform: `translateY(${thumb.y}px)`,
-                           height: `${thumb.height * 100}%`,
+                           height: `${thumb.height}%`,
                         }}
                         className={styles.thumb}
                      >
@@ -88,9 +90,9 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
    /* Initialize thumb height */
    useLayoutEffect(() => {
       if (contentRef.current && trackRef.current) {
-         const thumbHeight = trackRef.current.clientHeight / contentRef.current.clientHeight
-         setThumb((prev) => ({ ...prev, height: thumbHeight }))
-         const emptySpace = trackRef.current.clientHeight * (1 - thumbHeight)
+         const thumbNormal = containerRef.current.clientHeight / contentRef.current.clientHeight
+         setThumb((prev) => ({ ...prev, height: thumbNormal * 100 }))
+         const emptySpace = trackRef.current.clientHeight * (1 - thumbNormal)
          setEmptySpace(emptySpace || undefined)
       }
    }, [contentRef])
