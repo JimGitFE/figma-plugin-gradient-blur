@@ -83,7 +83,6 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
    // Internal State
    const [emptySpace, setEmptySpace] = useState(0)
    const prevDyRef = useRef(0)
-   /** Thumb Y max */
    const clampThumbY = (value) => clamp(value, { min: 0, max: emptySpace })
 
    /* Initialize thumb height */
