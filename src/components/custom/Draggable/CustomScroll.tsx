@@ -176,7 +176,7 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
       if (!trackRef.current || e.target !== trackRef.current) return
       /* Place thumb at center of event */
       const { top } = trackRef.current.getBoundingClientRect()
-      setThumb((prev) => ({ ...prev, y: clampThumbY(e.clientY - top - (prev.height / 2) * 100) }))
+      setThumb((prev) => ({ ...prev, y: clampThumbY(e.clientY - top - prev.height / 2) }))
    }
 
    useEventListener("mousedown", onTrackClick, { element: trackRef.current })
