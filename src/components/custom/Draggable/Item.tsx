@@ -64,6 +64,22 @@ function Item({ draggable, children }: ItemProps) {
       setPosY(isActive ? active.dy + offsetTop + scrollTop : offsetTop + slotHeight)
    }, [index, active, hovering, lifecycle, scrollTop])
 
+   useEffect(() => {
+      if (isActive) {
+         console.log(posY)
+         if (posY < 30 + scrollTop) {
+            console.log("scroll executer")
+            scroll((total) => total - 0.1)
+         } else if (posY - scrollTop > 130 - 30) {
+            scroll((total) => total + 0.1)
+         }
+      }
+   }, [active, scrolledY])
+
+   useEffect(() => {
+      console.log("scrolled cb", scrollTop)
+   }, [scrolledY])
+
    return (
       <>
          {/* 1 Item */}

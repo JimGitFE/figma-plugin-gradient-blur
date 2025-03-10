@@ -41,10 +41,11 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    const [scrolledTop, setScrolledTop] = useState(0) // current scroll top
 
    /** Reorderable Items State - Handles dragging active item, hovering over item, dragStart callback, & traveled drag distance */
-   const { downPos, initDrag } = useDrag({
+   const { downPos, initDrag, isDragging } = useDrag({
       callbacks: {
          move: (_, { dy }) => {
             setActive((act) => ({ ...act, dy }))
+            // handle scroll
          },
          up: () => {
             onReorder(reorder(sources, active.index, hovering.index))
@@ -80,7 +81,13 @@ function Container<T extends SourceProps>({ children, sources, onReorder, ...att
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
-      <CustomScroll {...atts} onScroll={scrollCallback} className={`${atts.className} ${atts.className} pos-relative`} ref={ref}>
+      <CustomScroll
+         {...atts}
+         scrollInstant={isDragging}
+         onScroll={scrollCallback}
+         className={`${atts.className} ${atts.className} pos-relative`}
+         ref={ref}
+      >
          {/* Scroll contianer */}
          {[...children]
             .filter((child) => child.type === Item)
