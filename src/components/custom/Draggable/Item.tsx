@@ -19,7 +19,7 @@ interface ItemProps extends SourceProps {
 // Misconception uniqueId might have empty steps, index represents the actual position
 /** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
 function Item({ draggable, children }: ItemProps) {
-   const { scrolledY, scroll } = useScrollCtx()
+   const { scrolledY } = useScrollCtx()
    const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, ...internal }] = useReorder()
    const [posY, setPosY] = useState(null) // makes posY controlled (double render)
 
@@ -36,7 +36,6 @@ function Item({ draggable, children }: ItemProps) {
    const updateScrollTop = (prevScrollY: number) => {
       if (isActive) {
          setScrollTop((prev) => {
-            console.log(prev, prevScrollY)
             return prev + scrolledY - prevScrollY
          })
       } else {
@@ -63,22 +62,6 @@ function Item({ draggable, children }: ItemProps) {
 
       setPosY(isActive ? active.dy + offsetTop + scrollTop : offsetTop + slotHeight)
    }, [index, active, hovering, lifecycle, scrollTop])
-
-   useEffect(() => {
-      if (isActive) {
-         console.log(posY)
-         if (posY < 30 + scrollTop) {
-            console.log("scroll executer")
-            scroll((total) => total - 0.1)
-         } else if (posY - scrollTop > 130 - 30) {
-            scroll((total) => total + 0.1)
-         }
-      }
-   }, [active, scrolledY])
-
-   useEffect(() => {
-      console.log("scrolled cb", scrollTop)
-   }, [scrolledY])
 
    return (
       <>
