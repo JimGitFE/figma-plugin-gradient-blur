@@ -28,9 +28,9 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
    const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, ...internal }] = useReorder()
    const [posY, setPosY] = useState(null) // makes posY controlled (double render)
 
+   // TODO: Smooth translate3d on wheel scroll (custom motion with lerp & targetPos)
+
    /* Account for scrolled since drag start */
-   // const [scrolledTop, setActiveScrolled] = useState(0)
-   // const prevScrolledTop = useRef(scrolledY)
    const [activeScrolled, setActiveScrolled] = useState(0)
    const prevScrolled = useRef(scrolledY)
    useEffect(() => {
@@ -55,20 +55,6 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
    useEffect(() => {active.index !== -1 && (wasPrevActiveRef.current = isActive)}, [active.index])
 
    // TODO: observe resizes of items
-
-   /* On scroll smooth transition (not triggered by drag on edge) */
-   // const [behaviourSmooth, setBehaviourSmooth] = useState(false)
-
-   // useEventListener("wheel", () => {
-   //    if (!isActive) return
-   //    // smooth scroll when from 0 => 130
-   //    setBehaviourSmooth(false)
-   //    setBehaviourSmooth(true)
-   // })
-
-   // useEffect(() => {
-   //    setBehaviourSmooth(!isActive)
-   // }, [active.dy])
 
    /* Item motion react to Scroll / Drag / remapping */
    useEffect(() => {

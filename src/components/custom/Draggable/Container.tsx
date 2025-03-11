@@ -89,15 +89,12 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    /* Scroll Hndlers */
 
    // Custom wheel event (avoid scroll on `scrollOnEdges` areas when dragging)
-   useEventListener(
-      "wheel",
-      (e) => {
-         if (!containerRef.current.contains(e.target as Node)) return
-         console.log("eventweheel", e.deltaY)
-         scroll((total) => total + e.deltaY / 2)
-      },
-      { conditional: !isDragging, element: containerRef.current }
-   )
+   const onWheelScroll = (e: WheelEvent) => {
+      if (!containerRef.current.contains(e.target as Node)) return
+      scroll((total) => total + e.deltaY)
+   }
+
+   useEventListener("wheel", onWheelScroll, { conditional: !isDragging, element: containerRef.current })
 
    // When dragging item is near the edges of the container
    const scrollOnEdges = (posY: number) => {
