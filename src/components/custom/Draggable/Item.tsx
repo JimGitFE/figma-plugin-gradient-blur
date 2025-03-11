@@ -1,5 +1,5 @@
 // Dependencies
-import React, { createContext, ReactNode, RefObject, useEffect, useRef, useState } from "react"
+import React, { act, createContext, ReactNode, RefObject, useEffect, useRef, useState } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
@@ -56,14 +56,24 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
 
    // TODO: observe resizes of items
 
-   const [transition, setTransition] = useState(0)
-   useEventListener("wheel", () => setTransition(130))
+   const isInScrollArea = (itmY: number) => {
+      const ctn = containerRef.current.getBoundingClientRect()
+      // Scroll top and scroll bottom
+      const [scTop, scBtm] = [30, ctn.height - 30]
+      console.log(itmY, itmY < scTop || itmY > scBtm)
+      return itmY < scTop || itmY > scBtm
+   }
+
+   /* On scroll smooth transition (not triggered by drag on edge) */
+   const [behaviourSmooth, setBehaviourSmooth] = useState(false)
+   useEventListener("wheel", () => {
+      if (!isActive || isInScrollArea(posY - scrolledY + rect.height - 15)) return
+      // smooth scroll when from 0 => 130
+      setBehaviourSmooth(false)
+      setBehaviourSmooth(true)
+   })
    useEffect(() => {
-      if (isActive) {
-         setTransition(0)
-      } else {
-         setTransition(130)
-      }
+      setBehaviourSmooth(!isActive)
    }, [active.dy])
 
    /* Item motion react to Scroll / Drag / remapping */
@@ -79,7 +89,8 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
       // clamp to container boundary when dragging / floating
       const bounds = rect && boundClamp ? { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 } : {}
 
-      setPosY(isActive ? clamp(active.dy + offsetTop + activeScrolled, bounds) : offsetTop + slotHeight)
+      const newPosY = isActive ? clamp(active.dy + offsetTop + activeScrolled, bounds) : offsetTop + slotHeight
+      posY !== newPosY && setPosY(newPosY)
    }, [index, active, hovering, lifecycle, activeScrolled])
 
    return (
@@ -96,7 +107,7 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
                top: 0,
                transform: lifecycle >= 1 && `translateY(${posY}px)`,
                zIndex: wasPrevActiveRef.current && 5,
-               transition: transition ? `transform ${transition}ms ease-in-out` : "",
+               transition: lifecycle >= 2 && behaviourSmooth ? "transform 130ms ease-in-out" : "",
             }}
          >
             <DragContext.Provider value={{ onDragStart: (e) => onDragStart(e, uniqueId), isActive }}>{children}</DragContext.Provider>

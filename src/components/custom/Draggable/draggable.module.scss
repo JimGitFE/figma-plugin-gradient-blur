@@ -1,5 +1,6 @@
 .floating {
    // transition: transform 0 linear;
+   // transition: transform 130ms ease-in-out;
    z-index: 4;
 
    &:not(.active) {
