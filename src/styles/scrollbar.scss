@@ -1,38 +1,44 @@
 // Custom Scrollbar
 
+// Wrapper (Scrollable)
 .custom-scroll-parent {
    .custom-scroll-track {
       opacity: 0;
    }
 
    &:has(.custom-scroll-thumb:active),
+   &:has(.reorder-slot-active),
    &:hover {
       .custom-scroll-track {
          opacity: 1;
+         transition-delay: 0 !important;
       }
    }
-}
 
-.custom-scroll-track {
-   width: 11px;
-   padding: 2px;
-   border-left: 1px solid transparent;
+   // Track
+   .custom-scroll-track {
+      width: 11px;
+      padding: 2px;
+      border-left: 1px solid transparent;
 
-   transition: opacity 60ms ease-out;
+      transition: opacity 60ms ease-out;
+      transition-delay: 100ms;
 
-   &:has(.custom-scroll-thumb:active),
-   &:hover {
-      border-color: var(--figma-color-border);
-   }
-}
+      &:has(.custom-scroll-thumb:active),
+      &:hover {
+         border-color: var(--figma-color-border);
+      }
 
-.custom-scroll-thumb {
-   background: var(--figma-color-text-tertiary);
-   border-radius: 3px;
-   opacity: 0.9;
+      // Thumb
+      .custom-scroll-thumb {
+         background: var(--figma-color-text-tertiary);
+         border-radius: 3px;
+         opacity: 0.9;
 
-   &:hover,
-   &:active {
-      opacity: 1;
+         &:hover,
+         &:active {
+            opacity: 1;
+         }
+      }
    }
 }
