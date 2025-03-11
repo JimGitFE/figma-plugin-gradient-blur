@@ -39,12 +39,12 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
 
    /* Thumb grab hook, (clamped dragging position) */
 
-   const { thumb, isDragging, initDrag, scrollTo } = useScrollThumb({ containerRef, contentRef, trackRef, config })
+   const { thumb, isDragging, initDrag, scrollTo } = useScrollThumb({ containerRef, contentRef, trackRef, setScrollInstant, config })
 
    /* Container controlled scroll (top, depends on thumb.y)  */
 
+   // Controlled scroll motion behaviour
    const [scrolledTop, setScrolledTop] = useState(0) // TODO: handle scrolling as % make thumb y dep on it
-   const prevScrolledTop = useRef(0)
 
    // Convert thumb user % movement to container % should move
    useEffect(() => {
@@ -62,15 +62,13 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
    // Make Wrap element scroll (deps `scrolledTop`)
    useEffect(() => {
       wrapRef.current.scrollTo({ top: scrolledTop, behavior: (isDragging || scrollInstant ? "instant" : "smooth") as ScrollBehavior })
-      return () => {
-         ;(isDragging || scrollInstant) && (prevScrolledTop.current = scrolledTop)
-      }
    }, [scrolledTop])
 
    /* Method scroll(current => current + 2) for consumers (of context provider) */
 
-   const scroll = (callback: ((diff: number) => number) | number) => {
+   const scroll = (callback: ((diff: number) => number) | number, instant?: boolean) => {
       if (!contentRef.current || !containerRef.current) return
+      setScrollInstant(instant)
 
       const toY = typeof callback === "number" ? callback : callback(scrolledTop)
 
@@ -85,9 +83,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
    }
 
    return (
-      <ScrollContext.Provider
-         value={{ scrolledY: scrolledTop, scrolledYDiff: scrolledTop - prevScrolledTop.current, scroll, containerRef, setScrollInstant }}
-      >
+      <ScrollContext.Provider value={{ scrolledY: scrolledTop, scroll, containerRef }}>
          <div {...atts} ref={containerRef} className={`custom-scroll-parent ${styles.container} ${atts.className}`}>
             <div ref={wrapRef} className={`${styles.wrap} pos-relative`}>
                <div ref={contentRef}>{children}</div>
@@ -123,12 +119,9 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
 interface ScrollContextProps {
    /** Current scroll top*/
    scrolledY: number
-   scrolledYDiff: number
    /** Scroll to */
-   scroll: (callback: ((scrolledY: number) => number) | number) => void
+   scroll: (callback: ((scrolledY: number) => number) | number, instant?: boolean) => void
    containerRef: FwdRef
-   /** Controlled scroll motion behaviour */
-   setScrollInstant: (instant: boolean) => void
 }
 
 const ScrollContext = createContext<ScrollContextProps | undefined>(undefined)
@@ -147,13 +140,14 @@ interface HookProps {
    containerRef: FwdRef
    contentRef: FwdRef
    trackRef: FwdRef
+   setScrollInstant: (instant: boolean) => void // internal
    config: {
       defaultWheelEvent: boolean
    }
 }
 
 /** Calculates thumb height relative to scrollable content, handles clamped dragging position */
-function useScrollThumb({ containerRef, contentRef, trackRef, config }: HookProps) {
+function useScrollThumb({ containerRef, contentRef, trackRef, setScrollInstant, config }: HookProps) {
    const [thumb, setThumb] = useState({ y: 0, height: 0 })
    // Internal State
    const [emptySpace, setEmptySpace] = useState(0)
@@ -191,7 +185,6 @@ function useScrollThumb({ containerRef, contentRef, trackRef, config }: HookProp
    // 2 Wheel Event
    const onWheel = (e: WheelEvent) => {
       // e.preventDefault()
-      // TODO: no wheel event when edge scrolling
       if (!containerRef.current.contains(e.target as Node)) return
       setThumb((prev) => ({ ...prev, y: clampThumbY(prev.y + e.deltaY) }))
    }
@@ -201,6 +194,7 @@ function useScrollThumb({ containerRef, contentRef, trackRef, config }: HookProp
    // 3 Track Click Event
    const onTrackClick = (e: MouseEvent) => {
       if (!trackRef.current || e.target !== trackRef.current) return
+      setScrollInstant(false)
       /* Place thumb at center of event */
       const { top } = trackRef.current.getBoundingClientRect()
       setThumb((prev) => ({ ...prev, y: clampThumbY(e.clientY - top - prev.height / 2) }))

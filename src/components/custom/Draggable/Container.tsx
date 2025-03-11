@@ -34,7 +34,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    // Items Dimension
    const itemRefs = useRef([]) // sorted by index
 
-   const { scrolledY, scroll, setScrollInstant, containerRef } = Scroll.useScrollCtx() // (attach observer)
+   const { scrolledY, scroll, containerRef } = Scroll.useScrollCtx() // (attach observer)
 
    /*
     * Item lifecycle
@@ -83,6 +83,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       // Fallback to closest slot
       if (index === -1) index = itemRefs.current[indexFromId(1)]?.rect.top >= mouseY ? 0 : itemRefs.current.length - 1
 
+      if (hovering.index === index) return // object/array is a new reference in memory
       setHovering({ uniqueId: sources[index].uniqueId, index })
    }, [active, scrolledY])
 
@@ -91,7 +92,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    // Custom wheel event (avoid scroll on `scrollOnEdges` areas when dragging)
    const onWheelScroll = (e: WheelEvent) => {
       if (!containerRef.current.contains(e.target as Node)) return
-      scroll((total) => total + e.deltaY)
+      scroll((total) => total + e.deltaY, false)
    }
 
    useEventListener("wheel", onWheelScroll, { conditional: !isDragging, element: containerRef.current })
@@ -104,20 +105,17 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       const [scTop, scBtm] = [ctn.top + config.dist, ctn.bottom - config.dist]
 
       if (posY < scTop) {
-         setScrollInstant(isDragging)
          const strength = config.multiplier * (posY - scTop)
-         scroll((total) => total + strength / 400) // normalizer
+         scroll((total) => total + strength / 400, isDragging) // normalizer
       } else if (posY > scBtm) {
-         setScrollInstant(isDragging)
          const strength = config.multiplier * (posY - scBtm)
-         scroll((total) => total + strength / 400) // normalizer
+         scroll((total) => total + strength / 400, isDragging) // normalizer
       }
    }
 
    useEffect(() => {
       if (active.index === -1 && typeof drag.clientPos.y !== "number") return
       scrollOnEdges(drag.clientPos.y)
-      return () => setScrollInstant(false)
    }, [active, scrolledY])
 
    // Utils

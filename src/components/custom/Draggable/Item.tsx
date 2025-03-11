@@ -6,7 +6,6 @@ import styles from "./draggable.module.scss"
 import { useReorder } from "./Container"
 import { useScrollCtx } from "./CustomScroll"
 import { clamp } from "@/utils"
-import { useEventListener } from "@/hooks/useEventListener"
 
 /** Required props */
 interface SourceProps {
