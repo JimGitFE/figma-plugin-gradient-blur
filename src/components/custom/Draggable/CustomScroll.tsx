@@ -38,6 +38,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, ...atts }: Props) 
    /* Container controlled scroll (top, depends on thumb.y)  */
 
    const [scrolledTop, setScrolledTop] = useState(0) // TODO: handle scrolling as % make thumb y dep on it
+   const prevScrolledTop = useRef(0)
 
    // Convert thumb user % movement to container % should move
    useEffect(() => {
@@ -55,6 +56,9 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, ...atts }: Props) 
    // Make Wrap element scroll (deps `scrolledTop`)
    useEffect(() => {
       wrapRef.current.scrollTo({ top: scrolledTop, behavior: (isDragging || scrollInstant ? "instant" : "smooth") as ScrollBehavior })
+      return () => {
+         ;(isDragging || scrollInstant) && (prevScrolledTop.current = scrolledTop)
+      }
    }, [scrolledTop])
 
    /* Method scroll(current => current + 2) for consumers (of context provider) */
@@ -75,7 +79,9 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, ...atts }: Props) 
    }
 
    return (
-      <ScrollContext.Provider value={{ scrolledY: scrolledTop, scroll, containerRef, setScrollInstant }}>
+      <ScrollContext.Provider
+         value={{ scrolledY: scrolledTop, scrolledYDiff: scrolledTop - prevScrolledTop.current, scroll, containerRef, setScrollInstant }}
+      >
          <div {...atts} ref={containerRef} className={`custom-scroll-parent ${styles.container} ${atts.className}`}>
             <div ref={wrapRef} className={`${styles.wrap} pos-relative`}>
                <div ref={contentRef}>{children}</div>
@@ -111,6 +117,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, ...atts }: Props) 
 interface ScrollContextProps {
    /** Current scroll top*/
    scrolledY: number
+   scrolledYDiff: number
    /** Scroll to */
    scroll: (callback: ((scrolledY: number) => number) | number) => void
    containerRef: FwdRef
@@ -175,6 +182,7 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
    // 2 Wheel Event
    const onWheel = (e: WheelEvent) => {
       e.preventDefault()
+      if (!containerRef.current.contains(e.target as Node)) return
       setThumb((prev) => ({ ...prev, y: clampThumbY(prev.y + e.deltaY) }))
    }
 
