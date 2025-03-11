@@ -14,10 +14,16 @@ interface Props extends Omit<React.HTMLAttributes<HTMLDivElement>, "onScroll"> {
    track?: React.HTMLAttributes<HTMLDivElement>
    thumb?: React.HTMLAttributes<HTMLDivElement>
    children?: React.ReactNode
+   config?: Partial<HookProps["config"]>
 }
 
+const DEFAULT_CONFIG: HookProps["config"] = {
+   defaultWheelEvent: true,
+} as const
+
 /** Wrapper */
-function Wrap({ thumb: thumbAtts, track: trackAtts, children, ...atts }: Props) {
+function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp = {}, ...atts }: Props) {
+   const config = { ...DEFAULT_CONFIG, ...configProp }
    /* Mutable JSX Scroll objects */
 
    /** Container */
@@ -33,7 +39,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, ...atts }: Props) 
 
    /* Thumb grab hook, (clamped dragging position) */
 
-   const { thumb, isDragging, initDrag, scrollTo } = useScrollThumb({ containerRef, contentRef, trackRef })
+   const { thumb, isDragging, initDrag, scrollTo } = useScrollThumb({ containerRef, contentRef, trackRef, config })
 
    /* Container controlled scroll (top, depends on thumb.y)  */
 
@@ -74,8 +80,8 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, ...atts }: Props) 
       const hiddenHeight = contentRef.current.clientHeight - containerRef.current.clientHeight
       const normal = clamp(toY / hiddenHeight, { min: 0, max: 1 }) // normalised value
 
-      if (normal === 0 || normal === 1) return
-      scrollTo(normal * trackEmptySpace)
+      if (scrolledTop === normal * hiddenHeight) return
+      scrollTo(normal * trackEmptySpace) // move thumb
    }
 
    return (
@@ -141,10 +147,13 @@ interface HookProps {
    containerRef: FwdRef
    contentRef: FwdRef
    trackRef: FwdRef
+   config: {
+      defaultWheelEvent: boolean
+   }
 }
 
 /** Calculates thumb height relative to scrollable content, handles clamped dragging position */
-function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
+function useScrollThumb({ containerRef, contentRef, trackRef, config }: HookProps) {
    const [thumb, setThumb] = useState({ y: 0, height: 0 })
    // Internal State
    const [emptySpace, setEmptySpace] = useState(0)
@@ -182,11 +191,12 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
    // 2 Wheel Event
    const onWheel = (e: WheelEvent) => {
       // e.preventDefault()
+      // TODO: no wheel event when edge scrolling
       if (!containerRef.current.contains(e.target as Node)) return
       setThumb((prev) => ({ ...prev, y: clampThumbY(prev.y + e.deltaY) }))
    }
 
-   useEventListener("wheel", onWheel, { element: containerRef.current })
+   useEventListener("wheel", onWheel, { element: containerRef.current, conditional: config.defaultWheelEvent })
 
    // 3 Track Click Event
    const onTrackClick = (e: MouseEvent) => {
@@ -200,9 +210,7 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
 
    /* Set methods (will sequentially update deps (wrap scroll)) */
 
-   const scrollTo = (y: number) => {
-      setThumb((prev) => ({ ...prev, y: clampThumbY(y) }))
-   }
+   const scrollTo = (y: number) => setThumb((prev) => ({ ...prev, y: clampThumbY(y) }))
 
    return { thumb, isDragging, initDrag, scrollTo }
 }

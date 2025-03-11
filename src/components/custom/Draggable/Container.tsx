@@ -6,6 +6,7 @@ import { type SourceProps, Item } from "./Item"
 import { reorder } from "./utils"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
 import Scroll from "./CustomScroll"
+import { useEventListener } from "@/hooks/useEventListener"
 
 const DEFAULT_CONFIG: Required<ManagerProps<any>["config"]> = {
    dist: 30,
@@ -13,7 +14,7 @@ const DEFAULT_CONFIG: Required<ManagerProps<any>["config"]> = {
 }
 
 /** extends CustomScroll config */
-interface ManagerProps<T extends SourceProps> extends Partial<React.ComponentProps<typeof Scroll.Wrap>> {
+interface ManagerProps<T extends SourceProps> extends Partial<Omit<React.ComponentProps<typeof Scroll.Wrap>, "config">> {
    children: Component<typeof Item>[]
    sources: T[]
    /** reordered data source */
@@ -86,6 +87,17 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    }, [active, scrolledY])
 
    /* Scroll Hndlers */
+
+   // Custom wheel event (avoid scroll on `scrollOnEdges` areas when dragging)
+   useEventListener(
+      "wheel",
+      (e) => {
+         if (!containerRef.current.contains(e.target as Node)) return
+         console.log("eventweheel", e.deltaY)
+         scroll((total) => total + e.deltaY / 2)
+      },
+      { conditional: !isDragging, element: containerRef.current }
+   )
 
    // When dragging item is near the edges of the container
    const scrollOnEdges = (posY: number) => {
@@ -199,9 +211,9 @@ function useReorder() {
 }
 
 // Makes Scroll provider available to Manager
-function Container<T extends SourceProps>({ sources, onReorder, children, ...atts }: ManagerProps<T>) {
+function Container<T extends SourceProps>({ sources, onReorder, children, ...atts }: Omit<ManagerProps<T>, "config">) {
    return (
-      <Scroll.Wrap {...atts} className={`${atts.className} pos-relative`}>
+      <Scroll.Wrap {...atts} config={{ defaultWheelEvent: false }} className={`${atts.className} pos-relative`}>
          <Manager sources={sources} onReorder={onReorder}>
             {children}
          </Manager>

@@ -1,13 +1,8 @@
-.floating {
-   // transition: transform 0 linear;
-   // transition: transform 130ms ease-in-out;
+.floating:not(.active) {
+   transition: transform 130ms linear;
    z-index: 4;
-
-   &:not(.active) {
-      // transition-duration: 130ms;
-   }
 }
 
-.scroll {
-   transition: transform 130ms ease-in-out;
-}
+// .scroll {
+//    transition: transform 130ms ease-in-out;
+// }

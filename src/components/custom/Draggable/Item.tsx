@@ -1,5 +1,5 @@
 // Dependencies
-import React, { act, createContext, ReactNode, RefObject, useEffect, useRef, useState } from "react"
+import React, { createContext, ReactNode, useEffect, useRef, useState } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
@@ -24,7 +24,7 @@ interface ItemProps extends SourceProps {
 // Misconception uniqueId might have empty steps, index represents the actual position
 /** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
 function Item({ draggable, boundClamp = true, children }: ItemProps) {
-   const { scrolledY, scrolledYDiff, containerRef } = useScrollCtx()
+   const { scrolledY, containerRef } = useScrollCtx()
    const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, ...internal }] = useReorder()
    const [posY, setPosY] = useState(null) // makes posY controlled (double render)
 
@@ -56,25 +56,19 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
 
    // TODO: observe resizes of items
 
-   const isInScrollArea = (itmY: number) => {
-      const ctn = containerRef.current.getBoundingClientRect()
-      // Scroll top and scroll bottom
-      const [scTop, scBtm] = [30, ctn.height - 30]
-      console.log(itmY, itmY < scTop || itmY > scBtm)
-      return itmY < scTop || itmY > scBtm
-   }
-
    /* On scroll smooth transition (not triggered by drag on edge) */
-   const [behaviourSmooth, setBehaviourSmooth] = useState(false)
-   useEventListener("wheel", () => {
-      if (!isActive || isInScrollArea(posY - scrolledY + rect.height - 15)) return
-      // smooth scroll when from 0 => 130
-      setBehaviourSmooth(false)
-      setBehaviourSmooth(true)
-   })
-   useEffect(() => {
-      setBehaviourSmooth(!isActive)
-   }, [active.dy])
+   // const [behaviourSmooth, setBehaviourSmooth] = useState(false)
+
+   // useEventListener("wheel", () => {
+   //    if (!isActive) return
+   //    // smooth scroll when from 0 => 130
+   //    setBehaviourSmooth(false)
+   //    setBehaviourSmooth(true)
+   // })
+
+   // useEffect(() => {
+   //    setBehaviourSmooth(!isActive)
+   // }, [active.dy])
 
    /* Item motion react to Scroll / Drag / remapping */
    useEffect(() => {
@@ -107,7 +101,7 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
                top: 0,
                transform: lifecycle >= 1 && `translateY(${posY}px)`,
                zIndex: wasPrevActiveRef.current && 5,
-               transition: lifecycle >= 2 && behaviourSmooth ? "transform 130ms ease-in-out" : "",
+               // transition: lifecycle >= 2 && behaviourSmooth ? "transform 130ms ease-in-out" : "",
             }}
          >
             <DragContext.Provider value={{ onDragStart: (e) => onDragStart(e, uniqueId), isActive }}>{children}</DragContext.Provider>
