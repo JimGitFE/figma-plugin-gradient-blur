@@ -181,7 +181,7 @@ function useScrollThumb({ containerRef, contentRef, trackRef }: HookProps) {
 
    // 2 Wheel Event
    const onWheel = (e: WheelEvent) => {
-      e.preventDefault()
+      // e.preventDefault()
       if (!containerRef.current.contains(e.target as Node)) return
       setThumb((prev) => ({ ...prev, y: clampThumbY(prev.y + e.deltaY) }))
    }

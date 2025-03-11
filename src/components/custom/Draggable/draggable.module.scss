@@ -1,4 +1,12 @@
-.floating:not(.active) {
-   transition: transform 130ms linear;
+.floating {
+   // transition: transform 0 linear;
    z-index: 4;
+
+   &:not(.active) {
+      // transition-duration: 130ms;
+   }
+}
+
+.scroll {
+   transition: transform 130ms ease-in-out;
 }

@@ -6,6 +6,7 @@ import styles from "./draggable.module.scss"
 import { useReorder } from "./Container"
 import { useScrollCtx } from "./CustomScroll"
 import { clamp } from "@/utils"
+import { useEventListener } from "@/hooks/useEventListener"
 
 /** Required props */
 interface SourceProps {
@@ -28,23 +29,23 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
    const [posY, setPosY] = useState(null) // makes posY controlled (double render)
 
    /* Account for scrolled since drag start */
-   // const [scrolledTop, setScrolledTop] = useState(0)
+   // const [scrolledTop, setActiveScrolled] = useState(0)
    // const prevScrolledTop = useRef(scrolledY)
-   const [scrolledTop, setScrolledTop] = useState(0)
-   const prevScrolledTop = useRef(scrolledY)
+   const [activeScrolled, setActiveScrolled] = useState(0)
+   const prevScrolled = useRef(scrolledY)
    useEffect(() => {
       // TODO smooth posY while scrolling
-      updateScrollTop(prevScrolledTop.current)
-      scrolledY !== prevScrolledTop.current && (prevScrolledTop.current = scrolledY)
+      updateScrollTop(prevScrolled.current)
+      scrolledY !== prevScrolled.current && (prevScrolled.current = scrolledY)
    }, [scrolledY, isActive])
 
-   const updateScrollTop = (prevScrolledTop: number) => {
+   const updateScrollTop = (prev: number) => {
       if (isActive) {
-         setScrolledTop((prev) => {
-            return prev + scrolledY - prevScrolledTop
+         setActiveScrolled((dy) => {
+            return dy + scrolledY - prev // dy + diff since active
          })
       } else {
-         setScrolledTop(0)
+         setActiveScrolled(0)
       }
    }
 
@@ -54,6 +55,16 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
    useEffect(() => {active.index !== -1 && (wasPrevActiveRef.current = isActive)}, [active.index])
 
    // TODO: observe resizes of items
+
+   const [transition, setTransition] = useState(0)
+   useEventListener("wheel", () => setTransition(130))
+   useEffect(() => {
+      if (isActive) {
+         setTransition(0)
+      } else {
+         setTransition(130)
+      }
+   }, [active.dy])
 
    /* Item motion react to Scroll / Drag / remapping */
    useEffect(() => {
@@ -68,13 +79,16 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
       // clamp to container boundary when dragging / floating
       const bounds = rect && boundClamp ? { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 } : {}
 
-      setPosY(isActive ? clamp(active.dy + offsetTop + scrolledTop, bounds) : offsetTop + slotHeight)
-   }, [index, active, hovering, lifecycle, scrolledTop])
+      setPosY(isActive ? clamp(active.dy + offsetTop + activeScrolled, bounds) : offsetTop + slotHeight)
+   }, [index, active, hovering, lifecycle, activeScrolled])
 
    return (
       <>
          {/* 1 Item */}
          <div
+            ref={(node) => node && (internal.itemRefs.current[index] = { ...internal.itemRefs.current[index], node })}
+            onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
+            className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating}`}
             style={{
                // Apply Floating layout once refs have settled
                position: lifecycle >= 1 ? "absolute" : "relative",
@@ -82,10 +96,8 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
                top: 0,
                transform: lifecycle >= 1 && `translateY(${posY}px)`,
                zIndex: wasPrevActiveRef.current && 5,
+               transition: transition ? `transform ${transition}ms ease-in-out` : "",
             }}
-            className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating}`}
-            onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
-            ref={(node) => node && (internal.itemRefs.current[index] = { ...internal.itemRefs.current[index], node })}
          >
             <DragContext.Provider value={{ onDragStart: (e) => onDragStart(e, uniqueId), isActive }}>{children}</DragContext.Provider>
          </div>
