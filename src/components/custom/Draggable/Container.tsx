@@ -37,7 +37,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    /* Scroll Managing State */
 
    const { scroll, scrolledY, containerRef } = Scroll.useScrollCtx() // (attach observer)
-   const [activeScrolledY, setActiveScrolledY] = useState(0) // usememo?
+   // const [activeScrolledY, setActiveScrolledY] = useState(0) // usememo?
    const activeInitScrolledYRef = useRef(0) // unused?
 
    /* Item lifecycle */
@@ -54,7 +54,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Reorderable Items Manager */
 
-   const [active, setActive] = useState({ uniqueId: -1, index: -1, dy: null })
+   const [active, setActive] = useState({ uniqueId: -1, index: -1, dy: null, scrolledY: null })
    const [hovering, setHovering] = useState({ uniqueId: -1, index: -1 }) // hovering slot index
 
    // Active grab, Hovering, initDrag, traveled dy
@@ -65,24 +65,22 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
          },
          up: () => {
             onReorder(reorder(sources, active.index, hovering.index))
-            setActive({ uniqueId: -1, index: -1, dy: null })
+            setActive({ uniqueId: -1, index: -1, dy: null, scrolledY: null })
             setHovering({ uniqueId: -1, index: -1 })
             activeInitScrolledYRef.current = 0
-            setActiveScrolledY(0)
          },
       },
    })
    const onDragStart = (e: EventFor<MouseEvent>, uniqueId: number) => {
       activeInitScrolledYRef.current = scrolledY
-      setActiveScrolledY(0)
-      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0 })
+      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0, scrolledY: 0 })
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
       initDrag(e)
    }
 
    /* Custom wheel event */
 
-   // avoid scroll on `scrollOnEdges` areas when dragging
+   // Avoid scroll on `scrollOnEdges` areas when dragging
    const onCustomWheel = (e: WheelEvent) => {
       if (!containerRef.current.contains(e.target as Node)) return
       scroll((top) => top + e.deltaY / 2, false)
@@ -125,7 +123,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
          const scBound = drag.clientPos.y < scTop ? scTop : scBtm
          const strength = config.multiplier * (drag.clientPos.y - scBound)
          const newTop = top + strength / 100
-         setActiveScrolledY(newTop - activeInitScrolledYRef.current)
+         setActive((prev) => ({ ...prev, scrolledY: newTop }))
 
          return newTop
       }, isDragging)
@@ -173,7 +171,6 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                         itemsRef,
                         recalculateRects: recalculateItemRects,
                         lifecycle,
-                        activeScrolledY,
                         scrolledY,
                      },
                   ]}
@@ -199,7 +196,7 @@ type ReorderContextProps = [
    },
    /** State */
    {
-      active: { uniqueId: number; index: number; dy: number }
+      active: { uniqueId: number; index: number; dy: number; scrolledY: number }
       /** hovering slot index */
       hovering: { uniqueId: number; index: number }
    },
@@ -209,7 +206,6 @@ type ReorderContextProps = [
       recalculateRects: () => void
       /**  0: idle, 1: drag start, 2: moved */
       lifecycle: number
-      activeScrolledY: number
       scrolledY: number
    }
 ]

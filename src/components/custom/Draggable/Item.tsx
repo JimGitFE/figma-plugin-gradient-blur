@@ -1,5 +1,5 @@
 // Dependencies
-import React, { createContext, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { createContext, ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
@@ -25,8 +25,7 @@ interface ItemProps extends SourceProps {
 /** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
 function Item({ draggable, boundClamp = true, children }: ItemProps) {
    const { containerRef } = useScrollCtx()
-   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, activeScrolledY, scrolledY, ...internal }] =
-      useReorder()
+   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, scrolledY, ...internal }] = useReorder()
 
    // TODO: Smooth translate3d on wheel scroll (custom motion with lerp & targetPos)
 
@@ -50,7 +49,7 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
    const bounds = useMemo(() => {
       if (!(rect && boundClamp) || !containerRef.current) return {}
       return { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 }
-   }, [scrolledY])
+   }, [lifecycle, scrolledY])
 
    // Calculate Y position of item
    const calcPosY = useCallback(
@@ -64,7 +63,7 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
 
          return isActive ? clamp(active.dy + offsetTop + diffScrolledY, bounds) : offsetTop + slotHeight
       },
-      [index, active, hovering, lifecycle, bounds]
+      [index, active.dy, hovering, lifecycle, bounds]
    )
 
    return (
@@ -79,7 +78,7 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
                position: lifecycle >= 1 ? "absolute" : "relative",
                height: lifecycle >= 1 && rect?.height,
                top: 0,
-               transform: lifecycle >= 1 && `translateY(${calcPosY(activeScrolledY)}px)`,
+               transform: lifecycle >= 1 && `translateY(${calcPosY(active.scrolledY)}px)`,
                zIndex: wasPrevActiveRef.current && 5,
                // transition: lifecycle >= 2 && behaviourSmooth ? "transform 130ms ease-in-out" : "",
             }}
