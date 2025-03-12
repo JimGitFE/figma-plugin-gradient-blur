@@ -7,6 +7,7 @@ import { reorder } from "./utils"
 import { useResizeObserver } from "@/hooks/useResizeObserver"
 import Scroll from "./CustomScroll"
 import { useEventListener } from "@/hooks/useEventListener"
+import useAnimation from "@/hooks/useAnimation"
 
 /** extends CustomScroll config */
 interface ManagerProps<T extends SourceProps> extends Partial<Omit<React.ComponentProps<typeof Scroll.Wrap>, "config">> {
@@ -107,48 +108,33 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Auto Scroll on bounds when dragging */
 
-   const scrollBounds = useMemo(() => {
-      if (!containerRef.current) return
+   // Auto scroll on item drag area
+   const [scTop, scBtm] = useMemo(() => {
+      if (!containerRef.current) return [0, 0]
       const ctn = containerRef.current.getBoundingClientRect()
       // Scroll top and scroll bottom
       return [ctn.top + config.dist, ctn.bottom - config.dist]
    }, [containerRef, config])
 
    // On item drag, scroll when near the edges
+   const onEdgeAutoScroll = () => {
+      if (active.index === -1 || typeof drag.clientPos.y !== "number") return
+
+      scroll((top) => {
+         const scBound = drag.clientPos.y < scTop ? scTop : scBtm
+         const strength = config.multiplier * (drag.clientPos.y - scBound)
+         const newTop = top + strength / 100
+         setActiveScrolledY(newTop - activeInitScrolledYRef.current)
+
+         return newTop
+      }, isDragging)
+   }
+
    // When dragging item is near the edges of the container
-   useEffect(() => {
-      let frameId
-      // animation fixes: Maximum update depth exceeded
-      function step() {
-         if (active.index === -1 || typeof drag.clientPos.y !== "number") return
+   useAnimation(onEdgeAutoScroll, [active], { conditional: drag.clientPos.y < scTop || drag.clientPos.y > scBtm })
 
-         const posY = drag.clientPos.y
-         const [scTop, scBtm] = scrollBounds
+   /* Utils */
 
-         // Each step, increment the scroll position by e.g. 20px.
-         // If we can keep scrolling, do it; otherwise stop.
-         if (posY < scTop || posY > scBtm) {
-            // Loop Logic
-            scroll((top) => {
-               const scBound = posY < scTop ? scTop : scBtm
-               const strength = config.multiplier * (posY - scBound)
-               const newTop = top + strength / 100
-               setActiveScrolledY(newTop - activeInitScrolledYRef.current)
-               return newTop
-            }, isDragging)
-
-            frameId = requestAnimationFrame(step)
-         }
-      }
-      frameId = requestAnimationFrame(step)
-
-      // Cleanup if effect re‐runs or unmounts
-      return () => {
-         cancelAnimationFrame(frameId)
-      }
-   }, [active])
-
-   // Utils
    const recalculateItemRects = () => itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 

@@ -134,7 +134,7 @@ function useEventListener<
       return () => {
          targetElement.removeEventListener(eventName, listener, config.options)
       }
-   }, [eventName, config.options, config.conditional])
+   }, [eventName, config.options, config.conditional, config.element])
 }
 
 export { useEventListener }
