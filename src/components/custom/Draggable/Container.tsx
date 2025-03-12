@@ -8,6 +8,7 @@ import { useResizeObserver } from "@/hooks/useResizeObserver"
 import Scroll from "./CustomScroll"
 import { useEventListener } from "@/hooks/useEventListener"
 import useAnimation from "@/hooks/useAnimation"
+import { clamp } from "@/utils"
 
 /** extends CustomScroll config */
 interface ManagerProps<T extends SourceProps> extends Partial<Omit<React.ComponentProps<typeof Scroll.Wrap>, "config">> {
@@ -121,7 +122,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       scroll((top) => {
          const scBound = drag.clientPos.y < scTop ? scTop : scBtm
          const strength = config.multiplier * (drag.clientPos.y - scBound)
-         const newTop = top + strength / 100
+         const newTop = top + strength / (clamp(deltaTime, { min: 1000 / 60 }) * 5)
 
          setActive((prev) => ({ ...prev, scrolledY: newTop - activeInitScrolledYRef.current }))
          return newTop

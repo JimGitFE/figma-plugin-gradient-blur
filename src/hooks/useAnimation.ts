@@ -10,19 +10,24 @@ interface Config {
 
 /** Animation Frame loop logic */
 export default function useAnimation(frame: FrameLoop, deps: React.DependencyList, { conditional = true }: Config) {
-   const lastTimeRef = useRef(performance.now())
+   const lastTimeRef = useRef(null)
    useEffect(() => {
       let frameId: number
 
-      const frameLoop = (time: number) => {
-         const deltaTime = time - lastTimeRef.current
-         lastTimeRef.current = time
+      const frameLoop = (timestamp: number) => {
+         //  if (lastTimeRef.current === null) lastTimeRef.current = timestamp
+
          frameId = requestAnimationFrame(frameLoop)
-         frame(deltaTime) // callback
+         frame(lastTimeRef.current !== null ? timestamp - lastTimeRef.current : 0) // callback
+
+         lastTimeRef.current = timestamp
       }
 
       if (conditional) frameId = requestAnimationFrame(frameLoop)
 
-      return () => cancelAnimationFrame(frameId)
+      return () => {
+         lastTimeRef.current = null
+         cancelAnimationFrame(frameId)
+      }
    }, [...deps]) // Deps, updated value made available inside loop
 }
