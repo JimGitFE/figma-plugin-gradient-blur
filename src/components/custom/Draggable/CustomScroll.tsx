@@ -192,8 +192,7 @@ function useThumb({ trackRef, trackContainerRef, dims, scroll, normalY }: HookPr
 
    // 2 Empty Track Click
    const onTrackClick = (e: MouseEvent) => {
-      if (!trackRef.current || e.target !== trackRef.current) return
-      console.log(e.target)
+      if (!trackRef.current || e.target !== trackContainerRef.current) return
       /* Place thumb at center of event */
       const { top } = trackRef.current.getBoundingClientRect()
       scroll(toTopFrom(e.clientY - top - dims.thumbHeight / 2), false)
