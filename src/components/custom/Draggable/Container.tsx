@@ -37,7 +37,6 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    /* Scroll Managing State */
 
    const { scroll, scrolledY, containerRef } = Scroll.useScrollCtx() // (attach observer)
-   // const [activeScrolledY, setActiveScrolledY] = useState(0) // usememo?
    const activeInitScrolledYRef = useRef(0) // unused?
 
    /* Item lifecycle */
