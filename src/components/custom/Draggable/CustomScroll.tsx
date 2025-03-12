@@ -34,6 +34,8 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
    const wrapRef = useRef<HTMLDivElement>(null) // defines scroll
    /** Overflowed content */
    const contentRef = useRef<HTMLDivElement>(null) // overflowed content
+   /** stylized track container  */
+   const trackContainerRef = useRef<HTMLDivElement>(null)
    /** Thumb Track */
    const trackRef = useRef<HTMLDivElement>(null)
 
@@ -84,7 +86,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
 
    /* Thumb grab hook, (clamped dragging position) */
 
-   const { initDrag, thumb } = useThumb({ trackRef, dims, normalY, scroll })
+   const { initDrag, thumb } = useThumb({ trackRef, trackContainerRef, dims, normalY, scroll })
 
    // Make Wrap element scroll (deps `scrolledTop`) TODO: move to scroll?
    useEffect(() => {
@@ -103,7 +105,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
             </div>
             {/* ScrollBar */}
             {thumb.height !== 100 && (
-               <div {...trackAtts} className={`${styles.track} ${trackAtts?.className} custom-scroll-track`}>
+               <div ref={trackContainerRef} {...trackAtts} className={`${styles.track} ${trackAtts?.className} custom-scroll-track`}>
                   {/* Track */}
                   <div ref={trackRef} className={`${styles["thumb-track"]}`}>
                      {/* Thumb */}
@@ -152,6 +154,7 @@ const useScrollCtx = () => {
 
 interface HookProps {
    trackRef: FwdRef
+   trackContainerRef: FwdRef
    dims: {
       hiddenHeight: number
       trackHeight: number
@@ -162,7 +165,7 @@ interface HookProps {
 }
 
 /** Thumb movement: grab drag / click on track, update on scroll */
-function useThumb({ trackRef, dims, scroll, normalY }: HookProps) {
+function useThumb({ trackRef, trackContainerRef, dims, scroll, normalY }: HookProps) {
    const [posY, setPosY] = useState(0)
 
    // Convert thumb travelled dy to scrollTop
@@ -196,7 +199,7 @@ function useThumb({ trackRef, dims, scroll, normalY }: HookProps) {
       scroll(toTopFrom(e.clientY - top - dims.thumbHeight / 2), false)
    }
 
-   useEventListener("mousedown", onTrackClick, { element: trackRef.current })
+   useEventListener("mousedown", onTrackClick, { element: trackContainerRef })
 
    /* Controlled thumb position (deps on scrolled)  */
 
