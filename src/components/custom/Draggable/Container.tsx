@@ -49,7 +49,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    // prettier-ignore
    // Resize Observer - calc hover slots relative positions
-   useResizeObserver({ref: containerRef, callback: () => {setLifecycle(0), requestAnimationFrame(() => {recalculateItemRects(), setLifecycle(1), requestAnimationFrame(() => setLifecycle(2))})}})
+   useResizeObserver({ref: containerRef, callback: () => {setLifecycle(0), requestAnimationFrame(() => {recalculateItemsRect(), setLifecycle(1), requestAnimationFrame(() => setLifecycle(2))})}})
 
    /* Reorderable Items Manager */
 
@@ -115,25 +115,27 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    }, [containerRef, config])
 
    // On item drag, scroll when near the edges
-   const onEdgeAutoScroll = () => {
-      if (active.index === -1 || typeof drag.clientPos.y !== "number") return
+   const onEdgeAutoScroll = (deltaTime: number) => {
+      if (typeof drag.clientPos.y !== "number") return
 
       scroll((top) => {
          const scBound = drag.clientPos.y < scTop ? scTop : scBtm
          const strength = config.multiplier * (drag.clientPos.y - scBound)
          const newTop = top + strength / 100
-         setActive((prev) => ({ ...prev, scrolledY: newTop }))
 
+         setActive((prev) => ({ ...prev, scrolledY: newTop - activeInitScrolledYRef.current }))
          return newTop
       }, isDragging)
    }
 
    // When dragging item is near the edges of the container
-   useAnimation(onEdgeAutoScroll, [active], { conditional: drag.clientPos.y < scTop || drag.clientPos.y > scBtm })
+   useAnimation(onEdgeAutoScroll, [active.dy], {
+      conditional: (drag.clientPos.y < scTop || drag.clientPos.y > scBtm) && active.index !== -1,
+   })
 
    /* Utils */
 
-   const recalculateItemRects = () => itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
+   const recalculateItemsRect = () => itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    return (
@@ -168,7 +170,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                      /* Internal */
                      {
                         itemsRef,
-                        recalculateRects: recalculateItemRects,
+                        recalculateRects: recalculateItemsRect,
                         lifecycle,
                         scrolledY,
                      },
