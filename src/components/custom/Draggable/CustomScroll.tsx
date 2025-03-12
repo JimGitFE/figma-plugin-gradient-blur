@@ -104,7 +104,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
                <div ref={contentRef}>{children}</div>
             </div>
             {/* ScrollBar */}
-            {thumb.height !== 100 && (
+            {thumb.heightPct !== 100 && (
                <div ref={trackContainerRef} {...trackAtts} className={`${styles.track} ${trackAtts?.className} custom-scroll-track`}>
                   {/* Track */}
                   <div ref={trackRef} className={`${styles["thumb-track"]}`}>
@@ -113,7 +113,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
                         onMouseDown={initDrag}
                         style={{
                            transform: `translateY(${thumb.y}px)`,
-                           height: thumb.height,
+                           height: `${thumb.heightPct}%`,
                            transitionDuration: scrollInstant && "0ms",
                         }}
                         className={styles.thumb}
@@ -204,7 +204,7 @@ function useThumb({ trackRef, trackContainerRef, dims, scroll, normalY }: HookPr
 
    useEffect(() => setPosY(normalY * (dims.trackHeight - dims.thumbHeight)), [normalY])
 
-   return { initDrag, thumb: { height: dims.thumbHeight, y: posY } }
+   return { initDrag, thumb: { y: posY, heightPct: (dims.thumbHeight / dims.trackHeight) * 100 } }
 }
 
 const Scroll = { Wrap, useScrollCtx } // namespace
