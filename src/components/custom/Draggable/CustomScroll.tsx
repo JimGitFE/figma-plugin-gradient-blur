@@ -54,8 +54,8 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
    const [scrollInstant, setScrollInstant] = useState(false)
 
    /* Container controlled scroll (top, depends on thumb.y)  */
-   const [normalY, setNormalY] = useState(0) // Scroll normal
-   const [scrolledTop, setScrolledTop] = useState(0) // TODO: handle scrolling as % make thumb y dep on it
+   const [normalY, setNormalY] = useState(0) // Scroll normal (internal use)
+   const [scrolledTop, setScrolledTop] = useState(0)
    const scrolledTopRef = useRef(0) // Controlled scroll motion behaviour
 
    // Wheel Event
@@ -177,11 +177,13 @@ function useThumb({ trackRef, dims, scroll, normalY }: HookProps) {
 
    /* Trigger scrolling (sequentially updates position via `normalY`) */
 
+   const downPosYRef = useRef(0)
    // 1 Thumb grab & Drag
    const { initDrag } = useDrag<"y">({
       callbacks: {
-         move: (_, { dy }) => scroll(toTopFrom(dy), true),
-         up: (_, { dy }) => scroll(toTopFrom(dy), true),
+         down: () => (downPosYRef.current = posY),
+         move: (_, { dy }) => scroll(toTopFrom(downPosYRef.current + dy), true),
+         up: (_, { dy }) => scroll(toTopFrom(downPosYRef.current + dy), true),
       },
    })
 
