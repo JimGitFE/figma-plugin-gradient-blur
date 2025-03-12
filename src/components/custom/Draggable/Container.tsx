@@ -92,7 +92,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Hovering slot index */
 
-   // accomodates dragged item (always represents an index of item[])
+   // Accomodates dragged item (always represents an index of item[])
    useEffect(() => {
       if (!itemsRef.current || active.index === -1) return
       // Account for scroll and drag distance
@@ -103,6 +103,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       if (index === -1) index = itemsRef.current[indexFromId(1)]?.rect.top >= mouseY ? 0 : itemsRef.current.length - 1
 
       if (hovering.index === index) return // object/array is a new reference in memory
+
       setHovering({ uniqueId: sources[index].uniqueId, index })
    }, [active, scrolledY])
 
@@ -110,7 +111,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    // Auto scroll on item drag area
    const [scTop, scBtm] = useMemo(() => {
-      if (!containerRef.current) return [0, 0]
+      if (!containerRef.current) return []
       const ctn = containerRef.current.getBoundingClientRect()
       // Scroll top and scroll bottom
       return [ctn.top + config.dist, ctn.bottom - config.dist]
