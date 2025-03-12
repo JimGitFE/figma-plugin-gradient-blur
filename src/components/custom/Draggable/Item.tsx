@@ -91,10 +91,8 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
             style={{
                display: lifecycle >= 1 ? "block" : "none",
                height: rect?.height,
-               // opacity: uniqueId / 10,
-               opacity: 0,
             }}
-            className={`w-100 bg-red ${isActive && "reorder-slot-active"}`}
+            className={`w-100 ${isActive && "reorder-slot-active"}`}
          />
       </>
    )

@@ -1,7 +1,6 @@
 .ai-c { align-items: center; }
 .bg--figma-color-bg { background: var(--figma-color-bg); }
 .bg-black { background: black; }
-.bg-red { background: red; }
 .c-white { color: white; }
 .d-f { display: flex; }
 .fd-co { flex-direction: column; }
