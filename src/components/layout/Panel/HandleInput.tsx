@@ -2,33 +2,47 @@
 // Dependencies
 import React, { useEffect, useRef, useState } from "react"
 // Components
-import { useCustomDrag } from "@/components/custom"
-import { CombinedInputs, SmallButton } from "@/components/figma"
+import { Reorder } from "@/components/custom"
+import { InputContainer, InputAreaBase, ActionButton } from "@/components/figma"
 // Internal
 import styles from "./properties.module.scss"
 import { useEventListener } from "@/hooks/useEventListener"
 import { clamp } from "@/utils"
 import { useCursor } from "@/hooks/useCursor"
+import { useProperties } from "@/store"
+import { useShallow } from "zustand/shallow"
 
-interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
-   setGrad: any
-   grad: any
-   isDrag?: boolean
+/** Store Hook */
+const useHandle = (handleId: number) => {
+   const updateHandle = useProperties(useShallow((state) => state.updateHandle))
+   return (patch: Partial<GradientStep>) => updateHandle(handleId, patch)
 }
 
-function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
-   const { onDragStart, isActive } = useCustomDrag()
+interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
+   handleId: number
+   handle: GradientStep
+}
+
+function HandleInput({ handle, handleId, ...atts }: HandleProps) {
+   const sortHandles = useProperties((state) => state.sortHandles)
+   const setHandle = useHandle(handleId)
+
+   // Drag resize input
+   const { onDragStart, isActive } = Reorder.useDragHandle()
+   useCursor({ initialCursor: "grabbing", setWhile: isActive })
+
+   /* Item Selection */
    const itemRef = useRef(null)
    const [isSelected, setIsSelected] = useState(false)
-
-   const onClickOut = (e: MouseEvent) => !itemRef.current?.contains(e.target) && setIsSelected(false)
-
+   const onClickOut = (e: EventFor<MouseEvent>) => !itemRef.current?.contains(e.target) && setIsSelected(false)
    // prettier-ignore
    useEffect(() => {isActive && setIsSelected(true)}, [isActive])
-
    useEventListener("mousedown", onClickOut, { conditional: isSelected })
 
-   useCursor({ initialCursor: "grabbing", setWhile: isActive })
+   const posChange = (newPos: number) => {
+      setHandle({ pos: newPos })
+      sortHandles()
+   }
 
    return (
       <div {...atts} className={`${styles.item} d-f`} ref={itemRef}>
@@ -36,29 +50,33 @@ function HandleInput({ grad, setGrad, ...atts }: HandleProps) {
          <div onMouseDown={onDragStart} className={`${styles.handle} ${isSelected && styles.active} d-f jc-c pl-6px`}>
             <div className="icon icon--handle icon--white o-70" />
          </div>
-         <CombinedInputs
-            inputs={[
-               // blur value px
-               {
-                  onChange: (e) => setGrad({ blur: clamp(Number(e.target.value), { min: 0 }) }),
-                  value: String(grad.blur),
-                  display: (v) => `${Math.round(Number(v))}`,
+         <InputContainer>
+            <InputAreaBase
+               state={{
+                  value: handle.blur,
+                  display: (v) => Math.round(v),
+                  onChange: (newVal) => setHandle({ blur: clamp(newVal, { min: 0 }) }),
+               }}
+               config={{
                   placeholder: "Blur in px",
-                  icon: "tidy-up-grid",
-               },
-               // position &
-               {
-                  onChange: (e) => setGrad({ pos: Number(e.target.value) }),
-                  value: String(grad.pos),
-                  display: (v) => `${Math.round(Number(v))}`,
-                  resize: { strength: 0.3 },
+                  left: { icon: "tidy-up-grid" },
+               }}
+            />
+            <InputAreaBase
+               style={{ width: 52, flex: 0 }}
+               state={{
+                  value: handle.pos,
+                  display: (v) => Math.round(v),
+                  onChange: posChange,
+               }}
+               resize={{ strength: 0.3 }}
+               config={{
                   placeholder: "Blur in px",
-                  style: { width: 52, flex: 0 },
-                  after: <span>%</span>,
-               },
-            ]}
-         />
-         <SmallButton isActive={false} icon="minus" large />
+                  right: { child: <span className="ml-2px">%</span> },
+               }}
+            />
+         </InputContainer>
+         <ActionButton isActive={false} icon="minus" large />
       </div>
    )
 }

@@ -11,8 +11,8 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    large?: boolean
 }
 
-/** Individual */
-function BtnSmBase({ icon, text, isActive = false, large = false, ...atts }: ButtonProps) {
+/** Individual for plural use */
+function ActionButtonBase({ icon, text, isActive = false, large = false, ...atts }: ButtonProps) {
    return (
       <button {...atts} className={`${styles.input} ${large && styles.large} ${numeric.input} ${isActive && styles.active}`}>
          {icon && <div className={`${styles.icon} icon icon--${icon} icon--${isActive ? "blue" : "white"}`} />}
@@ -21,26 +21,20 @@ function BtnSmBase({ icon, text, isActive = false, large = false, ...atts }: But
    )
 }
 
-interface PluralProps extends React.HTMLAttributes<HTMLDivElement> {
-   buttons: ButtonProps[]
+interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+   children: Component<typeof ActionButtonBase>[] | Component<typeof ActionButtonBase>
 }
 
-function SmallButtons({ buttons, ...atts }: PluralProps) {
+function ActionContainer({ ...atts }: ContainerProps) {
+   return <div {...atts} className={`${styles.textbox} d-f gap-1px`} />
+}
+
+function ActionButton({ ...props }: ButtonProps) {
    return (
-      <div {...atts} className={`${styles.textbox} d-f gap-1px`}>
-         {buttons.map((props, i) => (
-            <BtnSmBase key={i} {...props} />
-         ))}
-      </div>
+      <ActionContainer>
+         <ActionButtonBase {...props} />
+      </ActionContainer>
    )
 }
 
-function SmallButton({ ...props }: ButtonProps) {
-   return (
-      <div className={`${styles.textbox} d-f gap-1px`}>
-         <BtnSmBase {...props} />
-      </div>
-   )
-}
-
-export { SmallButtons, SmallButton }
+export { ActionContainer, ActionButtonBase, ActionButton }

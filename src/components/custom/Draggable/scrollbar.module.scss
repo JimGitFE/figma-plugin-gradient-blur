@@ -1,0 +1,60 @@
+// Scrollbar
+.container {
+   height: inherit;
+   width: inherit;
+   max-height: inherit;
+   max-width: inherit;
+}
+
+// overflowed content wrap (scrollable)
+.wrap {
+   width: inherit;
+   height: inherit;
+   max-height: inherit;
+   max-width: inherit;
+   overflow: hidden;
+}
+
+// User styles
+.track {
+   position: absolute !important;
+   top: 0 !important;
+   bottom: 0 !important;
+   right: 0 !important;
+   z-index: 28 !important;
+
+   & .thumb-track {
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+   }
+
+   // If no user style
+   &.default {
+      // Opts
+      width: 10px;
+      background: black;
+      padding: 2px;
+      padding-top: 10px;
+      padding-bottom: 4px;
+   }
+}
+
+.thumb {
+   &:not(:active) {
+      transition: transform 70ms linear;
+   }
+
+   // User styles
+   & .handle {
+      height: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      margin: 0 !important; // use padding at track
+
+      // If no user style
+      &.default {
+         background-color: pink;
+      }
+   }
+}

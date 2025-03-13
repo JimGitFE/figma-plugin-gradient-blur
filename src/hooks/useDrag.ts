@@ -1,49 +1,66 @@
 import { useState } from "react"
 import { useEventListener } from "./useEventListener"
 
+type Axes = "x" | "y"
 type Pos = { x?: number; y?: number }
 
-interface DragHookProps {
+// callback send event and distance traveled
+type Callback<A extends Axes> = (e: EventFor<MouseEvent>, distance: DistanceFor<A>) => void
+
+interface Props<A extends Axes> {
    /** Safe use singe axis */
-   axis?: "x" | "y"
    callbacks?: {
-      down?: (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => void
-      move?: (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => void
-      up?: (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => void
+      down?: Callback<A>
+      move?: Callback<A>
+      up?: Callback<A>
    }
 }
 
-export default function useDrag({ axis, callbacks = {} }: DragHookProps = {}) {
+type DistanceFor<A extends Axes, O = {}> = A extends undefined
+   ? { dx: number; dy: number } & O
+   : A extends "y"
+   ? { dy: number } & O
+   : { dx: number } & O
+
+type Return = {
+   initDrag: (e: EventFor<MouseEvent>) => void
+   isDragging: boolean
+   drag: {
+      downPos: Pos
+      clientPos: Pos
+   }
+}
+
+export default function useDrag<A extends Axes = undefined>({ callbacks = {} }: Props<A> = {}): DistanceFor<A, Return> {
    const [clientPos, setClientPos] = useState<Pos>({ x: null, y: null })
    const [downPos, setDownPos] = useState<Pos>({ x: null, y: null })
 
    const isDragging = typeof clientPos.x === "number" && typeof clientPos.y === "number"
 
-   const onDragStart = (e: MouseEvent | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+   const [dx, dy] = isDragging ? [clientPos.x - downPos.x, clientPos.y - downPos.y] : [null, null]
+
+   const initDrag = (e: EventFor<MouseEvent>) => {
       setDownPos({ x: e.clientX, y: e.clientY })
       setClientPos({ x: e.clientX, y: e.clientY })
-      callbacks.down && callbacks.down(e)
+      callbacks.down && callbacks.down(e, { dx, dy } as DistanceFor<A>)
    }
 
    const onMouseMove = (e) => {
       setClientPos({ x: e.clientX, y: e.clientY })
-      callbacks.move && callbacks.move(e)
+      callbacks.move && callbacks.move(e, { dx, dy } as DistanceFor<A>)
    }
 
    const onMouseUp = (e) => {
       setDownPos({ x: null, y: null })
       setClientPos({ x: null, y: null })
-      callbacks.up && callbacks.up(e)
+      callbacks.up && callbacks.up(e, { dx, dy } as DistanceFor<A>)
    }
 
    // Listeners
    useEventListener("mousemove", onMouseMove, { conditional: isDragging })
    useEventListener("mouseup", onMouseUp, { conditional: isDragging })
 
-   const [dx, dy] = isDragging ? [clientPos.x - downPos.x, clientPos.y - downPos.y] : [null, null]
-
-   if (axis === "x") return { dx, onDragStart, isDragging }
-   if (axis === "y") return { dy, onDragStart, isDragging }
-
-   return { dx, dy, onDragStart, isDragging }
+   return { dx, dy, initDrag, isDragging, drag: { downPos, clientPos } } as DistanceFor<A, Return>
 }
+
+// TODO: while dragging, disable initDrag until mouseup

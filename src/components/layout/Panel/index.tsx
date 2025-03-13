@@ -2,32 +2,23 @@
 // Dependencies
 import React from "react"
 // Components
-import useDynamicState from "@/hooks/useDynamicState"
-import { Reorderable } from "@/components/custom"
-import { Button, SmallButton, SmallButtons, Input } from "@/components/figma"
+import { Reorder } from "@/components/custom"
+import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
 // Internal
 import { HandleInput } from "./HandleInput"
 import styles from "./properties.module.scss"
 import { Heading } from "./Heading"
 import { clamp, modulo } from "@/utils"
-
-const DEFAULT_RESOLUTION = 5
-const DEFAULT_HANDLES = [
-   { pos: 0, blur: 10, id: 1 },
-   { pos: 75, blur: 4, id: 2 },
-   { pos: 100, blur: 0, id: 3 },
-]
+import { useProperties } from "@/store"
 
 interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {
    children?: React.ReactNode
 }
 
 export function PropertiesPanel({ children, ...atts }: PanelProps) {
-   const [grad, setGrad] = useDynamicState({ angle: 0, resolution: DEFAULT_RESOLUTION, handles: DEFAULT_HANDLES })
-
    const onCreate = () => {
       // const count = parseInt(textbox.current.value, 10)
-      parent.postMessage({ pluginMessage: { type: "create", grad } }, "*")
+      parent.postMessage({ pluginMessage: { type: "create", grad: "grad" } }, "*")
    }
 
    const onCancel = () => {
@@ -43,14 +34,14 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
             </Heading>
          </section>
 
-         <hr className="" />
+         <hr />
 
          {/* Properties */}
          <div className={styles.container}>
-            <PanelInputs dynamicState={[grad, setGrad]} />
+            <PanelInputs />
          </div>
 
-         <hr className="" />
+         <hr />
 
          {/* Submit */}
          <section>
@@ -60,11 +51,11 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
             </div>
          </section>
 
-         <hr className="" />
+         <hr />
 
          {/* Caption */}
          <section>
-            <div className="d-f ai-c mt-4px gap-12px o-60">
+            <div className="d-f ai-c mt-4px gap-12px o-60 mw-100">
                {/* <div className="icon icon--warning icon--white8 o-80" /> */} {/* On Frame with children */}
                <div className="icon icon--resolve icon--white8 o-80" />
                <p>
@@ -77,16 +68,15 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
 }
 
 interface InputProps {
-   dynamicState: any
+   // dynamicState: any
 }
 
-/** Adjustable Properties of Panel (No actions / header ) */
-function PanelInputs({ dynamicState }: InputProps) {
-   const [grad, setGrad] = dynamicState
+import { useShallow } from "zustand/shallow"
 
-   const onHandleChange = (newProp, rowIndex) => {
-      setGrad("handles", (prev) => prev.map((item, index) => (index === rowIndex ? { ...item, ...newProp } : item)))
-   }
+/** Adjustable Properties of Panel (No actions / header ) */
+function PanelInputs({}: InputProps) {
+   const [setGrad] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
+   const { angle, resolution, handles } = useProperties((state) => state.grad)
 
    return (
       <>
@@ -98,39 +88,45 @@ function PanelInputs({ dynamicState }: InputProps) {
 
             {/* Gradient Type */}
             <div className={`d-f gap-5px`}>
-               <SmallButtons style={{ flex: 1 }} buttons={[{ icon: "rotate" }, { icon: "mirror-y" }, { icon: "mirror-x" }]} />
-               <SmallButtons
-                  style={{ width: "auto", flex: 1 }}
-                  buttons={[
-                     { isActive: true, text: "Lin" },
-                     { isActive: false, text: "Rad" },
-                  ]}
-               />
-               <SmallButton icon="adjust" large disabled /> {/* TODO */}
+               <ActionContainer style={{ flex: 1 }}>
+                  <ActionButtonBase icon="rotate" />
+                  <ActionButtonBase icon="mirror-y" />
+                  <ActionButtonBase icon="mirror-x" />
+               </ActionContainer>
+               <ActionContainer style={{ width: "auto", flex: 1 }}>
+                  <ActionButtonBase text="Lin" isActive />
+                  <ActionButtonBase text="Rad" />
+               </ActionContainer>
+               <ActionButton icon="adjust" large disabled /> {/* TODO */}
             </div>
 
             {/* Resolution & Angle */}
             <div className={`d-f gap-5px`}>
-               <Input
+               <InputArea
                   style={{ flex: 1 }}
-                  onChange={(e) =>
-                     setGrad("angle", () => {
-                        return Number(e.target.value.replace("°", ""))
-                     })
-                  }
-                  icon={"angle"}
-                  value={grad.angle}
-                  display={(v) => `${modulo(Math.round(Number(v)), 359)}°`}
-                  placeholder={"Gradient Angle"}
+                  state={{
+                     value: angle,
+                     display: (v) => String(`${modulo(Math.round(v), 359)}°`),
+                     parse: (v) => Number(v.replace("°", "")),
+                     onChange: (newVal) => setGrad({ angle: newVal }),
+                  }}
+                  config={{
+                     left: { icon: "angle" },
+                     placeholder: "Gradient Angle",
+                  }}
                />
-               <Input
+               <InputArea
                   style={{ flex: 1 }}
-                  onChange={(e) => setGrad("resolution", clamp(Number(e.target.value), { min: 1 }))}
-                  display={(v) => `${Math.round(Number(v))}`}
+                  state={{
+                     value: resolution,
+                     display: (v) => Math.round(v),
+                     onChange: (newVal) => setGrad({ resolution: clamp(newVal, { min: 1 }) }),
+                  }}
                   resize={{ strength: 0.1 }}
-                  icon={"steps"}
-                  value={grad.resolution}
-                  placeholder={"Resolution Steps"}
+                  config={{
+                     left: { icon: "steps" },
+                     placeholder: "Resolution Steps",
+                  }}
                />
                <div className="w--space-24" />
             </div>
@@ -142,16 +138,24 @@ function PanelInputs({ dynamicState }: InputProps) {
          <section>
             {/* Title */}
             <Heading buttons={[{ icon: "swap" }, { icon: "plus" }]}>
-               <p>Gradient Handles</p>
+               <p
+                  onClick={() => {
+                     setGrad({ handles: handles.sort((a, b) => a.blur - b.blur) })
+                  }}
+               >
+                  Gradient Handles
+               </p>
             </Heading>
 
             {/* Inputs Handles */}
-            <div className={`d-f fd-co gap-6px`} style={{ marginTop: -3, marginBottom: -3 }}>
-               <Reorderable onReorder={(newSource) => setGrad("handles", newSource)} sources={grad.handles}>
-                  {grad.handles.map((handle, index) => (
-                     <HandleInput id={handle.id} grad={grad.handles[index]} setGrad={(prop) => onHandleChange(prop, index)} />
+            <div className={`d-f fd-co gap-6px ${styles.handles}`} style={{ marginTop: -3, marginBottom: -3 }}>
+               <Reorder.Container onReorder={(newHandles) => setGrad({ handles: newHandles })} sources={handles}>
+                  {handles.map((handle) => (
+                     <Reorder.Item uniqueId={handle.uniqueId}>
+                        <HandleInput handle={handle} handleId={handle.uniqueId} />
+                     </Reorder.Item>
                   ))}
-               </Reorderable>
+               </Reorder.Container>
             </div>
          </section>
       </>
