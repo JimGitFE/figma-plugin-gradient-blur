@@ -143,7 +143,7 @@ function PanelInputs({}: InputProps) {
                      setGrad({ handles: handles.sort((a, b) => a.blur - b.blur) })
                   }}
                >
-                  Gradient Handles
+                  Gradient Handles ({handles.length})
                </p>
             </Heading>
 
