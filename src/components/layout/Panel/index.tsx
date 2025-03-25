@@ -138,13 +138,7 @@ function PanelInputs({}: InputProps) {
          <section>
             {/* Title */}
             <Heading buttons={[{ icon: "swap" }, { icon: "plus" }]}>
-               <p
-                  onClick={() => {
-                     setGrad({ handles: handles.sort((a, b) => a.blur - b.blur) })
-                  }}
-               >
-                  Gradient Handles ({handles.length})
-               </p>
+               <p onClick={() => setGrad({ handles: handles.sort((a, b) => a.blur - b.blur) })}>Gradient Handles ({handles.length})</p>
             </Heading>
 
             {/* Inputs Handles */}

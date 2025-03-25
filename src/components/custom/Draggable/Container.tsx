@@ -134,6 +134,20 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       conditional: (drag.clientPos.y < scTop || drag.clientPos.y > scBtm) && active.index !== -1,
    })
 
+   /* Follow selected (out of screen on reorder) */
+
+   useEffect(() => {
+      const selectedId: number = 2
+      if (selectedId === -1 || !itemsRef.current || !containerRef.current) return
+      const selectedTop = itemsRef.current[indexFromId(selectedId)]?.rect?.top
+
+      const { top, height } = containerRef.current.getBoundingClientRect()
+
+      if (selectedTop < top || selectedTop > top + height) {
+         scroll((scTop) => scTop + selectedTop - top, true)
+      }
+   }, [sources])
+
    /* Utils */
 
    const recalculateItemsRect = () => itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
