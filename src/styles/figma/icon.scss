@@ -11,6 +11,12 @@
    -ms-user-select: none;
    user-select: none; */
    background-position: 50% 50%;
+
+   &-sm {
+      @extend .icon;
+      width: var(--space-16);
+      height: var(--space-16);
+   }
 }
 
 .icon--spin {

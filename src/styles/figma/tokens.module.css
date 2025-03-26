@@ -173,10 +173,13 @@
    --figma-color-text-warning: #b86200;
    --figma-color-text-warning-secondary: #b86200;
    --figma-color-text-warning-tertiary: #b86200;
+   --elevation-400-menu-panel: 0px 10px 16px rgba(0, 0, 0, 0.35), 0px 2px 5px rgba(0, 0, 0, 0.35),
+      inset 0px 0.5px 0px rgba(255, 255, 255, 0.08), inset 0px 0px 0.5px rgba(255, 255, 255, 0.35);
 }
 
 .dark {
    --figma-color-bg: #2c2c2c;
+   --figma-color-menu-bg: #1e1e1e;
    --figma-color-bg-brand: #0c8ce9;
    --figma-color-bg-brand-hover: #0a6dc2;
    --figma-color-bg-brand-pressed: #0a6dc2;
@@ -348,4 +351,6 @@
    --figma-color-text-warning: #f7d15f;
    --figma-color-text-warning-secondary: #f7d15f;
    --figma-color-text-warning-tertiary: #f7d15f;
+   --elevation-400-menu-panel: 0px 10px 16px rgba(0, 0, 0, 0.35), 0px 2px 5px rgba(0, 0, 0, 0.35),
+      inset 0px 0.5px 0px rgba(255, 255, 255, 0.08), inset 0px 0px 0.5px rgba(255, 255, 255, 0.35);
 }

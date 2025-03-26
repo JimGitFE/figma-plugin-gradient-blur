@@ -1,0 +1,56 @@
+// d-f fd-co
+.container {
+   // abs pos: btm -8px
+   position: absolute;
+   z-index: 54;
+   padding: var(--space-extra-small, 8px);
+   border-radius: var(--border-radius-12, 13px);
+   box-shadow: var(--elevation-400-menu-panel);
+   background: var(--figma-color-menu-bg);
+
+   hr {
+      margin: var(--space-extra-small, 8px) 0;
+      background-color: var(--figma-color-bg-secondary);
+   }
+
+   &:global(.right) {
+      @extend .container;
+      right: 0;
+      top: 100%;
+   }
+
+   &:global(.left) {
+      @extend .container;
+      left: 0;
+      top: 100%;
+   }
+}
+
+.item {
+   padding: 4px var(--space-4);
+   border-radius: var(--border-radius-4, 5px);
+
+   & > :global(.icon-sm) {
+      margin-left: -4px;
+      margin-right: 4px;
+   }
+
+   &:not(.shrinker) {
+      flex: 2;
+   }
+   .shrinker {
+      width: 4px;
+      max-width: 4px;
+      flex: 1;
+   }
+
+   &:hover {
+      background: var(--figma-color-bg-selected-strong);
+   }
+
+   // hot key
+   span {
+      margin-left: auto;
+      color: var(--figma-color-text-secondary);
+   }
+}

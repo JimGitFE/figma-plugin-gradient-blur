@@ -1,6 +1,6 @@
 /** Properties Panel Input sections */
 // Dependencies
-import React from "react"
+import React, { useState } from "react"
 // Components
 import { Reorder } from "@/components/custom"
 import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
@@ -25,12 +25,20 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
       parent.postMessage({ pluginMessage: { type: "cancel" } }, "*")
    }
 
+   const [isMenu, setIsMenu] = useState(false)
+
    return (
       <div {...atts}>
          {/* Main Title */}
          <section>
-            <Heading buttons={[{ icon: "ellipses" }]}>
+            <Heading buttons={[{ icon: "ellipses", onClick: () => setIsMenu(!isMenu) }]} className="pos-relative">
                <h3 className={`fs-14px fw-550`}>Properties Panel</h3>
+               <Menu className="mnw-170px" isOpen={isMenu}>
+                  <MenuItem title="Add Gradient" />
+                  <hr />
+                  <MenuItem title="Add Gradient" command="Ctrl+K" />
+                  <MenuItem title="Add Gradient" command="Ctrl+K" />
+               </Menu>
             </Heading>
          </section>
 
@@ -72,6 +80,7 @@ interface InputProps {
 }
 
 import { useShallow } from "zustand/shallow"
+import { Menu, MenuItem } from "@/components/figma/Menu"
 
 /** Adjustable Properties of Panel (No actions / header ) */
 function PanelInputs({}: InputProps) {

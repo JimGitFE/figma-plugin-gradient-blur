@@ -11,7 +11,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 
 function Heading({ children, buttons, ...atts }: Props) {
    return (
-      <div {...atts} className={`heading d-f jc-sb ai-c`}>
+      <div {...atts} className={`heading d-f jc-sb ai-c ${atts.className}`}>
          {children}
          <div className="d-f">
             {buttons?.map((button, i) => (

@@ -5,6 +5,7 @@
 .d-f { display: flex; }
 .fd-co { flex-direction: column; }
 .fs-14px { font-size: 14px; }
+.fw-450 { font-weight: 450; }
 .fw-500 { font-weight: 500; }
 .fw-550 { font-weight: 550; }
 .gap-12px { gap: 12px; }
@@ -14,8 +15,11 @@
 .gap-8px { gap: 8px; }
 .jc-c { justify-content: center; }
 .jc-fe { justify-content: flex-end; }
+.jc-fs { justify-content: flex-start; }
 .jc-sb { justify-content: space-between; }
 .ml-2px { margin-left: 2px; }
+.mnw-170px { min-width: 170px; }
+.mr-4px { margin-right: 4px; }
 .mt-4px { margin-top: 4px; }
 .o-60 { opacity: 60%; }
 .o-70 { opacity: 70%; }
