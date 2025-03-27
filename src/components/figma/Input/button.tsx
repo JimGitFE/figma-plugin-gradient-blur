@@ -1,4 +1,4 @@
-import React from "react"
+import React, { forwardRef } from "react"
 
 import numeric from "./numeric.module.css"
 import styles from "./button.module.scss"
@@ -9,17 +9,18 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    isActive?: boolean
    disabled?: boolean
    large?: boolean
+   ref?: React.MutableRefObject<HTMLButtonElement>
 }
 
 /** Individual for plural use */
-function ActionButtonBase({ icon, text, isActive = false, large = false, ...atts }: ButtonProps) {
+const ActionButtonBase = forwardRef<HTMLButtonElement, ButtonProps>(({ icon, text, isActive = false, large = false, ...atts }, ref) => {
    return (
-      <button {...atts} className={`${styles.input} ${large && styles.large} ${numeric.input} ${isActive && styles.active}`}>
+      <button {...atts} ref={ref} className={`${styles.input} ${large && styles.large} ${numeric.input} ${isActive && styles.active}`}>
          {icon && <div className={`${styles.icon} icon icon--${icon} icon--${isActive ? "blue" : "white"}`} />}
          {text && <span className="text type--small type--bold fw-500">{text}</span>}
       </button>
    )
-}
+})
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
    children: Component<typeof ActionButtonBase>[] | Component<typeof ActionButtonBase>

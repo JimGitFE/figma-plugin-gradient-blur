@@ -1,4 +1,4 @@
-import React from "react"
+import React, { forwardRef } from "react"
 import styles from "./menu.module.scss"
 
 interface MenuProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -7,19 +7,20 @@ interface MenuProps extends React.HTMLAttributes<HTMLDivElement> {
    isOpen?: boolean
 }
 
-function Menu({ isOpen = false, positioned = "right", ...atts }: MenuProps) {
-   return isOpen && <div {...atts} className={`d-f fd-co ${styles.container} ${positioned} ${atts.className}`} />
-}
+const Menu = forwardRef<HTMLDivElement, MenuProps>(({ isOpen = false, positioned = "right", ...atts }, ref) => {
+   return isOpen && <div {...atts} ref={ref} className={`d-f fd-co ${styles.container} ${positioned} ${atts.className}`} />
+})
 
 interface ItemProps {
    title: string
    command?: string
    icon?: string
+   disabled?: boolean
 }
 
-function MenuItem({ title, command, icon }: ItemProps) {
+function MenuItem({ title, command, icon, disabled = false }: ItemProps) {
    return (
-      <div className={`d-f jc-fs ai-c ${styles.item}`}>
+      <div className={`d-f jc-fs ai-c ${styles.item} ${disabled && styles.disabled}`}>
          <div className={`icon-sm icon--${icon} icon--white`} style={{ opacity: icon ? 1 : 0 }} />
          <p className="fw-450">{title}</p> {/* fs- 12px white */}
          <div className={styles.shrinker} />

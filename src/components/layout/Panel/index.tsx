@@ -1,6 +1,6 @@
 /** Properties Panel Input sections */
 // Dependencies
-import React, { useState } from "react"
+import React from "react"
 // Components
 import { Reorder } from "@/components/custom"
 import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
@@ -10,6 +10,7 @@ import styles from "./properties.module.scss"
 import { Heading } from "./Heading"
 import { clamp, modulo } from "@/utils"
 import { useProperties } from "@/store"
+import useModal from "@/hooks/useModal"
 
 interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {
    children?: React.ReactNode
@@ -25,15 +26,15 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
       parent.postMessage({ pluginMessage: { type: "cancel" } }, "*")
    }
 
-   const [isMenu, setIsMenu] = useState(false)
+   const { display: isMenu, setDisplay: setIsMenu, modalRef: menuRef, actionRef: menuBtnRef } = useModal()
 
    return (
       <div {...atts}>
          {/* Main Title */}
          <section>
-            <Heading buttons={[{ icon: "ellipses", onClick: () => setIsMenu(!isMenu) }]} className="pos-relative">
+            <Heading buttons={[{ icon: "ellipses", onClick: () => setIsMenu(!isMenu), ref: menuBtnRef }]} className="pos-relative">
                <h3 className={`fs-14px fw-550`}>Properties Panel</h3>
-               <Menu className="mnw-170px" isOpen={isMenu}>
+               <Menu ref={menuRef} className="mnw-170px" isOpen={isMenu}>
                   <MenuItem title="Add Gradient" />
                   <hr />
                   <MenuItem title="Add Gradient" command="Ctrl+K" />
