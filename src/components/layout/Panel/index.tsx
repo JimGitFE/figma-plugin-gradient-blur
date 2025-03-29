@@ -138,7 +138,7 @@ function PanelInputs({}: InputProps) {
                      placeholder: "Resolution Steps",
                   }}
                />
-               <div className="w--space-24" />
+               <div style={{ width: 24 + 2 }} />
             </div>
          </section>
 
