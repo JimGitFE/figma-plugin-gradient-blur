@@ -14,25 +14,27 @@ interface UnmountProps extends HTMLAttributes<HTMLDivElement> {
    /**Duration in ms */
    duration: number
    className?: string
-   /** validConditional Changes After Mounting thus cannot use conditional directly
+   /** transitionIndx Changes After Mounting thus cannot use conditional directly
     *
     * **Solution, examples:**
     *
-    * {height: [250, 0]} =>  {height: **`validConditional`**?250:0}
+    * {height: [250, 0]} =>  {height: **`transitionIndx`**?250:0}
     *
-    * {opacity: [1, 0]} =>  {opacity: **`validConditional`**?1:0}
+    * {opacity: [1, 0]} =>  {opacity: **`transitionIndx`**?1:0}
     */
    styleTransition?: [CSSProperties, CSSProperties]
 }
 
 /** Delayed children unmounting, resetted on `conditional` conditional update */
 function DelayedUnmount({ conditional, duration, styleTransition = TRANSITION, ...atts }: UnmountProps) {
-   const [validConditional, setValidConditional] = useState(false)
+   const [transitionIndx, setTransitionIndx] = useState(false)
    const [isRendered, setIsRendered] = useState(true)
    const timeoutIdRef = useRef<NodeJS.Timeout | number | null>(null)
 
    useEffect(() => {
       setIsRendered(true)
+      requestAnimationFrame(() => setTransitionIndx(conditional))
+
       if (conditional) {
          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
          timeoutIdRef.current && clearTimeout(timeoutIdRef.current)
@@ -45,15 +47,11 @@ function DelayedUnmount({ conditional, duration, styleTransition = TRANSITION, .
       // eslint-disable-next-line react-hooks/exhaustive-deps
    }, [conditional]) // duration is not a dependency
 
-   useEffect(() => {
-      setValidConditional(conditional)
-   }, [conditional])
-
    // prettier-ignore
-   return (conditional||isRendered)&&(<div {...atts} style={{ ...styleTransition[validConditional?1:0] }}  />)
+   return (conditional||isRendered)&&(<div {...atts} style={{ ...styleTransition[transitionIndx?1:0] }}  />)
 }
 
-export default DelayedUnmount
+export { DelayedUnmount }
 
 /**
  * Bug #1: Late removal of the element
