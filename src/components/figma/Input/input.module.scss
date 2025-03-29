@@ -1,11 +1,23 @@
 .textbox {
    position: relative;
-   flex: 1;
    z-index: var(--z-index-1);
-   border: var(--border-width-1) solid transparent;
-   border-radius: var(--border-radius-4);
-   overflow: hidden;
    width: fit-content;
+   flex: 1;
+   border: var(--border-width-1) solid transparent;
+
+   border-radius: var(--border-radius-4);
+   --inner-radius: calc(var(--border-radius-4) - var(--border-width-1));
+   & > .input:first-child,
+   & > *:first-child .input {
+      border-top-left-radius: var(--inner-radius);
+      border-bottom-left-radius: var(--inner-radius);
+   }
+   & > .input:last-child,
+   & > *:last-child .input {
+      border-top-right-radius: var(--inner-radius);
+      border-bottom-right-radius: var(--inner-radius);
+   }
+   // overflow: hidden; // sets radius
 }
 
 .textbox:focus-within {
