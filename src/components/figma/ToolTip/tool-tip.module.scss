@@ -1,0 +1,76 @@
+// Item
+.wrap {
+}
+
+.box {
+   pointer-events: none;
+   position: absolute;
+   z-index: 54;
+
+   transition: all 120ms ease-out;
+
+   // Tool Tip
+   .tooltip {
+      // padding: var(--space-extra-small, 8px);
+      padding: 4px 8px;
+      border-radius: var(--border-radius-4, 4px);
+      box-shadow: var(--elevation-400-menu-panel);
+      background: var(--figma-color-menu-bg);
+      width: fit-content;
+
+      white-space: nowrap;
+      max-width: 150px;
+      & > div {
+         overflow: hidden;
+      }
+
+      // tip
+      &::after {
+         content: "";
+         position: absolute;
+         background: var(--figma-color-menu-bg);
+         height: 6px;
+         width: 6px;
+
+         transform: rotate(45deg);
+      }
+
+      // Horizontal Allignments
+      &.auto {
+         transform: translateX(calc(-50% + var(--wrap-width) / 2));
+
+         &::after {
+            left: calc(50% - 3px);
+         }
+      }
+
+      &.left::after {
+         left: calc(var(--wrap-width) / 2);
+      }
+
+      &.right {
+         transform: translateX(calc(-100% + var(--wrap-width)));
+
+         &::after {
+            right: calc(var(--wrap-width) / 2);
+         }
+      }
+   }
+
+   // Vertical Allignments
+   &.bottom {
+      top: calc(100% + 5px + 3px);
+
+      & > div::after {
+         top: -3px;
+      }
+   }
+
+   &.top {
+      bottom: calc(100% + 5px + 3px);
+
+      & > div::after {
+         bottom: -3px;
+      }
+   }
+}

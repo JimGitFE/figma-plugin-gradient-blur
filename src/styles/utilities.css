@@ -8,6 +8,7 @@
 .fw-450 { font-weight: 450; }
 .fw-500 { font-weight: 500; }
 .fw-550 { font-weight: 550; }
+.fx-1 { flex: 1; }
 .gap-12px { gap: 12px; }
 .gap-1px { gap: 1px; }
 .gap-5px { gap: 5px; }
@@ -26,8 +27,8 @@
 .o-80 { opacity: 80%; }
 .pb-1rem { padding-bottom: 1rem; }
 .pl-6px { padding-left: 6px; }
+.pos-absolute { position: absolute; }
 .pos-relative { position: relative; }
 .pt-1rem { padding-top: 1rem; }
-.w--space-24 { width: var(--space-24); }
 .w-100 { width: 100%; }
 .z-6 { z-index: 6; }

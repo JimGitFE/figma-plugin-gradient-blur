@@ -32,7 +32,10 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
       <div {...atts}>
          {/* Main Title */}
          <section>
-            <Heading buttons={[{ icon: "ellipses", onClick: () => setIsMenu(!isMenu), ref: menuBtnRef }]} className="pos-relative">
+            <Heading
+               buttons={[{ icon: "ellipses", onClick: () => setIsMenu(!isMenu), ref: menuBtnRef, tip: "Plugin menu" }]}
+               className="pos-relative"
+            >
                <h3 className={`fs-14px fw-550`}>Properties Panel</h3>
                <Menu ref={menuRef} className="mnw-170px" isOpen={isMenu}>
                   <MenuItem title="Add Gradient" />
@@ -92,22 +95,22 @@ function PanelInputs({}: InputProps) {
       <>
          <section>
             {/* Title */}
-            <Heading buttons={[{ isActive: false, icon: "info" }]}>
+            <Heading buttons={[{ isActive: false, icon: "info", tip: "Info" }]}>
                <p>Resolution / Type</p>
             </Heading>
 
             {/* Gradient Type */}
             <div className={`d-f gap-5px`}>
                <ActionContainer style={{ flex: 1 }}>
-                  <ActionButtonBase icon="rotate" />
-                  <ActionButtonBase icon="mirror-y" />
-                  <ActionButtonBase icon="mirror-x" />
+                  <ActionButtonBase icon="rotate" tip="Rotate 90 degrees" />
+                  <ActionButtonBase icon="mirror-y" tip="Mirror y axis" />
+                  <ActionButtonBase icon="mirror-x" tip="Mirror x axis" />
                </ActionContainer>
                <ActionContainer style={{ width: "auto", flex: 1 }}>
-                  <ActionButtonBase text="Lin" isActive />
-                  <ActionButtonBase text="Rad" />
+                  <ActionButtonBase text="Lin" tip="Linear Gradient" isActive />
+                  <ActionButtonBase text="Rad" tip="Radial Gradient" />
                </ActionContainer>
-               <ActionButton icon="adjust" large disabled /> {/* TODO */}
+               <ActionButton icon="adjust" tip="Disabled" large disabled /> {/* TODO */}
             </div>
 
             {/* Resolution & Angle */}
@@ -147,7 +150,12 @@ function PanelInputs({}: InputProps) {
          {/* Parameters */}
          <section>
             {/* Title */}
-            <Heading buttons={[{ icon: "swap" }, { icon: "plus" }]}>
+            <Heading
+               buttons={[
+                  { icon: "swap", tip: "Reset" },
+                  { icon: "plus", tip: "Create" },
+               ]}
+            >
                <p onClick={() => setGrad({ handles: handles.sort((a, b) => a.blur - b.blur) })}>Gradient Handles ({handles.length})</p>
             </Heading>
 

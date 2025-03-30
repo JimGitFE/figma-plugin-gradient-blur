@@ -1,7 +1,8 @@
-import React, { forwardRef } from "react"
+import React, { ComponentProps, forwardRef } from "react"
 
 import numeric from "./numeric.module.css"
 import styles from "./button.module.scss"
+import { ToolTip } from "../ToolTip"
 
 interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    icon?: string
@@ -10,17 +11,28 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    disabled?: boolean
    large?: boolean
    ref?: React.MutableRefObject<HTMLButtonElement>
+   tooltip?: Omit<ComponentProps<typeof ToolTip>, "children">
+   /** Short for text tooltip property */
+   tip?: ComponentProps<typeof ToolTip>["text"]
 }
 
 /** Individual for plural use */
-const ActionButtonBase = forwardRef<HTMLButtonElement, ButtonProps>(({ icon, text, isActive = false, large = false, ...atts }, ref) => {
-   return (
-      <button {...atts} ref={ref} className={`${styles.input} ${large && styles.large} ${numeric.input} ${isActive && styles.active}`}>
-         {icon && <div className={`${styles.icon} icon icon--${icon} icon--${isActive ? "blue" : "white"}`} />}
-         {text && <span className="text type--small type--bold fw-500">{text}</span>}
-      </button>
-   )
-})
+const ActionButtonBase = forwardRef<HTMLButtonElement, ButtonProps>(
+   ({ icon, text, isActive = false, large = false, tooltip, tip, ...atts }, ref) => {
+      return (
+         <ToolTip {...(tooltip ?? { text: tip })} className={`fx-1`}>
+            <button
+               {...atts}
+               ref={ref}
+               className={`w-100 ${styles.input} ${large && styles.large} ${numeric.input} ${isActive && styles.active}`}
+            >
+               {icon && <div className={`${styles.icon} icon icon--${icon} icon--${isActive ? "blue" : "white"}`} />}
+               {text && <span className="text type--small type--bold fw-500">{text}</span>}
+            </button>
+         </ToolTip>
+      )
+   }
+)
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
    children: Component<typeof ActionButtonBase>[] | Component<typeof ActionButtonBase>

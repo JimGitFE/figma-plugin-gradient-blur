@@ -4,5 +4,8 @@
    "readFrom": "src/",
    "writeTo": "./src/styles/utilities.css",
    "extensions": "tsx,ts,js,jsx",
-   "exclude": ["node_modules", ".git", ".*/**/*"]
+   "exclude": ["node_modules", ".git", ".*/**/*"],
+   "extendKeys": {
+      "fx": { "name": "flex", "valueExtension": "" }
+   }
 }
