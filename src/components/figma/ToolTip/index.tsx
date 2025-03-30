@@ -7,6 +7,8 @@ interface TipProps extends React.HTMLAttributes<HTMLDivElement> {
    text?: string
    /** Allignment X */
    allign?: "left" | "right" | "auto"
+   /** Render when true */
+   conditional?: boolean
 }
 
 const transition: [React.CSSProperties, React.CSSProperties] = [
@@ -15,7 +17,7 @@ const transition: [React.CSSProperties, React.CSSProperties] = [
 ]
 
 /** Wrapper */
-function ToolTip({ text, allign = "auto", children, ...atts }: TipProps) {
+function ToolTip({ text, allign = "auto", conditional = true, children, ...atts }: TipProps) {
    const [isOpen, setIsOpen] = useState(false)
    const wrapRef = useRef<HTMLDivElement>(null) // dimensions
    const [allignmentX, setAllignmentX] = useState<"left" | "right" | "auto">(allign)
@@ -59,7 +61,7 @@ function ToolTip({ text, allign = "auto", children, ...atts }: TipProps) {
          </div>
          {/* Tool Tip */}
          <DelayedUnmount
-            conditional={isOpen && !!text}
+            conditional={isOpen && !!text && conditional}
             duration={120}
             styleTransition={transition}
             className={`pos-absolute ${styles.box} ${styles[allignmentY]}`}

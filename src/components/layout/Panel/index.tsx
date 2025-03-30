@@ -33,7 +33,14 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
          {/* Main Title */}
          <section>
             <Heading
-               buttons={[{ icon: "ellipses", onClick: () => setIsMenu(!isMenu), ref: menuBtnRef, tip: "Plugin menu" }]}
+               buttons={[
+                  {
+                     ref: menuBtnRef,
+                     icon: "ellipses",
+                     onClick: () => setIsMenu(!isMenu),
+                     tooltip: { text: "Plugin menu", conditional: !isMenu },
+                  },
+               ]}
                className="pos-relative"
             >
                <h3 className={`fs-14px fw-550`}>Properties Panel</h3>
