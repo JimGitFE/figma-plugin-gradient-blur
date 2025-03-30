@@ -2,6 +2,12 @@ import React, { useLayoutEffect, useRef, useState } from "react"
 import { DelayedUnmount } from "@/components/custom"
 import styles from "./tool-tip.module.scss"
 
+/** Delayed unmount transition */
+const transition: [React.CSSProperties, React.CSSProperties] = [
+   { opacity: 0, transform: "translateY(4px)" },
+   { opacity: 1, transform: "translateY(0)" },
+]
+
 interface TipProps extends React.HTMLAttributes<HTMLDivElement> {
    children: React.ReactNode
    text?: string
@@ -11,11 +17,6 @@ interface TipProps extends React.HTMLAttributes<HTMLDivElement> {
    conditional?: boolean
 }
 
-const transition: [React.CSSProperties, React.CSSProperties] = [
-   { opacity: 0, transform: "translateY(4px)" },
-   { opacity: 1, transform: "translateY(0)" },
-]
-
 /** Wrapper */
 function ToolTip({ text, allign = "auto", conditional = true, children, ...atts }: TipProps) {
    const [isOpen, setIsOpen] = useState(false)
@@ -23,14 +24,18 @@ function ToolTip({ text, allign = "auto", conditional = true, children, ...atts 
    const [allignmentX, setAllignmentX] = useState<"left" | "right" | "auto">(allign)
    const [allignmentY, setAllignmentY] = useState<"top" | "bottom">("bottom")
 
+   /* Dynamic allignment */
    useLayoutEffect(() => {
       if (wrapRef.current) {
          const { width, height, left, right, bottom } = wrapRef.current.getBoundingClientRect() // button
 
          wrapRef.current.style.setProperty("--wrap-width", `${width}px`)
          wrapRef.current.style.setProperty("--wrap-height", `${height}px`)
+         wrapRef.current.style.setProperty("--wrap-left", `${left}px`)
+         wrapRef.current.style.setProperty("--wrap-right", `${right}px`)
+         wrapRef.current.style.setProperty("--cont-width", `${window.innerWidth}px`)
 
-         /** Dynamic allignment on window overflow */
+         /* Dynamic allignment on window overflow */
 
          const tip = { width: 150, height: 24 + 3 }
          const viewport = { width: window.innerWidth, height: window.innerHeight }

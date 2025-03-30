@@ -44,15 +44,19 @@
          }
       }
 
-      &.left::after {
-         left: calc(var(--wrap-width) / 2);
+      &.left {
+         transform: translateX(calc(var(--wrap-left) * (-1)));
+
+         &::after {
+            left: calc(var(--wrap-width) / 2 + var(--wrap-left) - 3px);
+         }
       }
 
       &.right {
-         transform: translateX(calc(-100% + var(--wrap-width)));
+         transform: translateX(calc(var(--cont-width) - var(--wrap-left) - 100%));
 
          &::after {
-            right: calc(var(--wrap-width) / 2);
+            right: calc((var(--cont-width) - var(--wrap-left)) - var(--wrap-width) / 2 - 3px);
          }
       }
    }
