@@ -1,6 +1,6 @@
 /** Properties Panel Input sections */
 // Dependencies
-import React from "react"
+import React, { useRef } from "react"
 // Components
 import { Reorder } from "@/components/custom"
 import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
@@ -98,6 +98,9 @@ function PanelInputs({}: InputProps) {
    const [setGrad] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
    const { angle, resolution, handles } = useProperties((state) => state.grad)
 
+   /* Tooltip containers allginment */
+   const panelRef = useRef<HTMLDivElement>(null)
+
    return (
       <>
          <section>
@@ -107,17 +110,17 @@ function PanelInputs({}: InputProps) {
             </Heading>
 
             {/* Gradient Type */}
-            <div className={`d-f gap-5px`}>
+            <div ref={panelRef} className={`d-f gap-5px`}>
                <ActionContainer style={{ flex: 1 }}>
-                  <ActionButtonBase icon="rotate" tip="Rotate 90 degrees" />
-                  <ActionButtonBase icon="mirror-y" tip="Mirror y axis" />
-                  <ActionButtonBase icon="mirror-x" tip="Mirror x axis" />
+                  <ActionButtonBase icon="rotate" tooltip={{ text: "Rotate 90 degrees", containerRef: panelRef }} />
+                  <ActionButtonBase icon="mirror-y" tooltip={{ text: "Mirror y axis" }} />
+                  <ActionButtonBase icon="mirror-x" tooltip={{ text: "Mirror x axis" }} />
                </ActionContainer>
                <ActionContainer style={{ width: "auto", flex: 1 }}>
-                  <ActionButtonBase text="Lin" tip="Linear Gradient" isActive />
-                  <ActionButtonBase text="Rad" tip="Radial Gradient" />
+                  <ActionButtonBase text="Lin" tooltip={{ text: "Linear Gradient" }} isActive />
+                  <ActionButtonBase text="Rad" tooltip={{ text: "Radial Gradient" }} />
                </ActionContainer>
-               <ActionButton icon="adjust" tip="Disabled" large disabled /> {/* TODO */}
+               <ActionButton icon="adjust" tooltip={{ text: "Disabled", containerRef: panelRef }} large disabled /> {/* TODO }}*/}
             </div>
 
             {/* Resolution & Angle */}

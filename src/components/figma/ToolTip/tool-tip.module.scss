@@ -45,15 +45,15 @@
       }
 
       &.left {
-         transform: translateX(calc(var(--wrap-left) * (-1)));
+         transform: translateX(calc(var(--wrap-left) * (-1) + var(--cont-left)));
 
          &::after {
-            left: calc(var(--wrap-width) / 2 + var(--wrap-left) - 3px);
+            left: calc(var(--wrap-width) / 2 + var(--wrap-left) - var(--cont-left) - 3px);
          }
       }
 
       &.right {
-         transform: translateX(calc(var(--cont-width) - var(--wrap-left) - 100%));
+         transform: translateX(calc(0 * (-1)));
 
          &::after {
             right: calc((var(--cont-width) - var(--wrap-left)) - var(--wrap-width) / 2 - 3px);

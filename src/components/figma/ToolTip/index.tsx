@@ -15,10 +15,12 @@ interface TipProps extends React.HTMLAttributes<HTMLDivElement> {
    allign?: "left" | "right" | "auto"
    /** Render when true */
    conditional?: boolean
+   /** Container Ref */
+   containerRef?: React.MutableRefObject<HTMLDivElement>
 }
 
 /** Wrapper */
-function ToolTip({ text, allign = "auto", conditional = true, children, ...atts }: TipProps) {
+function ToolTip({ text, allign = "auto", conditional = true, containerRef, children, ...atts }: TipProps) {
    const [isOpen, setIsOpen] = useState(false)
    const wrapRef = useRef<HTMLDivElement>(null) // dimensions
    const [allignmentX, setAllignmentX] = useState<"left" | "right" | "auto">(allign)
@@ -33,12 +35,22 @@ function ToolTip({ text, allign = "auto", conditional = true, children, ...atts 
          wrapRef.current.style.setProperty("--wrap-height", `${height}px`)
          wrapRef.current.style.setProperty("--wrap-left", `${left}px`)
          wrapRef.current.style.setProperty("--wrap-right", `${right}px`)
-         wrapRef.current.style.setProperty("--cont-width", `${window.innerWidth}px`)
 
          /* Dynamic allignment on window overflow */
 
          const tip = { width: 150, height: 24 + 3 }
-         const viewport = { width: window.innerWidth, height: window.innerHeight }
+         const container = containerRef?.current?.getBoundingClientRect()
+         const viewport = {
+            width: container?.width ?? window.innerWidth,
+            height: container?.height ?? window.innerHeight,
+            left: container?.left ?? 0,
+            right: container?.right ?? window.innerWidth,
+         }
+
+         console.log(viewport, text)
+         wrapRef.current.style.setProperty("--cont-width", `${viewport.width}px`)
+         wrapRef.current.style.setProperty("--cont-left", `${viewport.left}px`)
+         wrapRef.current.style.setProperty("--cont-right", `${viewport.right}px`)
 
          // Horizontal Axis
          if (allign === "auto") {
@@ -52,7 +64,7 @@ function ToolTip({ text, allign = "auto", conditional = true, children, ...atts 
          // Vertical Axis
          if (bottom + tip.height + 12 > viewport.height) setAllignmentY("top")
       }
-   }, [wrapRef.current])
+   }, [wrapRef.current, containerRef])
 
    return (
       <div {...atts} ref={wrapRef} className={`pos-relative ${styles.wrap} ${atts.className}`}>
