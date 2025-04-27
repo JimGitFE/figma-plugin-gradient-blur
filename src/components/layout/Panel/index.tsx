@@ -1,9 +1,9 @@
 /** Properties Panel Input sections */
 // Dependencies
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 // Components
 import { Reorder } from "@/components/custom"
-import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
+import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase, ToolTip } from "@/components/figma"
 // Internal
 import { HandleInput } from "./HandleInput"
 import styles from "./properties.module.scss"
@@ -28,8 +28,20 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
 
    const { display: isMenu, setDisplay: setIsMenu, modalRef: menuRef, actionRef: menuBtnRef } = useModal()
 
+   /* Tooltip containers allginment */
+   const panelRef = useRef<HTMLDivElement>(null)
+   const [contRect, setContRect] = useState<DOMRect>({} as DOMRect) // + margins
+
+   /* Implement margins to shared tooltips rect reference */
+   useEffect(() => {
+      // Margins, left: 1 rem right: 0.6 rem
+      // get panelRef rect and add margins 20px
+      const rect = panelRef.current?.getBoundingClientRect()
+      setContRect({ ...rect, left: rect?.left + 16, right: rect?.right - 9, width: rect.width - 25 })
+   }, [panelRef])
+
    return (
-      <div {...atts}>
+      <ToolTip.Container {...atts} ref={panelRef} contRect={contRect}>
          {/* Main Title */}
          <section>
             <Heading
@@ -80,7 +92,7 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
                </p>
             </div>
          </section>
-      </div>
+      </ToolTip.Container>
    )
 }
 
@@ -100,20 +112,8 @@ function PanelInputs({}: InputProps) {
 
    // Tooltips
 
-   /* Tooltip containers allginment */
-   const panelRef = useRef<HTMLDivElement>(null)
-   const [contRect, setContRect] = useState<DOMRect>({} as DOMRect) // + margins
-
-   /* Implement margins to shared tooltips rect reference */
-   useEffect(() => {
-      // Margins, left: 1 rem right: 0.6 rem
-      // get panelRef rect and add margins 20px
-      const rect = panelRef.current?.getBoundingClientRect()
-      setContRect({ ...rect, left: rect?.left + 16, right: rect?.right - 9, width: rect.width - 25 })
-   }, [panelRef])
-
    return (
-      <div className={styles.container} ref={panelRef}>
+      <div className={styles.container}>
          <section>
             {/* Title */}
             <Heading buttons={[{ isActive: false, icon: "info", tip: "Info" }]}>
@@ -123,15 +123,15 @@ function PanelInputs({}: InputProps) {
             {/* Gradient Type */}
             <div className={`d-f gap-5px`}>
                <ActionContainer style={{ flex: 1 }}>
-                  <ActionButtonBase icon="rotate" tooltip={{ text: "Rotate 90 degrees", contRect }} />
-                  <ActionButtonBase icon="mirror-y" tooltip={{ text: "Mirror y axis", contRect }} />
-                  <ActionButtonBase icon="mirror-x" tooltip={{ text: "Mirror x axis", contRect }} />
+                  <ActionButtonBase icon="rotate" tooltip={{ text: "Rotate 90 degrees" }} />
+                  <ActionButtonBase icon="mirror-y" tooltip={{ text: "Mirror y axis" }} />
+                  <ActionButtonBase icon="mirror-x" tooltip={{ text: "Mirror x axis" }} />
                </ActionContainer>
                <ActionContainer style={{ width: "auto", flex: 1 }}>
-                  <ActionButtonBase text="Lin" tooltip={{ text: "Linear Gradient", contRect }} isActive />
-                  <ActionButtonBase text="Rad" tooltip={{ text: "Radial Gradient", contRect }} />
+                  <ActionButtonBase text="Lin" tooltip={{ text: "Linear Gradient" }} isActive />
+                  <ActionButtonBase text="Rad" tooltip={{ text: "Radial Gradient" }} />
                </ActionContainer>
-               <ActionButton icon="adjust" tooltip={{ text: "Disabled", contRect }} large disabled />
+               <ActionButton icon="adjust" tooltip={{ text: "Disabled" }} large disabled />
                {/* TODO }}*/}
             </div>
 

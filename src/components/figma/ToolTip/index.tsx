@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from "react"
+import React, { useLayoutEffect, useRef, useState, createContext, useContext, useEffect, forwardRef } from "react"
 import { DelayedUnmount } from "@/components/custom"
 import styles from "./tool-tip.module.scss"
 
@@ -8,7 +8,7 @@ const transition: [React.CSSProperties, React.CSSProperties] = [
    { opacity: 1, transform: "translateY(0)" },
 ]
 
-interface TipProps extends React.HTMLAttributes<HTMLDivElement> {
+interface Props extends React.HTMLAttributes<HTMLDivElement> {
    children: React.ReactNode
    text?: string
    /** Allignment X */
@@ -21,8 +21,11 @@ interface TipProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 /** Wrapper */
-function ToolTip({ text, allignX = "auto", allignY, conditional = true, contRect, children, ...atts }: TipProps) {
+function Item({ text, allignX = "auto", allignY, conditional = true, contRect: propContRect, children, ...atts }: Props) {
    const [isOpen, setIsOpen] = useState(false)
+   /** Container Group Context DOMRect & Timeout */
+   const contGroup = ContCtx ? useContext(ContCtx) : null
+   const contRect = contGroup?.contRect || propContRect
    /** Tooltip wrap div */
    const wrapRef = useRef<HTMLDivElement>(null)
    /** tooltip dynamic x */
@@ -64,7 +67,6 @@ function ToolTip({ text, allignX = "auto", allignY, conditional = true, contRect
                setAllignmentX("left")
             }
          }
-
          // Vertical Axis
          if (wrap.bottom + tip.height + 12 > container.height && !allignY) setAllignmentY("top")
       }
@@ -95,12 +97,52 @@ function ToolTip({ text, allignX = "auto", allignY, conditional = true, contRect
    )
 }
 
+/* Context Provider */
+
+interface ContCtxConfig {
+   contRect: DOMRect
+}
+
+/** Tooltips container context */
+const ContCtx = createContext<ContCtxConfig>(null)
+
+interface ContProps extends React.HTMLAttributes<HTMLDivElement> {
+   /** Override Rect (defaults to group wrap) */
+   contRect?: DOMRect
+}
+
+/** Tooltips group wrapper
+ * Items boundary - "auto" positioned allignment
+ * Timeouts - show after delay (keep showing until threshold)
+ */
+const Container = forwardRef(({ children, contRect: propContRect, ...atts }: ContProps, propRef: React.Ref<HTMLDivElement>) => {
+   /* Tooltip containers allginment */
+
+   const contRef = useRef<HTMLDivElement>(null) // Default ref if no ref forwarded
+   const ref: typeof contRef = (propRef as React.MutableRefObject<HTMLDivElement | null>) ?? contRef
+
+   /** Default cont rect (if no prop override) */
+   const [defContRect, setDefContRect] = useState<DOMRect>({} as DOMRect)
+
+   /* Calculate rect */
+   useEffect(() => setDefContRect(ref.current?.getBoundingClientRect()), [ref])
+
+   return (
+      <div {...atts} ref={ref}>
+         <ContCtx.Provider value={{ contRect: propContRect ?? defContRect }}>{children}</ContCtx.Provider>
+      </div>
+   )
+})
+
+/* Utils */
+
 /** Helper function
  * @example
  * const fakeRect = new DOMRect(100, 200, 300, 400); // x, y, width, height
  * const fakeContainerRef = fakeRectRef(fakeRect);
  *
  * console.log(fakeContainerRef.current.getBoundingClientRect()); // Logs the fake rect
+ * @deprecated (DOMRect should be used)
  */
 function fakeRectRef(rect: DOMRect): React.MutableRefObject<HTMLDivElement> {
    return {
@@ -113,6 +155,10 @@ function fakeRectRef(rect: DOMRect): React.MutableRefObject<HTMLDivElement> {
          },
       } as unknown as HTMLDivElement,
    }
+}
+const ToolTip = {
+   Item,
+   Container,
 }
 
 export { ToolTip, fakeRectRef }

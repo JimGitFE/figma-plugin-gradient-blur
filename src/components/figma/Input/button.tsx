@@ -11,16 +11,16 @@ interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
    disabled?: boolean
    large?: boolean
    ref?: React.MutableRefObject<HTMLButtonElement>
-   tooltip?: Omit<ComponentProps<typeof ToolTip>, "children">
+   tooltip?: Omit<ComponentProps<typeof ToolTip.Item>, "children">
    /** Short for text tooltip property */
-   tip?: ComponentProps<typeof ToolTip>["text"]
+   tip?: ComponentProps<typeof ToolTip.Item>["text"]
 }
 
 /** Individual for plural use */
 const ActionButtonBase = forwardRef<HTMLButtonElement, ButtonProps>(
    ({ icon, text, isActive = false, large = false, tooltip, tip, ...atts }, ref) => {
       return (
-         <ToolTip {...(tooltip ?? { text: tip })} className={`fx-1`}>
+         <ToolTip.Item {...(tooltip ?? { text: tip })} className={`fx-1`}>
             <button
                {...atts}
                ref={ref}
@@ -29,7 +29,7 @@ const ActionButtonBase = forwardRef<HTMLButtonElement, ButtonProps>(
                {icon && <div className={`${styles.icon} icon icon--${icon} icon--${isActive ? "blue" : "white"}`} />}
                {text && <span className="text type--small type--bold fw-500">{text}</span>}
             </button>
-         </ToolTip>
+         </ToolTip.Item>
       )
    }
 )
