@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState, createContext, useContext, useEffect, forwardRef } from "react"
 import { DelayedUnmount } from "@/components/custom"
 import styles from "./tool-tip.module.scss"
+import { useResizeObserver } from "@/hooks/useResizeObserver"
 
 /** Delayed unmount transition */
 const transition: [React.CSSProperties, React.CSSProperties] = [
@@ -16,7 +17,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
    allignY?: "top" | "bottom"
    /** Render when true */
    conditional?: boolean
-   /** Container Ref `{width, left, height, right}` */
+   /** Container Ref `{width, left, right}` */
    contRect?: DOMRect
 }
 
@@ -41,7 +42,7 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
          /** Wrap rect dimensions { width, height, left, right, bottom } */
          const wrap = wrapRef.current.getBoundingClientRect() // button
          /** Tooltip Rect dimensions */
-         const tip = { width: tipRef.current?.getBoundingClientRect().width || 150, height: 24 + 3 }
+         const tip = { width: tipRef.current?.getBoundingClientRect().width || (text?.length * 5.5 ?? 150), height: 24 + 3, rad: 6 }
          /** Container Rect */
          const container = {
             width: contRect?.width ?? window.innerWidth,
@@ -62,18 +63,20 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
 
          // 2
          /* Horizontal Axis auto allignment */
+         const overflowedX = (tip.width - wrap.width) / 2
          if (allignX === "auto") {
-            if (wrap.right + (tip.width - wrap.width) / 2 > container.width) {
+            if (wrap.right - container.left + overflowedX > container.width) {
                setAllignmentX("right")
-            } else if (wrap.left - (tip.width - wrap.width) / 2 < container.left) {
-               console.log
+            } else if (wrap.left + container.left - overflowedX < container.left) {
                setAllignmentX("left")
+            } else {
+               setAllignmentX("auto") // reset
             }
          }
          // Vertical Axis
          if (wrap.bottom + tip.height + 12 > container.height && !allignY) setAllignmentY("top")
       }
-   }, [wrapRef.current, contRect])
+   }, [wrapRef.current, tipRef.current, contRect])
 
    /* Events */
    const mouseLeave = () => {
