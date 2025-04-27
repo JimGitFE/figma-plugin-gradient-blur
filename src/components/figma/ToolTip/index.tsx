@@ -58,11 +58,14 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
          wrapRef.current.style.setProperty("--cont-left", `${container.left}px`)
          wrapRef.current.style.setProperty("--cont-right", `${container.right}px`)
 
+         console.log(container.width)
+         if (text?.includes("rez")) console.log(container.width, wrap.right, tip.width)
+
          // Horizontal Axis
          if (allignX === "auto") {
-            if (wrap.right + tip.width / 2 > container.width) {
+            if (wrap.right + (tip.width - wrap.width) / 2 > container.width) {
                setAllignmentX("right")
-            } else if (wrap.left - tip.width / 2 < container.left) {
+            } else if (wrap.left - (tip.width - wrap.width) / 2 < container.left) {
                console.log
                setAllignmentX("left")
             }
@@ -123,13 +126,15 @@ const Container = forwardRef(({ children, contRect: propContRect, ...atts }: Con
 
    /** Default cont rect (if no prop override) */
    const [defContRect, setDefContRect] = useState<DOMRect>({} as DOMRect)
+   const [contRect, setContRect] = useState<DOMRect>({} as DOMRect)
 
    /* Calculate rect */
    useEffect(() => setDefContRect(ref.current?.getBoundingClientRect()), [ref])
+   useEffect(() => setContRect(propContRect || defContRect), [propContRect, defContRect])
 
    return (
       <div {...atts} ref={ref}>
-         <ContCtx.Provider value={{ contRect: propContRect ?? defContRect }}>{children}</ContCtx.Provider>
+         <ContCtx.Provider value={{ contRect }}>{children}</ContCtx.Provider>
       </div>
    )
 })
@@ -157,7 +162,12 @@ function fakeRectRef(rect: DOMRect): React.MutableRefObject<HTMLDivElement> {
    }
 }
 const ToolTip = {
+   /** Tooltip, method: Wrapper */
    Item,
+   /** Tooltips group wrapper
+    * Items boundary - "auto" positioned allignment
+    * Timeouts - show after delay (keep showing until threshold)
+    */
    Container,
 }
 
