@@ -1,22 +1,16 @@
 /** Properties Panel Input sections */
 // Dependencies
 import React, { useEffect, useRef, useState } from "react"
+import { useShallow } from "zustand/shallow"
 // Components
 import { Reorder } from "@/components/custom"
 import { InputContainer, InputAreaBase, ActionButton } from "@/components/figma"
-// Internal
-import styles from "./properties.module.scss"
 import { useEventListener } from "@/hooks/useEventListener"
-import { clamp } from "@/utils"
 import { useCursor } from "@/hooks/useCursor"
 import { useProperties } from "@/store"
-import { useShallow } from "zustand/shallow"
-
-/** Store Hook */
-const useHandle = (handleId: number) => {
-   const updateHandle = useProperties(useShallow((state) => state.updateHandle))
-   return (patch: Partial<GradientStep>) => updateHandle(handleId, patch)
-}
+import { clamp } from "@/utils"
+// Internal
+import styles from "./handles.module.scss"
 
 interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
    handleId: number
@@ -25,7 +19,7 @@ interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
 
 function HandleInput({ handle, handleId, ...atts }: HandleProps) {
    const sortHandles = useProperties((state) => state.sortHandles)
-   const setHandle = useHandle(handleId)
+   const setHandle = useHandle(handleId) // store hook
 
    // Drag resize input
    const { onDragStart, isActive } = Reorder.useDragHandle()
@@ -79,6 +73,14 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
          <ActionButton isActive={false} icon="minus" large />
       </div>
    )
+}
+
+// Helpers
+
+/** Store Hook */
+const useHandle = (handleId: number) => {
+   const updateHandle = useProperties(useShallow((state) => state.updateHandle))
+   return (patch: Partial<GradientStep>) => updateHandle(handleId, patch)
 }
 
 export { HandleInput }

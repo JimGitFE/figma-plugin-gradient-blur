@@ -1,6 +1,6 @@
 import React from "react"
 import { createRoot } from "react-dom/client"
-import Interface from "@/ui"
+import Interface from "@/app"
 
 document.addEventListener("DOMContentLoaded", function () {
    const container = document.getElementById("react-page")

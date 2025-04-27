@@ -1,9 +1,12 @@
+// Dependencies
 import React, { useEffect } from "react"
-import "./styles/globals.scss" // Import your CSS file
-
+// Components
 import { Theme } from "@/contexts/useTheme"
-import { PropertiesPanel } from "@/components/layout"
+// Internal
+import "@/styles/globals.scss" // Centralized
+import * as Editor from "./Editor"
 
+/** Main App ui entry point */
 function Interface() {
    useEffect(() => {
       // This is how we read messages sent from the plugixn controller
@@ -18,9 +21,17 @@ function Interface() {
    return (
       <Theme>
          <div className="d-f">
-            <PropertiesPanel
-               className={`props-panel d-f fd-co bc-red pt-1rem pb-1rem c-white type--small type--medium type--inverse mw-200px`}
-            />
+            {/* Properties Editor Panel */}
+            <Editor.Wrap className={`props-panel d-f fd-co bc-red pt-1rem pb-1rem c-white type--small type--medium type--inverse mw-200px`}>
+               <Editor.Title />
+               <hr />
+               <Editor.Config />
+               <hr />
+               <Editor.Steps />
+               <hr />
+               <Editor.Submit />
+            </Editor.Wrap>
+            {/* Preview */}
             <div className="previewer bg-black w-100 o-60"></div>
          </div>
       </Theme>

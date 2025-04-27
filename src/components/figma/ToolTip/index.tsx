@@ -1,7 +1,6 @@
 import React, { useLayoutEffect, useRef, useState, createContext, useContext, useEffect, forwardRef } from "react"
 import { DelayedUnmount } from "@/components/custom"
 import styles from "./tool-tip.module.scss"
-import { useResizeObserver } from "@/hooks/useResizeObserver"
 
 /** Delayed unmount transition */
 const transition: [React.CSSProperties, React.CSSProperties] = [
