@@ -16,55 +16,60 @@ interface TipProps extends React.HTMLAttributes<HTMLDivElement> {
    allignY?: "top" | "bottom"
    /** Render when true */
    conditional?: boolean
-   /** Container Ref */
-   // containerRef?: React.MutableRefObject<HTMLDivElement>
+   /** Container Ref `{width, left, height, right}` */
    contRect?: DOMRect
 }
 
 /** Wrapper */
 function ToolTip({ text, allignX = "auto", allignY, conditional = true, contRect, children, ...atts }: TipProps) {
    const [isOpen, setIsOpen] = useState(false)
-   const wrapRef = useRef<HTMLDivElement>(null) // dimensions
-   const tipRef = useRef<HTMLDivElement>(null) // tooltip dynamic x
+   /** Tooltip wrap div */
+   const wrapRef = useRef<HTMLDivElement>(null)
+   /** tooltip dynamic x */
+   const tipRef = useRef<HTMLDivElement>(null)
    const [allignmentX, setAllignmentX] = useState<"left" | "right" | "auto">(allignX)
    const [allignmentY, setAllignmentY] = useState<"top" | "bottom">(allignY || "bottom")
 
    /* Dynamic allignment */
    useLayoutEffect(() => {
       if (wrapRef.current) {
-         const { width, height, left, right, bottom } = wrapRef.current.getBoundingClientRect() // button
+         /** Wrap rect dimensions { width, height, left, right, bottom } */
+         const wrap = wrapRef.current.getBoundingClientRect() // button
 
-         wrapRef.current.style.setProperty("--wrap-width", `${width}px`)
-         wrapRef.current.style.setProperty("--wrap-height", `${height}px`)
-         wrapRef.current.style.setProperty("--wrap-left", `${left}px`)
-         wrapRef.current.style.setProperty("--wrap-right", `${right}px`)
+         wrapRef.current.style.setProperty("--wrap-width", `${wrap.width}px`)
+         wrapRef.current.style.setProperty("--wrap-height", `${wrap.height}px`)
+         wrapRef.current.style.setProperty("--wrap-left", `${wrap.left}px`)
+         wrapRef.current.style.setProperty("--wrap-right", `${wrap.right}px`)
 
          /* Dynamic allignment on window overflow */
+         /** Tooltip Rect dimensions */
          const tip = { width: tipRef.current?.getBoundingClientRect().width || 150, height: 24 + 3 }
-         // const container = contRect?.current?.getBoundingClientRect()
-         const viewport = {
+         /** Container Rect */
+         const container = {
             width: contRect?.width ?? window.innerWidth,
             height: contRect?.height ?? window.innerHeight,
             left: contRect?.left ?? 0,
             right: contRect?.right ?? window.innerWidth,
          }
 
-         wrapRef.current.style.setProperty("--cont-width", `${viewport.width}px`)
-         wrapRef.current.style.setProperty("--cont-left", `${viewport.left}px`)
-         wrapRef.current.style.setProperty("--cont-right", `${viewport.right}px`)
+         console.log(text?.slice(0, 4), container.right - wrap.right)
+
+         wrapRef.current.style.setProperty("--cont-width", `${container.width}px`)
+         wrapRef.current.style.setProperty("--cont-left", `${container.left}px`)
+         wrapRef.current.style.setProperty("--cont-right", `${container.right}px`)
 
          // Horizontal Axis
          if (allignX === "auto") {
-            if (right + tip.width / 2 > viewport.width) {
+            if (wrap.right + tip.width / 2 > container.width) {
                setAllignmentX("right")
-            } else if (left - tip.width / 2 < viewport.left) {
+            } else if (wrap.left - tip.width / 2 < container.left) {
                console.log
                setAllignmentX("left")
             }
          }
 
          // Vertical Axis
-         if (bottom + tip.height + 12 > viewport.height && !allignY) setAllignmentY("top")
+         if (wrap.bottom + tip.height + 12 > container.height && !allignY) setAllignmentY("top")
       }
    }, [wrapRef.current, contRect])
 

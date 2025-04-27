@@ -53,10 +53,11 @@
       }
 
       &.right {
-         transform: translateX(calc(-100% + var(--wrap-width)));
+         --diff: calc(var(--cont-right) - var(--wrap-right)); // diff-to-edge
+         transform: translateX(calc(-100% + var(--wrap-width) + var(--diff)));
 
          &::after {
-            right: calc((var(--wrap-width) / 2) - 3px);
+            right: calc((var(--wrap-width) / 2) - 3px + var(--diff));
          }
       }
    }
