@@ -1,6 +1,6 @@
 /** Properties Panel Input sections */
 // Dependencies
-import React, { useEffect, useRef, useState } from "react"
+import React, { useRef, useState } from "react"
 // Components
 import { Reorder } from "@/components/custom"
 import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase, ToolTip } from "@/components/figma"
@@ -11,6 +11,7 @@ import { Heading } from "./Heading"
 import { clamp, modulo } from "@/utils"
 import { useProperties } from "@/store"
 import useModal from "@/hooks/useModal"
+import { useResizeObserver } from "@/hooks/useResizeObserver"
 
 interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {
    children?: React.ReactNode
@@ -33,12 +34,12 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
    const [contRect, setContRect] = useState<DOMRect>({} as DOMRect) // + margins
 
    /* Implement margins to shared tooltips rect reference */
-   useEffect(() => {
-      // Margins, left: 1 rem right: 0.6 rem
-      // get panelRef rect and add margins 20px
-      const rect = panelRef.current?.getBoundingClientRect()
-      setContRect({ ...rect, left: rect?.left + 16, right: rect?.right - 9, width: rect.width - 25 })
-   }, [panelRef])
+   useResizeObserver({
+      ref: panelRef,
+      callback: (rect) => {
+         setContRect({ ...rect, left: rect.left + 16, right: rect.right - 9, width: rect.width - 25 })
+      },
+   })
 
    return (
       <ToolTip.Container {...atts} ref={panelRef} contRect={contRect}>
