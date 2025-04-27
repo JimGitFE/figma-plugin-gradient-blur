@@ -30,18 +30,11 @@ function ToolTip({ text, allignX = "auto", allignY, conditional = true, contRect
    const [allignmentX, setAllignmentX] = useState<"left" | "right" | "auto">(allignX)
    const [allignmentY, setAllignmentY] = useState<"top" | "bottom">(allignY || "bottom")
 
-   /* Dynamic allignment */
+   /* Dynamic allignment on container / window overflow */
    useLayoutEffect(() => {
       if (wrapRef.current) {
          /** Wrap rect dimensions { width, height, left, right, bottom } */
          const wrap = wrapRef.current.getBoundingClientRect() // button
-
-         wrapRef.current.style.setProperty("--wrap-width", `${wrap.width}px`)
-         wrapRef.current.style.setProperty("--wrap-height", `${wrap.height}px`)
-         wrapRef.current.style.setProperty("--wrap-left", `${wrap.left}px`)
-         wrapRef.current.style.setProperty("--wrap-right", `${wrap.right}px`)
-
-         /* Dynamic allignment on window overflow */
          /** Tooltip Rect dimensions */
          const tip = { width: tipRef.current?.getBoundingClientRect().width || 150, height: 24 + 3 }
          /** Container Rect */
@@ -52,8 +45,12 @@ function ToolTip({ text, allignX = "auto", allignY, conditional = true, contRect
             right: contRect?.right ?? window.innerWidth,
          }
 
-         console.log(text?.slice(0, 4), container.right - wrap.right)
-
+         // Wrap css vars
+         wrapRef.current.style.setProperty("--wrap-width", `${wrap.width}px`)
+         wrapRef.current.style.setProperty("--wrap-height", `${wrap.height}px`)
+         wrapRef.current.style.setProperty("--wrap-left", `${wrap.left}px`)
+         wrapRef.current.style.setProperty("--wrap-right", `${wrap.right}px`)
+         // Container css vars
          wrapRef.current.style.setProperty("--cont-width", `${container.width}px`)
          wrapRef.current.style.setProperty("--cont-left", `${container.left}px`)
          wrapRef.current.style.setProperty("--cont-right", `${container.right}px`)
