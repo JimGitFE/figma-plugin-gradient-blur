@@ -89,7 +89,7 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
    return (
       <div {...atts} ref={wrapRef} className={`pos-relative ${styles.wrap} ${atts.className}`}>
          {/* Item */}
-         <div onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} onMouseDown={mouseLeave}>
+         <div onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} onMouseDown={mouseLeave} onMouseMove={() => contGroup?.move()}>
             {children}
          </div>
          {/* Shared hover delay */}
@@ -117,6 +117,7 @@ interface ContCtxConfig {
    isAvailable: boolean
    enter: () => void
    leave: () => void
+   move: () => void
 }
 
 /** Tooltips container context */
@@ -129,7 +130,7 @@ interface ContProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /** Tooltips group wrapper
  * Items boundary - "auto" positioned allignment
- * Timeouts - show after delay (keep showing until threshold)
+ * Timeouts - show after delay & steady hover (keep showing until grace threshold)
  */
 const Container = forwardRef(({ children, contRect: propContRect, ...atts }: ContProps, propRef: React.Ref<HTMLDivElement>) => {
    // 1
@@ -149,7 +150,7 @@ const Container = forwardRef(({ children, contRect: propContRect, ...atts }: Con
    // 2
    /* Global timeouts (shared hover delay) */
    const [isAvailable, setIsAvailable] = useState(false)
-   const [delay, grace] = [800, 600]
+   const [delay, grace] = [400, 250]
    // const lastEvent = useRef(0) // timestamp
    const delayTimer = useRef<ReturnType<typeof setTimeout> | null>(null) // timeout
    const graceTimer = useRef<ReturnType<typeof setTimeout> | null>(null) // timeout
@@ -180,6 +181,16 @@ const Container = forwardRef(({ children, contRect: propContRect, ...atts }: Con
       }
    }
 
+   /** MouseMove reset delay */
+   const move = () => {
+      if (delayTimer.current) {
+         clearTimeout(delayTimer.current)
+         delayTimer.current = setTimeout(() => {
+            setIsAvailable(true)
+         }, delay)
+      }
+   }
+
    const cleanup = () => {
       delayTimer.current && clearTimeout(delayTimer.current)
       graceTimer.current && clearTimeout(graceTimer.current)
@@ -190,7 +201,7 @@ const Container = forwardRef(({ children, contRect: propContRect, ...atts }: Con
 
    return (
       <div {...atts} ref={ref}>
-         <ContCtx.Provider value={{ contRect, isAvailable, enter, leave }}>{children}</ContCtx.Provider>
+         <ContCtx.Provider value={{ contRect, isAvailable, enter, leave, move }}>{children}</ContCtx.Provider>
       </div>
    )
 })
