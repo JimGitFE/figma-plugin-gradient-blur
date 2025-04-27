@@ -58,8 +58,6 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
          wrapRef.current.style.setProperty("--cont-left", `${container.left}px`)
          wrapRef.current.style.setProperty("--cont-right", `${container.right}px`)
 
-         if (text?.includes("rez")) console.log(container.width, wrap.right, tip.width)
-
          // Horizontal Axis
          if (allignX === "auto") {
             if (wrap.right + (tip.width - wrap.width) / 2 > container.width) {
