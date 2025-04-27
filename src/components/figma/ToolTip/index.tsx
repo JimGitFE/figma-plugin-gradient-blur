@@ -23,6 +23,7 @@ interface Props extends React.HTMLAttributes<HTMLDivElement> {
 /** Wrapper */
 function Item({ text, allignX = "auto", allignY, conditional = true, contRect: propContRect, children, ...atts }: Props) {
    const [isOpen, setIsOpen] = useState(false)
+
    /** Container Group Context DOMRect & Timeout */
    const contGroup = ContCtx ? useContext(ContCtx) : null
    const contRect = contGroup?.contRect || propContRect
@@ -36,6 +37,7 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
    /* Dynamic allignment on container / window overflow */
    useLayoutEffect(() => {
       if (wrapRef.current) {
+         // 1
          /** Wrap rect dimensions { width, height, left, right, bottom } */
          const wrap = wrapRef.current.getBoundingClientRect() // button
          /** Tooltip Rect dimensions */
@@ -58,7 +60,8 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
          wrapRef.current.style.setProperty("--cont-left", `${container.left}px`)
          wrapRef.current.style.setProperty("--cont-right", `${container.right}px`)
 
-         // Horizontal Axis
+         // 2
+         /* Horizontal Axis auto allignment */
          if (allignX === "auto") {
             if (wrap.right + (tip.width - wrap.width) / 2 > container.width) {
                setAllignmentX("right")
@@ -72,27 +75,37 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
       }
    }, [wrapRef.current, contRect])
 
+   /* Events */
+   const mouseLeave = () => {
+      contGroup?.leave()
+      isOpen && setIsOpen(false)
+   }
+
+   const mouseEnter = () => {
+      if (text) contGroup?.enter()
+      !isOpen && setIsOpen(true)
+   }
+
    return (
       <div {...atts} ref={wrapRef} className={`pos-relative ${styles.wrap} ${atts.className}`}>
          {/* Item */}
-         <div
-            onMouseEnter={() => !isOpen && setIsOpen(true)}
-            onMouseLeave={() => isOpen && setIsOpen(false)}
-            onMouseDown={() => isOpen && setIsOpen(false)}
-         >
+         <div onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} onMouseDown={mouseLeave}>
             {children}
          </div>
-         {/* Tool Tip */}
-         <DelayedUnmount
-            conditional={isOpen && !!text && conditional}
-            duration={120}
-            styleTransition={transition}
-            className={`pos-absolute ${styles.box} ${styles[allignmentY]}`}
-         >
-            <div className={`${styles.tooltip} ${styles[allignmentX]}`} ref={tipRef}>
-               <div>{text}</div>
-            </div>
-         </DelayedUnmount>
+         {/* Shared hover delay */}
+         {(contGroup?.isAvailable ?? true) && (
+            // Tool Tip
+            <DelayedUnmount
+               conditional={isOpen && !!text && conditional}
+               duration={120}
+               styleTransition={transition}
+               className={`pos-absolute ${styles.box} ${styles[allignmentY]}`}
+            >
+               <div className={`${styles.tooltip} ${styles[allignmentX]}`} ref={tipRef}>
+                  <div>{text}</div>
+               </div>
+            </DelayedUnmount>
+         )}
       </div>
    )
 }
@@ -101,6 +114,9 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
 
 interface ContCtxConfig {
    contRect: DOMRect
+   isAvailable: boolean
+   enter: () => void
+   leave: () => void
 }
 
 /** Tooltips container context */
@@ -116,6 +132,7 @@ interface ContProps extends React.HTMLAttributes<HTMLDivElement> {
  * Timeouts - show after delay (keep showing until threshold)
  */
 const Container = forwardRef(({ children, contRect: propContRect, ...atts }: ContProps, propRef: React.Ref<HTMLDivElement>) => {
+   // 1
    /* Tooltip containers allginment */
 
    const contRef = useRef<HTMLDivElement>(null) // Default ref if no ref forwarded
@@ -129,9 +146,51 @@ const Container = forwardRef(({ children, contRect: propContRect, ...atts }: Con
    useEffect(() => setDefContRect(ref.current?.getBoundingClientRect()), [ref])
    useEffect(() => setContRect(propContRect || defContRect), [propContRect, defContRect])
 
+   // 2
+   /* Global timeouts (shared hover delay) */
+   const [isAvailable, setIsAvailable] = useState(false)
+   const [delay, grace] = [800, 600]
+   // const lastEvent = useRef(0) // timestamp
+   const delayTimer = useRef<ReturnType<typeof setTimeout> | null>(null) // timeout
+   const graceTimer = useRef<ReturnType<typeof setTimeout> | null>(null) // timeout
+
+   /** Mouseenter a tooltip (start count) */
+   const enter = () => {
+      // Initialize hover delay
+      delayTimer.current = setTimeout(() => {
+         setIsAvailable(true)
+      }, delay)
+
+      // Cleanup
+      clearTimeout(graceTimer.current)
+      graceTimer.current = null
+   }
+
+   /** Mouseleave a tooltip (count grace) */
+   const leave = () => {
+      if (isAvailable) {
+         graceTimer.current = setTimeout(() => {
+            setIsAvailable(false)
+            clearTimeout(delayTimer.current)
+            delayTimer.current = null
+         }, grace)
+      } else {
+         clearTimeout(delayTimer.current)
+         delayTimer.current = null
+      }
+   }
+
+   const cleanup = () => {
+      delayTimer.current && clearTimeout(delayTimer.current)
+      graceTimer.current && clearTimeout(graceTimer.current)
+   }
+
+   // Clear timer on unmount
+   useEffect(() => cleanup, [])
+
    return (
       <div {...atts} ref={ref}>
-         <ContCtx.Provider value={{ contRect }}>{children}</ContCtx.Provider>
+         <ContCtx.Provider value={{ contRect, isAvailable, enter, leave }}>{children}</ContCtx.Provider>
       </div>
    )
 })
