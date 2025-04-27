@@ -53,10 +53,10 @@
       }
 
       &.right {
-         transform: translateX(calc(0 * (-1)));
+         transform: translateX(calc(-100% + var(--wrap-width)));
 
          &::after {
-            right: calc((var(--cont-width) - var(--wrap-left)) - var(--wrap-width) / 2 - 3px);
+            right: calc((var(--wrap-width) / 2) - 3px);
          }
       }
    }

@@ -12,19 +12,22 @@ interface TipProps extends React.HTMLAttributes<HTMLDivElement> {
    children: React.ReactNode
    text?: string
    /** Allignment X */
-   allign?: "left" | "right" | "auto"
+   allignX?: "left" | "right" | "auto"
+   allignY?: "top" | "bottom"
    /** Render when true */
    conditional?: boolean
    /** Container Ref */
-   containerRef?: React.MutableRefObject<HTMLDivElement>
+   // containerRef?: React.MutableRefObject<HTMLDivElement>
+   contRect?: DOMRect
 }
 
 /** Wrapper */
-function ToolTip({ text, allign = "auto", conditional = true, containerRef, children, ...atts }: TipProps) {
+function ToolTip({ text, allignX = "auto", allignY, conditional = true, contRect, children, ...atts }: TipProps) {
    const [isOpen, setIsOpen] = useState(false)
    const wrapRef = useRef<HTMLDivElement>(null) // dimensions
-   const [allignmentX, setAllignmentX] = useState<"left" | "right" | "auto">(allign)
-   const [allignmentY, setAllignmentY] = useState<"top" | "bottom">("bottom")
+   const tipRef = useRef<HTMLDivElement>(null) // tooltip dynamic x
+   const [allignmentX, setAllignmentX] = useState<"left" | "right" | "auto">(allignX)
+   const [allignmentY, setAllignmentY] = useState<"top" | "bottom">(allignY || "bottom")
 
    /* Dynamic allignment */
    useLayoutEffect(() => {
@@ -37,34 +40,33 @@ function ToolTip({ text, allign = "auto", conditional = true, containerRef, chil
          wrapRef.current.style.setProperty("--wrap-right", `${right}px`)
 
          /* Dynamic allignment on window overflow */
-
-         const tip = { width: 150, height: 24 + 3 }
-         const container = containerRef?.current?.getBoundingClientRect()
+         const tip = { width: tipRef.current?.getBoundingClientRect().width || 150, height: 24 + 3 }
+         // const container = contRect?.current?.getBoundingClientRect()
          const viewport = {
-            width: container?.width ?? window.innerWidth,
-            height: container?.height ?? window.innerHeight,
-            left: container?.left ?? 0,
-            right: container?.right ?? window.innerWidth,
+            width: contRect?.width ?? window.innerWidth,
+            height: contRect?.height ?? window.innerHeight,
+            left: contRect?.left ?? 0,
+            right: contRect?.right ?? window.innerWidth,
          }
 
-         console.log(viewport, text)
          wrapRef.current.style.setProperty("--cont-width", `${viewport.width}px`)
          wrapRef.current.style.setProperty("--cont-left", `${viewport.left}px`)
          wrapRef.current.style.setProperty("--cont-right", `${viewport.right}px`)
 
          // Horizontal Axis
-         if (allign === "auto") {
+         if (allignX === "auto") {
             if (right + tip.width / 2 > viewport.width) {
                setAllignmentX("right")
-            } else if (left - tip.width / 2 < 0) {
+            } else if (left - tip.width / 2 < viewport.left) {
+               console.log
                setAllignmentX("left")
             }
          }
 
          // Vertical Axis
-         if (bottom + tip.height + 12 > viewport.height) setAllignmentY("top")
+         if (bottom + tip.height + 12 > viewport.height && !allignY) setAllignmentY("top")
       }
-   }, [wrapRef.current, containerRef])
+   }, [wrapRef.current, contRect])
 
    return (
       <div {...atts} ref={wrapRef} className={`pos-relative ${styles.wrap} ${atts.className}`}>
@@ -83,7 +85,7 @@ function ToolTip({ text, allign = "auto", conditional = true, containerRef, chil
             styleTransition={transition}
             className={`pos-absolute ${styles.box} ${styles[allignmentY]}`}
          >
-            <div className={`${styles.tooltip} ${styles[allignmentX]}`}>
+            <div className={`${styles.tooltip} ${styles[allignmentX]}`} ref={tipRef}>
                <div>{text}</div>
             </div>
          </DelayedUnmount>
@@ -91,4 +93,24 @@ function ToolTip({ text, allign = "auto", conditional = true, containerRef, chil
    )
 }
 
-export { ToolTip }
+/** Helper function
+ * @example
+ * const fakeRect = new DOMRect(100, 200, 300, 400); // x, y, width, height
+ * const fakeContainerRef = fakeRectRef(fakeRect);
+ *
+ * console.log(fakeContainerRef.current.getBoundingClientRect()); // Logs the fake rect
+ */
+function fakeRectRef(rect: DOMRect): React.MutableRefObject<HTMLDivElement> {
+   return {
+      current: {
+         getBoundingClientRect: () => rect,
+         style: {
+            setProperty: (property: string, value: string) => {
+               console.log(`Set style property: ${property} = ${value}`)
+            },
+         },
+      } as unknown as HTMLDivElement,
+   }
+}
+
+export { ToolTip, fakeRectRef }

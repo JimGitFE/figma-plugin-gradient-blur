@@ -1,6 +1,6 @@
 /** Properties Panel Input sections */
 // Dependencies
-import React, { useRef } from "react"
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react"
 // Components
 import { Reorder } from "@/components/custom"
 import { Button, ActionButton, InputArea, ActionContainer, ActionButtonBase } from "@/components/figma"
@@ -56,9 +56,7 @@ export function PropertiesPanel({ children, ...atts }: PanelProps) {
          <hr />
 
          {/* Properties */}
-         <div className={styles.container}>
-            <PanelInputs />
-         </div>
+         <PanelInputs />
 
          <hr />
 
@@ -95,14 +93,27 @@ import { Menu, MenuItem } from "@/components/figma/Menu"
 
 /** Adjustable Properties of Panel (No actions / header ) */
 function PanelInputs({}: InputProps) {
+   // Inputs
+
    const [setGrad] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
    const { angle, resolution, handles } = useProperties((state) => state.grad)
 
+   // Tooltips
+
    /* Tooltip containers allginment */
    const panelRef = useRef<HTMLDivElement>(null)
+   const [contRect, setContRect] = useState<DOMRect>({} as DOMRect) // + margins
+
+   /* Implement margins to shared tooltips rect reference */
+   useEffect(() => {
+      // Margins, left: 1 rem right: 0.6 rem
+      // get panelRef rect and add margins 20px
+      const rect = panelRef.current?.getBoundingClientRect()
+      setContRect({ ...rect, left: rect?.left + 16, right: rect?.right - 9, width: rect.width - 25 })
+   }, [panelRef])
 
    return (
-      <>
+      <div className={styles.container} ref={panelRef}>
          <section>
             {/* Title */}
             <Heading buttons={[{ isActive: false, icon: "info", tip: "Info" }]}>
@@ -110,17 +121,18 @@ function PanelInputs({}: InputProps) {
             </Heading>
 
             {/* Gradient Type */}
-            <div ref={panelRef} className={`d-f gap-5px`}>
+            <div className={`d-f gap-5px`}>
                <ActionContainer style={{ flex: 1 }}>
-                  <ActionButtonBase icon="rotate" tooltip={{ text: "Rotate 90 degrees", containerRef: panelRef }} />
-                  <ActionButtonBase icon="mirror-y" tooltip={{ text: "Mirror y axis" }} />
-                  <ActionButtonBase icon="mirror-x" tooltip={{ text: "Mirror x axis" }} />
+                  <ActionButtonBase icon="rotate" tooltip={{ text: "Rotate 90 degrees", contRect }} />
+                  <ActionButtonBase icon="mirror-y" tooltip={{ text: "Mirror y axis", contRect }} />
+                  <ActionButtonBase icon="mirror-x" tooltip={{ text: "Mirror x axis", contRect }} />
                </ActionContainer>
                <ActionContainer style={{ width: "auto", flex: 1 }}>
-                  <ActionButtonBase text="Lin" tooltip={{ text: "Linear Gradient" }} isActive />
-                  <ActionButtonBase text="Rad" tooltip={{ text: "Radial Gradient" }} />
+                  <ActionButtonBase text="Lin" tooltip={{ text: "Linear Gradient", contRect }} isActive />
+                  <ActionButtonBase text="Rad" tooltip={{ text: "Radial Gradient", contRect }} />
                </ActionContainer>
-               <ActionButton icon="adjust" tooltip={{ text: "Disabled", containerRef: panelRef }} large disabled /> {/* TODO }}*/}
+               <ActionButton icon="adjust" tooltip={{ text: "Disabled", contRect }} large disabled />
+               {/* TODO }}*/}
             </div>
 
             {/* Resolution & Angle */}
@@ -180,6 +192,6 @@ function PanelInputs({}: InputProps) {
                </Reorder.Container>
             </div>
          </section>
-      </>
+      </div>
    )
 }
