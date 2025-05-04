@@ -34,6 +34,20 @@ const useProperties = create<Properties>((set) => ({
          const sortedHandles = [...state.grad.handles].sort((a, b) => a.pos - b.pos)
          return { grad: { ...state.grad, handles: sortedHandles } }
       }),
+   removeHandle: (uniqueId) =>
+      set((state) => {
+         const newHandles = state.grad.handles.filter((h) => h.uniqueId !== uniqueId)
+         return { grad: { ...state.grad, handles: newHandles } }
+      }),
+   addHandle: (handleProps, at) =>
+      set((state) => {
+         const maxUId = Math.max(...state.grad.handles.map((h) => h.uniqueId), 0)
+         const newHandle = { ...handleProps, uniqueId: maxUId + 1 }
+         const newHandles = [...state.grad.handles]
+         if (at) newHandles.splice(at, 0, newHandle)
+         else newHandles.push(newHandle)
+         return { grad: { ...state.grad, handles: newHandles } }
+      }),
 }))
 
 /** Figma API (selected frame) */

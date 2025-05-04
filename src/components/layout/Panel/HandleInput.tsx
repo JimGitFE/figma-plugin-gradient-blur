@@ -18,8 +18,7 @@ interface HandleProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 function HandleInput({ handle, handleId, ...atts }: HandleProps) {
-   const sortHandles = useProperties((state) => state.sortHandles)
-   const setHandle = useHandle(handleId) // store hook
+   const [update, destroy] = useHandle(handleId) // store hook
 
    // Drag resize input
    const { onDragStart, isActive } = Reorder.useDragHandle()
@@ -33,12 +32,6 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
    useEffect(() => {isActive && setIsSelected(true)}, [isActive])
    useEventListener("mousedown", onClickOut, { conditional: isSelected })
 
-   /** On position input change */
-   const posChange = (newPos: number) => {
-      setHandle({ pos: newPos })
-      sortHandles()
-   }
-
    return (
       <div {...atts} className={`${styles.item} d-f`} ref={itemRef}>
          {/* Handle */}
@@ -50,7 +43,7 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
                state={{
                   value: handle.blur,
                   display: (v) => Math.round(v),
-                  onChange: (newVal) => setHandle({ blur: clamp(newVal, { min: 0 }) }),
+                  onChange: (newVal) => update({ blur: clamp(newVal, { min: 0 }) }),
                }}
                config={{
                   placeholder: "Blur in px",
@@ -62,7 +55,7 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
                state={{
                   value: handle.pos,
                   display: (v) => Math.round(v),
-                  onChange: posChange,
+                  onChange: (n) => update({ pos: n }),
                }}
                resize={{ strength: 0.3 }}
                config={{
@@ -71,7 +64,7 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
                }}
             />
          </InputContainer>
-         <ActionButton isActive={false} icon="minus" large />
+         <ActionButton onClick={destroy} isActive={false} icon="minus" large />
       </div>
    )
 }
@@ -80,8 +73,13 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
 
 /** Store Hook */
 const useHandle = (handleId: number) => {
-   const updateHandle = useProperties(useShallow((state) => state.updateHandle))
-   return (patch: Partial<GradientStep>) => updateHandle(handleId, patch)
+   const { updateHandle, removeHandle, sortHandles } = useProperties(useShallow((state) => state))
+   const update = (patch: Partial<GradientStep>) => {
+      updateHandle(handleId, patch)
+      sortHandles()
+   }
+   const remove = () => removeHandle(handleId)
+   return [update, remove] as const
 }
 
 export { HandleInput }

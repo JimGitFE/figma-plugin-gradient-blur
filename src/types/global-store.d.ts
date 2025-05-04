@@ -16,4 +16,8 @@ interface Properties {
    updateHandle: (index: number, handle: Partial<GradientStep>) => void
    /** Reorder */
    sortHandles: () => void
+   /** Remove uniqueId handle */
+   removeHandle: (uniqueId: number) => void
+   /** Add at position */
+   addHandle: (newHandle: Omit<GradientStep, "uniqueId">, at?: number) => void
 }

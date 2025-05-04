@@ -14,8 +14,9 @@ interface InputProps {
 
 /** Gradient handles, position & blur amount */
 export default function PanelInputs({}: InputProps) {
-   const [setGrad] = useProperties(useShallow((state) => [state.setGrad, state.updateHandle]))
+   const [setGrad, addHandle] = useProperties(useShallow((state) => [state.setGrad, state.addHandle, state.updateHandle]))
    const { handles } = useProperties((state) => state.grad)
+   const last = handles[handles.length - 1] ?? { pos: 100, blur: 0 }
 
    return (
       <section>
@@ -23,7 +24,7 @@ export default function PanelInputs({}: InputProps) {
          <Heading
             buttons={[
                { icon: "swap", tip: "Reset" },
-               { icon: "plus", tip: "Create" },
+               { icon: "plus", tip: "Create", onClick: () => addHandle({ pos: last.pos + 1, blur: last.blur }) },
             ]}
          >
             <p onClick={() => setGrad({ handles: handles.sort((a, b) => a.blur - b.blur) })}>Gradient Handles ({handles.length})</p>
