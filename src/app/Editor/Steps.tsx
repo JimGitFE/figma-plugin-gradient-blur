@@ -50,8 +50,8 @@ export default function PanelInputs({}: InputProps) {
 
 /** Dropped item - recalculate intermediate pos out of neighbours */
 const computeIntPos = (data: GradientStep[], at: number) => {
-   const prev = data[at - 1] ?? { pos: 0 }
-   const next = data[at + 1] ?? { pos: 100 }
+   const prev = data[at - 1] ?? { pos: Math.min(0, data[at + 1].pos) }
+   const next = data[at + 1] ?? { pos: Math.max(100, data[at - 1].pos) }
 
    // Compute new position
    const newData = data.map((h, i) => {
