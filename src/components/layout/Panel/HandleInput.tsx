@@ -33,6 +33,7 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
    useEffect(() => {isActive && setIsSelected(true)}, [isActive])
    useEventListener("mousedown", onClickOut, { conditional: isSelected })
 
+   /** On position input change */
    const posChange = (newPos: number) => {
       setHandle({ pos: newPos })
       sortHandles()

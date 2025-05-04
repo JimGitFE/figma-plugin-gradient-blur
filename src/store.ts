@@ -36,4 +36,8 @@ const useProperties = create<Properties>((set) => ({
       }),
 }))
 
+/** Figma API (selected frame) */
+
+/** App Config */
+
 export { useProperties }
