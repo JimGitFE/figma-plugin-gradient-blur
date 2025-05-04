@@ -31,7 +31,10 @@ export default function PanelInputs({}: InputProps) {
 
          {/* Inputs Handles */}
          <div className={`d-f fd-co gap-6px ${styles.steps}`} style={{ marginTop: -3, marginBottom: -3 }}>
-            <Reorder.Container onReorder={(newHandles) => setGrad({ handles: newHandles })} sources={handles}>
+            <Reorder.Container
+               onReorder={(newHandles, dropped) => setGrad({ handles: computeIntPos(newHandles, dropped.index) })}
+               sources={handles}
+            >
                {handles.map((handle) => (
                   <Reorder.Item uniqueId={handle.uniqueId}>
                      <HandleInput handle={handle} handleId={handle.uniqueId} />
@@ -41,4 +44,21 @@ export default function PanelInputs({}: InputProps) {
          </div>
       </section>
    )
+}
+
+// Utils
+
+/** Dropped item - recalculate intermediate pos out of neighbours */
+const computeIntPos = (data: GradientStep[], at: number) => {
+   const prev = data[at - 1] ?? { pos: 0 }
+   const next = data[at + 1] ?? { pos: 100 }
+
+   // Compute new position
+   const newData = data.map((h, i) => {
+      if (i === at) {
+         return { ...h, pos: (prev.pos + next.pos) / 2 }
+      }
+      return h
+   })
+   return newData
 }
