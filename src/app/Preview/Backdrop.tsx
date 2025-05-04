@@ -25,13 +25,13 @@ export default function Backdrop({ children }: Props) {
 
    return (
       <div className="pos-relative h-100 w-100">
-         {children}
          <ResolutionBlur
             handles={handles ?? DEFAULT.handles}
             type="linear"
             angle={angle ?? DEFAULT.angle}
             resolution={Math.round(resolution) ?? DEFAULT.resolution}
-         ></ResolutionBlur>
+         />
+         {children}
       </div>
    )
 }

@@ -6,6 +6,7 @@
    "extensions": "tsx,ts,js,jsx",
    "exclude": ["node_modules", ".git", ".*/**/*"],
    "extendKeys": {
-      "fx": { "name": "flex", "valueExtension": "" }
+      "fx": { "name": "flex", "valueExtension": "" },
+      "lh": { "name": "line-height", "valueExtension": "" }
    }
 }
