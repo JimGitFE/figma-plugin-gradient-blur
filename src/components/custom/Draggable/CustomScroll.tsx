@@ -6,6 +6,7 @@ import { clamp, refContains } from "@/utils"
 import useDrag from "@/hooks/useDrag"
 // Internal
 import styles from "./scrollbar.module.scss"
+import { useResizeObserver } from "@/hooks/useResizeObserver"
 
 type FwdRef = React.RefObject<HTMLDivElement>
 
@@ -45,7 +46,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
 
    /* Initialize thumb height */
 
-   useLayoutEffect(() => {
+   const computeDimensions = () => {
       if (!containerRef.current || !contentRef.current) return
       const hiddenHeight = contentRef.current.clientHeight - containerRef.current.clientHeight
 
@@ -53,7 +54,10 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
       const thumbHeight = trackHeight * (containerRef.current.clientHeight / contentRef.current.clientHeight)
 
       setDims({ hiddenHeight, trackHeight, thumbHeight })
-   }, [containerRef, contentRef])
+   }
+
+   useLayoutEffect(computeDimensions, [containerRef, contentRef])
+   useResizeObserver({ ref: contentRef, callback: computeDimensions })
 
    const [scrollInstant, setScrollInstant] = useState(false)
 
@@ -206,7 +210,7 @@ function useThumb({ trackRef, thumbRef, trackContainerRef, dims, scroll, normalY
 
    /* Controlled thumb position (deps on scrolled)  */
 
-   useEffect(() => setPosY(normalY * (dims.trackHeight - dims.thumbHeight)), [normalY])
+   useEffect(() => setPosY(normalY * (dims.trackHeight - dims.thumbHeight)), [normalY, dims])
 
    return { initDrag, thumb: { y: posY, heightPct: (dims.thumbHeight / dims.trackHeight) * 100 } }
 }

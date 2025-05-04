@@ -161,49 +161,45 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    const recalculateItemsRect = () => itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
-   return (
-      <>
-         {/* Scroll contianer */}
-         {[...children]
-            .filter((child) => child.type === Item)
-            .sort((a, b) => a.props.uniqueId - b.props.uniqueId)
-            .map((item, sortedIndex) => (
-               <ReorderContext.Provider
-                  /* If uniqueId sequential then sortedIndex === uniqueId - 1 */
-                  key={item.props.uniqueId ?? sortedIndex}
-                  /* Context */
-                  value={[
-                     /* Item */
-                     {
-                        /** Handles display order */
-                        index: indexFromId(item.props.uniqueId),
-                        /** state key control */
-                        uniqueId: item.props.uniqueId ?? sortedIndex,
-                        /** DOM rect dimensions */
-                        rect: itemsRef.current[indexFromId(item.props.uniqueId)]?.rect,
-                        /** drag handle Init */
-                        onDragStart,
-                        isActive: active.uniqueId === item.props.uniqueId,
-                     },
-                     /* State */
-                     {
-                        hovering,
-                        active,
-                     },
-                     /* Internal */
-                     {
-                        itemsRef,
-                        recalculateRects: recalculateItemsRect,
-                        lifecycle,
-                        scrolledY,
-                     },
-                  ]}
-                  /* Children */
-                  children={item}
-               />
-            ))}
-      </>
-   )
+   // Scroll contianer
+   return [...children]
+      .filter((child) => child.type === Item)
+      .sort((a, b) => a.props.uniqueId - b.props.uniqueId)
+      .map((item, sortedIndex) => (
+         <ReorderContext.Provider
+            /* If uniqueId sequential then sortedIndex === uniqueId - 1 */
+            key={item.props.uniqueId ?? sortedIndex}
+            /* Context */
+            value={[
+               /* Item */
+               {
+                  /** Handles display order */
+                  index: indexFromId(item.props.uniqueId),
+                  /** state key control */
+                  uniqueId: item.props.uniqueId ?? sortedIndex,
+                  /** DOM rect dimensions */
+                  rect: itemsRef.current[indexFromId(item.props.uniqueId)]?.rect,
+                  /** drag handle Init */
+                  onDragStart,
+                  isActive: active.uniqueId === item.props.uniqueId,
+               },
+               /* State */
+               {
+                  hovering,
+                  active,
+               },
+               /* Internal */
+               {
+                  itemsRef,
+                  recalculateRects: recalculateItemsRect,
+                  lifecycle,
+                  scrolledY,
+               },
+            ]}
+            /* Children */
+            children={item}
+         />
+      ))
 }
 
 type ItemRef = React.MutableRefObject<{ rect: DOMRect; node: HTMLDivElement }[]>
