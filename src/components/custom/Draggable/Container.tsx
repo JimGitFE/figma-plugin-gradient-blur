@@ -14,9 +14,9 @@ import { clamp } from "@/utils"
 interface ManagerProps<T extends SourceProps> extends Partial<Omit<React.ComponentProps<typeof Scroll.Wrap>, "config">> {
    children: Component<typeof Item>[]
    sources: T[]
-   /** reordered data source */
-   onReorder: (dataSources: T[]) => void
-   /** Scroll config */
+   /** reordered data source (callback) + unique Id for dropped item */
+   onReorder: (dataSources: T[], uId: T["uniqueId"]) => void
+   /** Scroll on edge config */
    config?: {
       /** Start scrolling when dragging at `dist` from boundary */
       dist?: number
@@ -64,7 +64,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
             setActive((act) => ({ ...act, dy }))
          },
          up: () => {
-            onReorder(reorder(sources, active.index, hovering.index))
+            onReorder(reorder(sources, active.index, hovering.index), active.uniqueId)
             setActive({ uniqueId: -1, index: -1, dy: null, scrolledY: null })
             setHovering({ uniqueId: -1, index: -1 })
             activeInitScrolledYRef.current = 0
