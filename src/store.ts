@@ -1,28 +1,25 @@
 import { create } from "zustand"
 
-const DEFAULT_RESOLUTION = 64 - 8 * 2
-const DEFAULT_HANDLES = [
-   { pos: 0, blur: 42, uniqueId: 1 },
-   { pos: 32, blur: 0, uniqueId: 2 },
-   { pos: 54, blur: 0, uniqueId: 3 },
-   { pos: 60, blur: 3, uniqueId: 5 },
-   { pos: 100, blur: 28, uniqueId: 6 },
-]
-// Presets
-// const DEFAULT_HANDLES_2 = [
-//    { pos: 0, blur: 10, uniqueId: 1 },
-//    { pos: 75, blur: 4, uniqueId: 2 },
-//    { pos: 100, blur: 0, uniqueId: 3 },
-//    { pos: 120, blur: 3, uniqueId: 5 },
-//    { pos: 130, blur: 8, uniqueId: 6 },
-// ]
+// TODO: Presets
+const DEFAULT = {
+   /** exponential gradient at pos 33 */
+   handles: [
+      { pos: 0, blur: 0, uniqueId: 1 },
+      { pos: 33, blur: 0, uniqueId: 2 },
+      { pos: 55, blur: 4, uniqueId: 3 },
+      { pos: 77, blur: 30, uniqueId: 5 },
+      { pos: 100, blur: 64, uniqueId: 6 },
+   ],
+   angle: 110,
+   resolution: 32,
+}
 
 /** Gradient User Inputted Config */
 const useProperties = create<Properties>((set) => ({
    grad: {
-      angle: 90,
-      resolution: DEFAULT_RESOLUTION,
-      handles: DEFAULT_HANDLES,
+      angle: DEFAULT.angle,
+      resolution: DEFAULT.resolution,
+      handles: DEFAULT.handles,
    },
    setGrad: (grad) => set((state) => ({ grad: { ...state.grad, ...grad } })),
    updateHandle: (uniqueId, handle) =>
