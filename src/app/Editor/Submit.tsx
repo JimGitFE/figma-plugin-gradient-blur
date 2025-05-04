@@ -19,6 +19,7 @@ export default function Submit() {
             <div className={`d-f jc-fe gap-8px`}>
                <Button onClick={onCancel} style={{ flex: 1.5 }} label="Cancel" secondary />
                <Button onClick={onCreate} style={{ flex: 2 }} label="Create" />
+               {/* Create / Apply (existing frame) */}
             </div>
          </section>
 
