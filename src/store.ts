@@ -21,6 +21,7 @@ const useProperties = create<Properties>((set) => ({
       resolution: DEFAULT.resolution,
       handles: DEFAULT.handles,
    },
+   lastUniqueId: 6,
    setGrad: (grad) => set((state) => ({ grad: { ...state.grad, ...grad } })),
    updateHandle: (uniqueId, handle) =>
       set((state) => {
@@ -41,12 +42,13 @@ const useProperties = create<Properties>((set) => ({
       }),
    addHandle: (handleProps, at) =>
       set((state) => {
-         const maxUId = Math.max(...state.grad.handles.map((h) => h.uniqueId), 0)
+         const maxUId = state.lastUniqueId
          const newHandle = { ...handleProps, uniqueId: maxUId + 1 }
          const newHandles = [...state.grad.handles]
          if (at) newHandles.splice(at, 0, newHandle)
          else newHandles.push(newHandle)
-         return { grad: { ...state.grad, handles: newHandles } }
+         console.log(newHandles)
+         return { grad: { ...state.grad, handles: newHandles }, lastUniqueId: maxUId + 1 }
       }),
 }))
 
