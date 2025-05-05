@@ -48,6 +48,7 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
             height: contRect?.height ?? window.innerHeight,
             left: contRect?.left ?? 0,
             right: contRect?.right ?? window.innerWidth,
+            top: contRect?.top ?? 0,
          }
 
          // Wrap css vars
@@ -73,7 +74,10 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
             }
          }
          // Vertical Axis
-         if (wrap.bottom + tip.height + 12 > container.height && !allignY) setAllignmentY("top")
+         if (!allignY) {
+            if (wrap.bottom + tip.height + 12 > container.height + container.top) setAllignmentY("top")
+            else setAllignmentY("bottom")
+         }
       }
    }, [wrapRef.current, tipRef.current, contRect])
 
@@ -116,6 +120,7 @@ function Item({ text, allignX = "auto", allignY, conditional = true, contRect: p
 
 interface ContCtxConfig {
    contRect: DOMRect
+   /** Group tooltips avoid delay */
    isAvailable: boolean
    enter: () => void
    leave: () => void
