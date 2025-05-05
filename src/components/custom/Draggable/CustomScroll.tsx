@@ -48,10 +48,10 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
 
    const computeDimensions = () => {
       if (!containerRef.current || !contentRef.current) return
-      const hiddenHeight = contentRef.current.clientHeight - containerRef.current.clientHeight
+      const hiddenHeight = contentRef.current?.clientHeight - containerRef.current?.clientHeight
 
-      const trackHeight = trackRef.current.clientHeight
-      const thumbHeight = trackHeight * (containerRef.current.clientHeight / contentRef.current.clientHeight)
+      const trackHeight = trackRef.current?.clientHeight
+      const thumbHeight = trackHeight * (containerRef.current?.clientHeight / contentRef.current?.clientHeight)
 
       setDims({ hiddenHeight, trackHeight, thumbHeight })
    }
