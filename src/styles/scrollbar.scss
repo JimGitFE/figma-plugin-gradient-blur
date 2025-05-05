@@ -17,6 +17,7 @@
 
    // Track
    .custom-scroll-track {
+      z-index: 150 !important;
       width: 11px;
       border-left: 1px solid transparent;
 

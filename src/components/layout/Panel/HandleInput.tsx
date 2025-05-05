@@ -64,7 +64,7 @@ function HandleInput({ handle, handleId, ...atts }: HandleProps) {
                }}
             />
          </InputContainer>
-         <ActionButton onClick={destroy} isActive={false} icon="minus" large />
+         <ActionButton onClick={destroy} tooltip={{ text: "Remove" }} isActive={false} icon="minus" large />
       </div>
    )
 }

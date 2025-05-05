@@ -18,8 +18,9 @@ export default function Wrap({ children, ...atts }: PanelProps) {
    /* Implement margins to shared tooltips rect reference */
    useResizeObserver({
       ref: panelRef,
-      callback: (rect) => {
-         setContRect({ ...rect, left: rect.left + 16, right: rect.right - 9, width: rect.width - 25 })
+      callback: () => {
+         const rect = panelRef.current.getBoundingClientRect()
+         setContRect({ ...rect, height: rect.height, top: rect.top, left: rect.left + 16, right: rect.right - 9, width: rect.width - 25 })
       },
    })
 

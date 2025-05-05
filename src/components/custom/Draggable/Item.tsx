@@ -1,5 +1,5 @@
 // Dependencies
-import React, { createContext, ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
+import React, { createContext, HTMLAttributes, ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
@@ -13,7 +13,7 @@ interface SourceProps {
    uniqueId: number
 }
 
-interface ItemProps extends SourceProps {
+interface ItemProps extends SourceProps, HTMLAttributes<HTMLDivElement> {
    children: ReactNode
    /** Attach listener to item (alt: `use) */
    draggable?: boolean
@@ -23,7 +23,7 @@ interface ItemProps extends SourceProps {
 
 // Misconception uniqueId might have empty steps, index represents the actual position
 /** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
-function Item({ draggable, boundClamp = true, children }: ItemProps) {
+function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
    const { containerRef } = useScrollCtx()
    const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, scrolledY, ...internal }] = useReorder()
 
@@ -72,7 +72,7 @@ function Item({ draggable, boundClamp = true, children }: ItemProps) {
          <div
             ref={(node) => node && (internal.itemsRef.current[index] = { ...internal.itemsRef.current[index], node })}
             onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
-            className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating}`}
+            className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating} ${atts.className}`}
             style={{
                // Apply Floating layout once refs have settled
                position: lifecycle >= 1 ? "absolute" : "relative",

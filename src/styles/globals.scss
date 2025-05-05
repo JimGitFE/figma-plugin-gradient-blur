@@ -47,3 +47,7 @@ html {
       border-color: darkgrey; /* Darker grey thumb on thumb hover */
    }
 }
+
+.has-tooltip:hover {
+   z-index: 80 !important; // scrollbar: 150
+}
