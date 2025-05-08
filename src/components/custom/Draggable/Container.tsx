@@ -61,6 +61,31 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Reorderable Items Manager */
 
+   /* Sources re order / addition */
+   const prevSourcesRef = useRef(sources)
+   useEffect(() => {
+      if ( !isSameUniqueId(prevSourcesRef.current, sources)) {
+         // Recalculate items rectsconso
+         console.log("Reorderable Items Manager sources updated")
+         console.log(sources)
+         // recalculateItemsRect()
+         //  setLifecycle(1)
+         //   requestAnimationFrame(() => setLifecycle(2))
+         requestAnimationFrame(() => {recalculateItemsRect(), setLifecycle(1), requestAnimationFrame(() => setLifecycle(2))})
+         }
+
+      prevSourcesRef.current = sources
+   }, [sources])
+
+   // util function check from [prevSourcesRef and sources if uniqueId is the same]
+   const isSameUniqueId = (prev: SourceProps[], curr: SourceProps[]) => {
+      if (prev.length !== curr.length) return false
+      // for (let i = 0; i < prev.length; i++) {
+      //    if (prev[i].uniqueId !== curr[i].uniqueId) return false
+      // }
+      return true
+   }
+
    const [active, setActive] = useState({ uniqueId: -1, index: -1, dy: null, scrolledY: null })
    const [hovering, setHovering] = useState({ uniqueId: -1, index: -1 }) // hovering slot index
 
@@ -111,7 +136,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       if (hovering.index === index) return // object/array is a new reference in memory
 
       setHovering({ uniqueId: sources[index].uniqueId, index })
-   }, [active, scrolledY])
+   }, [active, scrolledY, lifecycle])
 
    /* Auto Scroll on bounds when dragging */
 
@@ -121,7 +146,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       const ctn = containerRef.current.getBoundingClientRect()
       // Scroll top and scroll bottom
       return [ctn.top + config.dist, ctn.bottom - config.dist]
-   }, [containerRef, config])
+   }, [containerRef, config, lifecycle])
 
    // On item drag, scroll when near the edges
    const onEdgeAutoScroll = (deltaTime: number) => {

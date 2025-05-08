@@ -12,6 +12,7 @@ const DEFAULT = {
    ],
    angle: 110,
    resolution: 32,
+   lastUniqueId: 6,
 }
 
 /** Gradient User Inputted Config */
