@@ -1,10 +1,10 @@
 // Dependencies
-import React, { createContext, HTMLAttributes, ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
+import React, { act, createContext, HTMLAttributes, ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
 import { useReorder } from "./Container"
-import { useScrollCtx } from "./CustomScroll"
+// import { useScrollCtx } from "./CustomScroll"
 import { clamp } from "@/utils"
 // import { useEventListener } from "@/hooks/useEventListener"
 
@@ -24,8 +24,8 @@ interface ItemProps extends SourceProps, HTMLAttributes<HTMLDivElement> {
 // Misconception uniqueId might have empty steps, index represents the actual position
 /** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
 function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
-   const { containerRef } = useScrollCtx()
-   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, scrolledY, ...internal }] = useReorder()
+   // const { containerRef } = useScrollCtx()
+   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { lifecycle, ...internal }] = useReorder()
 
    // TODO: Smooth translate3d on wheel scroll (custom motion with lerp & targetPos)
 
@@ -45,11 +45,11 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
       return internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect?.height, 0)
    }, [index, lifecycle])
 
-   // Item draggable Y clamp boundaries
-   const bounds = useMemo(() => {
-      if (!(rect && boundClamp) || !containerRef.current) return {}
-      return { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 }
-   }, [lifecycle, scrolledY])
+   // // Item draggable Y clamp boundaries
+   // const bounds = useMemo(() => {
+   //    if (!(rect && boundClamp) || !containerRef.current) return {}
+   //    return { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 }
+   // }, [lifecycle, scrolledY])
 
    // Calculate Y position of item
    const calcPosY = useCallback(
@@ -59,18 +59,29 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
          const activeRef = internal.itemsRef.current[active.index]
          // Make room for empty slot (draggable new position)
          const direction = index > active.index ? -1 : 1
-         const slotHeight = isBetween(index, active.index, hovering.index) ? direction * activeRef?.rect.height : 0
+         const slotHeight = isBetween(index, active.index, hovering.index) ? direction * activeRef?.rect?.height : 0
 
-         return isActive ? clamp(active.dy + offsetTop + diffScrolledY, bounds) : offsetTop + slotHeight
+         // return isActive ? clamp(active.dy + offsetTop + diffScrolledY, bounds) : offsetTop + slotHeight
+         return isActive ? active.dy + offsetTop + diffScrolledY : offsetTop + slotHeight
       },
-      [index, active.dy, hovering, lifecycle, bounds]
+      // [index, active.dy, hovering, lifecycle, bounds]
+      [index, active.dy, hovering, lifecycle]
    )
+
+   useEffect(() => {
+      isActive && console.log("Moving ", uniqueId, " to ", calcPosY(active.scrolledY))
+   }, [active.dy])
 
    return (
       <>
          {/* 1 Item */}
          <div
-            ref={(node) => node && (internal.itemsRef.current[index] = { ...internal.itemsRef.current[index], node })}
+            ref={(node) => {
+               if (node) {
+                  internal.itemsRef.current[index] = { ...internal.itemsRef.current[index], node }
+                  // console.log("updating item ref", uniqueId, index, node.getBoundingClientRect(), node)
+               }
+            }}
             onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
             className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating} ${atts.className}`}
             style={{
