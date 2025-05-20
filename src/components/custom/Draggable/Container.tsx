@@ -1,5 +1,5 @@
 // Dependencies
-import React, { useRef, useState, createContext, useEffect, useMemo } from "react"
+import React, { useRef, useState, createContext, useEffect, useMemo, useLayoutEffect, Children } from "react"
 // Internal
 import useDrag from "@/hooks/useDrag"
 import { type SourceProps, Item } from "./Item"
@@ -41,6 +41,7 @@ const DEFAULT_CONFIG: Required<ManagerProps<any>["config"]> = {
 function Manager<T extends SourceProps>({ children, sources, onReorder, config: configProp = {} }: ManagerProps<T>) {
    const config = { ...DEFAULT_CONFIG, ...configProp }
    const itemsRef = useRef([]) // Items Dimension (sorted by index)
+   const [itemsRect, setItemsRect] = useState([]) // Items Dimension (sorted by index)
 
    /* Scroll Managing State */
 
@@ -54,11 +55,28 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    // - `0` Standard document flow - Compute bounding rect
    // - `1` Explicitly positioned - Moves to index position
    // - `2` Floating - Enables Transition
-   const [lifecycle, setLifecycle] = useState<(0 | 1 | 2)>(0)
+   // const [lifecycle, setLifecycle] = useState<(0 | 1 | 2)>(2)
+   const [lifecycle, setLifecycle] = useState<number>(2)
 
    // prettier-ignore
    // Resize Observer - calc hover slots relative positions
-   useResizeObserver({ref: tempContainerRef, callback: () => {setLifecycle(0), requestAnimationFrame(() => {recalculateItemsRect(), setLifecycle(1), requestAnimationFrame(() => setLifecycle(2))})}})
+   // useResizeObserver({ref: tempContainerRef, callback: () => {setLifecycle(0), requestAnimationFrame(() => {recalculateItemsRect(), setLifecycle(1), requestAnimationFrame(() => setLifecycle(2))})}})
+   // useResizeObserver({ref: tempContainerRef, callback: () => {
+   //    setLifecycle(0)
+   //    // recalculateItemsRect()
+   //    requestAnimationFrame(() => {setLifecycle(1), setLifecycle(2)})
+   //    // setLifecycle(2)
+   // }})
+
+   useLayoutEffect(() => {
+      // setLifecycle(0)
+      recalculateItemsRect() // use state? for rects?x
+      // console.log("items recalculated, now lifecycle 2")
+      // requestAnimationFrame(() => {
+         // setLifecycle(2)
+      // })
+      console.log("children update", itemsRef.current)
+   }, [children, itemsRef.current])
 
    /* Reorderable Items Manager */
 
@@ -189,7 +207,10 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    /* Utils */
 
    // Precaution: should compute rect position on lifecycle 0, meaning no floating items
-   const recalculateItemsRect = () => itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
+   const recalculateItemsRect = () => {
+      itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
+      setItemsRect(itemsRef.current.map((ref) => ref.rect))
+   }
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    // Scroll contianer
@@ -211,7 +232,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                         /** state key control */
                         uniqueId: item.props.uniqueId ?? sortedIndex,
                         /** DOM rect dimensions */
-                        rect: itemsRef.current[indexFromId(item.props.uniqueId)]?.rect,
+                        // rect: itemsRef.current[indexFromId(item.props.uniqueId)]?.rect,
+                        rect: itemsRect[indexFromId(item.props.uniqueId)],
                         /** drag handle Init */
                         onDragStart,
                         isActive: active.uniqueId === item.props.uniqueId,
@@ -224,6 +246,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                      /* Internal */
                      {
                         itemsRef,
+                        itemsRect,
                         recalculateRects: recalculateItemsRect,
                         lifecycle,
                         // scrolledY,
@@ -258,6 +281,7 @@ type ReorderContextProps = [
    /** Internal */
    {
       itemsRef: ItemRef
+      itemsRect: DOMRect[]
       recalculateRects: () => void
       /**  0: idle, 1: drag start, 2: moved */
       lifecycle: number
