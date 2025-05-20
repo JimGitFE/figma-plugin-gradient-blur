@@ -27,48 +27,35 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
    // const { containerRef } = useScrollCtx()
    const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { ...internal }] = useReorder()
 
-   const isMeasured = useRef(false)
-   const lifecycle = isMeasured.current ? 2 : 0
-   const [topOffset, setTopOffset] = React.useState(0)
-   useLayoutEffect(() => {
-      
-      // if (!internal.itemsRect.slice(0, index).reduce((totalHeight, rect) => totalHeight + rect?.height, 0)) return
-      // return internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect?.height, 0)
-      // setTopOffset(internal.itemsRect.slice(0, index).reduce((totalHeight, rect) => totalHeight + rect?.height, 0))
-      const offset = internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => {
-         const height = ref?.node?.getBoundingClientRect()?.height
-         return totalHeight + height
-      }, 0)
-      console.log("Item at", uniqueId, "lifecycle", internal.itemsRef, "setting to", offset)
-      isMeasured.current = true
-      setTopOffset(offset)
-   // }, [internal.itemsRect])
-   }, [])
+   /* 1 Item Positioning */
 
-   useEffect(() => {
-      
-      // if (!internal.itemsRect.slice(0, index).reduce((totalHeight, rect) => totalHeight + rect?.height, 0)) return
-      // return internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect?.height, 0)
-      // setTopOffset(internal.itemsRect.slice(0, index).reduce((totalHeight, rect) => totalHeight + rect?.height, 0))
-      const offset = internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => {
-         const height = ref?.node?.getBoundingClientRect()?.height
-         return totalHeight + height
-      }, 0)
-      console.log("Item at", uniqueId, "lifecycle", internal.itemsRef, "setting to", offset)
-      isMeasured.current = true
-      setTopOffset(offset)
-   // }, [internal.itemsRect])
-   }, [index, internal.itemsRef])
-   // TODO: Smooth translate3d on wheel scroll (custom motion with lerp & targetPos)
+   // prettier-ignore
+   const offset = useMemo(() => internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0), [index, internal.itemsRef.current])
 
-   // TODO: observe resizes of items
+   // Calculate Y position of item
+   const calcPosY = useCallback(
+      (diffScrolledY: number) => {
+         // if (!rect || lifecycle === 0) internal.recalculateRects() // observer will compute rects after <Item> mounts
+
+         const activeRect = internal.itemsRef.current[active.index]?.rect
+         // Make room for empty slot (draggable new position)
+         const direction = index > active.index ? -1 : 1
+         const slotHeight = isBetween(index, active.index, hovering.index) ? direction * activeRect?.height : 0 // active height
+
+         // return isActive ? clamp(active.dy + offsetTop + diffScrolledY, bounds) : offsetTop + slotHeight
+         // return isActive ? active.dy + offsetTop + diffScrolledY : offsetTop + slotHeight
+         return isActive ? active.dy + diffScrolledY + offset : slotHeight + offset
+      },
+      // [index, active.dy, hovering, lifecycle, bounds]
+      [index, active.dy, offset, hovering, internal.itemsRef]
+   )
 
    /* keep item z on top after drop */
 
    // Previous active item
    const wasPrevActiveRef = useRef(false)
    // prettier-ignore
-   useEffect(() => {active.index !== -1 && (wasPrevActiveRef.current = isActive)}, [active.index])
+   useEffect(() => {active.uniqueId !== -1 && (wasPrevActiveRef.current = isActive)}, [active.uniqueId])
 
    /* Item motion react to Scroll / Drag / remapping */
 
@@ -86,33 +73,19 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
    //    return { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 }
    // }, [lifecycle, scrolledY])
 
-   const [update, setUpdate] = React.useState(0)
+   // TODO: Smooth translate3d on wheel scroll (custom motion with lerp & targetPos)
 
-   // Calculate Y position of item
-   const calcPosY = useCallback(
-      (diffScrolledY: number) => {
-         // if (!rect || lifecycle === 0) internal.recalculateRects() // observer will compute rects after <Item> mounts
-
-         const activeRect = internal.itemsRef.current[active.index]?.node?.getBoundingClientRect()
-         // Make room for empty slot (draggable new position)
-         const direction = index > active.index ? -1 : 1
-         const slotHeight = isBetween(index, active.index, hovering.index) ? direction * activeRect?.height : 0
-
-         // return isActive ? clamp(active.dy + offsetTop + diffScrolledY, bounds) : offsetTop + slotHeight
-         // return isActive ? active.dy + offsetTop + diffScrolledY : offsetTop + slotHeight
-         return isActive ? active.dy + topOffset + diffScrolledY : topOffset + slotHeight
-      },
-      // [index, active.dy, hovering, lifecycle, bounds]
-      [index, active.dy, topOffset, hovering, lifecycle, update]
-   )
+   // TODO: observe resizes of items
 
    return (
       <>
          {/* 1 Item */}
          <div
             ref={(node) => {
-               if (node) {
-                  internal.itemsRef.current[index] = { ...internal.itemsRef.current[index], node }
+               if (node && internal.itemsRef.current[index]?.node !== node) {
+                  const rect = node.getBoundingClientRect()
+                  console.warn("recomputing rect for at ", uniqueId)
+                  internal.itemsRef.current[index] = { node, rect }
                   // const tgt= internal.itemsRef.current[index]
                   // if (!tgt?.rect) {
                   //    console.log("updating item ref", uniqueId, index, node.getBoundingClientRect(), node)
@@ -124,15 +97,17 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
                }
             }}
             onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
-            className={`z-6 w-100 ${isActive && styles.active} ${lifecycle >= 2 && styles.floating} ${atts.className}`}
+            className={`z-6 w-100 ${isActive && styles.active} ${styles.floating} ${atts.className}`}
             style={{
                // Apply Floating layout once refs have settled
-               position: lifecycle >= 1 ? "absolute" : "relative",
-               height: lifecycle >= 1 && rect?.height,
+               // position: lifecycle >= 1 ? "absolute" : "relative",
+               position: "absolute",
+               // height: lifecycle >= 1 && rect?.height,
                top: 0,
-               transform: lifecycle >= 1 && `translateY(${calcPosY(active.scrolledY)}px)`,
+               transform: `translateY(${calcPosY(active.scrolledY)}px)`,
                // transform: lifecycle >= 1 && `translateY(${topOffset}px)`,
                zIndex: wasPrevActiveRef.current && 5,
+               // border: wasPrevActiveRef.current && "1px solid red",
                // transition: lifecycle >= 2 && behaviourSmooth ? "transform 130ms ease-in-out" : "",
                // transition: topOffset !== 0 && "none" // fix transition, goes from 0 to 100
             }}
@@ -142,7 +117,8 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
          {/* 2 display block representation of item */}
          <div
             style={{
-               display: lifecycle >= 1 ? "block" : "none",
+               // display: lifecycle >= 1 ? "block" : "none",
+               display: "block",
                height: rect?.height,
             }}
             className={`w-100 ${isActive && "reorder-slot-active"}`}

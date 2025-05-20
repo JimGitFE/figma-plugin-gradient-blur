@@ -40,6 +40,7 @@ const DEFAULT_CONFIG: Required<ManagerProps<any>["config"]> = {
 /** Drag Reorder & Provider */
 function Manager<T extends SourceProps>({ children, sources, onReorder, config: configProp = {} }: ManagerProps<T>) {
    const config = { ...DEFAULT_CONFIG, ...configProp }
+   /** Sorted by index thus updates on reorder events */
    const itemsRef = useRef([]) // Items Dimension (sorted by index)
    const [itemsRect, setItemsRect] = useState([]) // Items Dimension (sorted by index)
 
@@ -70,7 +71,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    useLayoutEffect(() => {
       // setLifecycle(0)
-      recalculateItemsRect() // use state? for rects?x
+      // recalculateItemsRect() // use state? for rects?x
       // console.log("items recalculated, now lifecycle 2")
       // requestAnimationFrame(() => {
          // setLifecycle(2)
@@ -206,11 +207,12 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Utils */
 
-   // Precaution: should compute rect position on lifecycle 0, meaning no floating items
-   const recalculateItemsRect = () => {
-      itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
-      setItemsRect(itemsRef.current.map((ref) => ref.rect))
-   }
+   // @deprecate, use at node setter (Item ref cb)
+   // // Precaution: should compute rect position on lifecycle 0, meaning no floating items
+   // const recalculateItemsRect = () => {
+   //    itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
+   //    setItemsRect(itemsRef.current.map((ref) => ref.rect))
+   // }
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
 
    // Scroll contianer
@@ -232,8 +234,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                         /** state key control */
                         uniqueId: item.props.uniqueId ?? sortedIndex,
                         /** DOM rect dimensions */
-                        // rect: itemsRef.current[indexFromId(item.props.uniqueId)]?.rect,
-                        rect: itemsRect[indexFromId(item.props.uniqueId)],
+                        rect: itemsRef.current[indexFromId(item.props.uniqueId)]?.rect,
+                        // rect: itemsRect[indexFromId(item.props.uniqueId)],
                         /** drag handle Init */
                         onDragStart,
                         isActive: active.uniqueId === item.props.uniqueId,
@@ -247,7 +249,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                      {
                         itemsRef,
                         itemsRect,
-                        recalculateRects: recalculateItemsRect,
+                        // recalculateRects: recalculateItemsRect,
                         lifecycle,
                         // scrolledY,
                      },
@@ -261,6 +263,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 }
 
 type ItemRef = React.MutableRefObject<{ rect: DOMRect; node: HTMLDivElement }[]>
+// type ItemRef = React.MutableRefObject<HTMLDivElement[]>
 
 type ReorderContextProps = [
    /** Item */
@@ -282,7 +285,7 @@ type ReorderContextProps = [
    {
       itemsRef: ItemRef
       itemsRect: DOMRect[]
-      recalculateRects: () => void
+      // recalculateRects: () => void
       /**  0: idle, 1: drag start, 2: moved */
       lifecycle: number
       // scrolledY: number
