@@ -29,25 +29,23 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
    /* 1 Item Positioning */
 
-   // prettier-ignore
-   const offset = useMemo(() => internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0), [index, internal.itemsRef.current])
+   /** Offset based on elements before */
+   const offset = useMemo(() => {
+      return internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0)
+   }, [index, internal.itemsRef.current, rect]) // rect? makes sure it updates on initialization (useLatyoutEffect)
 
-   // Calculate Y position of item
+   /** Calculate Y position of item */
    const calcPosY = useCallback(
-      (diffScrolledY: number) => {
-         // if (!rect || lifecycle === 0) internal.recalculateRects() // observer will compute rects after <Item> mounts
-
-         const activeRect = internal.itemsRef.current[active.index]?.rect
+      (translate: number) => {
          // Make room for empty slot (draggable new position)
          const direction = index > active.index ? -1 : 1
-         const slotHeight = isBetween(index, active.index, hovering.index) ? direction * activeRect?.height : 0 // active height
+         const moveOut = isBetween(index, active.index, hovering.index) ? direction * active.rect?.height : 0
 
-         // return isActive ? clamp(active.dy + offsetTop + diffScrolledY, bounds) : offsetTop + slotHeight
-         // return isActive ? active.dy + offsetTop + diffScrolledY : offsetTop + slotHeight
-         return isActive ? active.dy + diffScrolledY + offset : slotHeight + offset
+         if (isActive) return translate + offset // clamp to bounds
+
+         return moveOut + offset
       },
-      // [index, active.dy, hovering, lifecycle, bounds]
-      [index, active.dy, offset, hovering, internal.itemsRef]
+      [index, offset, hovering] // bounds
    )
 
    /* keep item z on top after drop */
@@ -82,18 +80,14 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
          {/* 1 Item */}
          <div
             ref={(node) => {
-               if (node && internal.itemsRef.current[index]?.node !== node) {
+               if (node) {
+                  if (internal.itemsRef.current[index]?.node === node) return
                   const rect = node.getBoundingClientRect()
                   console.warn("recomputing rect for at ", uniqueId)
                   internal.itemsRef.current[index] = { node, rect }
-                  // const tgt= internal.itemsRef.current[index]
-                  // if (!tgt?.rect) {
-                  //    console.log("updating item ref", uniqueId, index, node.getBoundingClientRect(), node)
-                  //    internal.itemsRef.current[index] = {...tgt, rect: node.getBoundingClientRect()}
-                  //    console.log(internal.itemsRef.current[index])
-                  //    // setUpdate((prev) => prev + 1)
-                  // }
-                  // console.log("updating item ref", uniqueId, index, node.getBoundingClientRect(), node)
+               } else {
+                  console.log("should remove ", uniqueId, " at ", index, node, internal.itemsRef.current)
+                  internal.itemsRef.current.splice(index, 1)
                }
             }}
             onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
@@ -104,7 +98,7 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
                position: "absolute",
                // height: lifecycle >= 1 && rect?.height,
                top: 0,
-               transform: `translateY(${calcPosY(active.scrolledY)}px)`,
+               transform: `translateY(${calcPosY(active.dy + active.scrolledY)}px)`,
                // transform: lifecycle >= 1 && `translateY(${topOffset}px)`,
                zIndex: wasPrevActiveRef.current && 5,
                // border: wasPrevActiveRef.current && "1px solid red",

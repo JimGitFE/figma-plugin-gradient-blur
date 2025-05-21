@@ -81,7 +81,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Reorderable Items Manager */
 
-   const [active, setActive] = useState({ uniqueId: -1, index: -1, dy: null, scrolledY: null })
+   type Item = { uniqueId: number; index: number; dy: number; scrolledY: number } & { rect?: DOMRect; node?: HTMLDivElement }
+   const [active, setActive] = useState<Item>({ uniqueId: -1, index: -1, dy: null, scrolledY: null })
    const [hovering, setHovering] = useState({ uniqueId: -1, index: -1 }) // hovering slot index
 
    // Active grab, Hovering, initDrag, traveled dy
@@ -101,7 +102,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    })
    const onDragStart = (e: EventFor<MouseEvent>, uniqueId: number) => {
       // activeInitScrolledYRef.current = scrolledY
-      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0, scrolledY: 0 })
+      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0, scrolledY: 0, ...itemsRef.current[indexFromId(uniqueId)] })
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
       initDrag(e)
    }
@@ -160,7 +161,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       setHovering({ uniqueId: sources[index].uniqueId, index })
       console.log("Hovering ", sources[index].uniqueId, " at ", index)
       // }, [active, scrolledY])
-   }, [active])
+   }, [active, sources])
 
    /* Auto Scroll on bounds when dragging */
 
@@ -277,7 +278,7 @@ type ReorderContextProps = [
    },
    /** State */
    {
-      active: { uniqueId: number; index: number; dy: number; scrolledY: number }
+      active: { uniqueId: number; index: number; dy: number; scrolledY: number } & { rect?: DOMRect; node?: HTMLDivElement }
       /** hovering slot index */
       hovering: { uniqueId: number; index: number }
    },
