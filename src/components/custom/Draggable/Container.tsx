@@ -42,11 +42,10 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    const config = { ...DEFAULT_CONFIG, ...configProp }
    /** Sorted by index thus updates on reorder events */
    const itemsRef = useRef([]) // Items Dimension (sorted by index)
-   // const [itemsRect, setItemsRect] = useState([]) // Items Dimension (sorted by index)
 
    /* Scroll Managing State */
 
-   // const { scroll, scrolledY, containerRef } = Scroll.useScrollCtx() // (attach observer)
+   const { scroll, scrolledY, containerRef } = Scroll.useScrollCtx() // (attach observer)
    const tempContainerRef = useRef<HTMLDivElement>(null) // (attach observer)
    const activeInitScrolledYRef = useRef(0) // unused?
 
@@ -63,7 +62,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    // Resize Observer - calc hover slots relative positions
    // useResizeObserver({ref: tempContainerRef, callback: () => {setLifecycle(0), requestAnimationFrame(() => {recalculateItemsRect(), setLifecycle(1), requestAnimationFrame(() => setLifecycle(2))})}})
 
-   /* Reorderable Items Manager */
+   /* 1 Reorderable Items Manager */
 
    type Item = { uniqueId: number; index: number; dy: number; scrolledY: number } & { rect?: DOMRect; node?: HTMLDivElement }
    const [active, setActive] = useState<Item>({ uniqueId: -1, index: -1, dy: null, scrolledY: null })
@@ -85,23 +84,23 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       },
    })
    const onDragStart = (e: EventFor<MouseEvent>, uniqueId: number) => {
-      // activeInitScrolledYRef.current = scrolledY
-      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0, scrolledY: 0, ...itemsRef.current[indexFromId(uniqueId)] })
+      activeInitScrolledYRef.current = scrolledY
+      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0, scrolledY, ...itemsRef.current[indexFromId(uniqueId)] })
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
       initDrag(e)
    }
 
    /* Custom wheel event */
 
-   // // Avoid scroll on `scrollOnEdges` areas when dragging
-   // const onCustomWheel = (e: WheelEvent) => {
-   //    if (!containerRef.current.contains(e.target as Node)) return
-   //    scroll((top) => top + e.deltaY / 2, false)
-   // }
+   /** Avoid scroll on `scrollOnEdges` areas when dragging */
+   const onCustomWheel = (e: WheelEvent) => {
+      if (!containerRef.current.contains(e.target as Node)) return
+      scroll((top) => top + e.deltaY / 2, false)
+   }
 
-   // useEventListener("wheel", onCustomWheel, { conditional: !isDragging, element: containerRef })
+   useEventListener("wheel", onCustomWheel, { conditional: !isDragging, element: containerRef })
 
-   /* Hovering slot index */
+   /* Hovering slot index */ // TODO: refactor
 
    // Accomodates dragged item (always represents an index of item[])
    useEffect(() => {
@@ -133,32 +132,32 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Auto Scroll on bounds when dragging */
 
-   // // Auto scroll on item drag area
-   // const [scTop, scBtm] = useMemo(() => {
-   //    if (!containerRef.current) return []
-   //    const ctn = containerRef.current.getBoundingClientRect()
-   //    // Scroll top and scroll bottom
-   //    return [ctn.top + config.dist, ctn.bottom - config.dist]
-   // }, [containerRef, config])
+   /** Define auto-scroll areas */
+   const [scTop, scBtm] = useMemo(() => {
+      if (!containerRef.current) return []
+      const ctn = containerRef.current.getBoundingClientRect()
+      // Scroll top and scroll bottom
+      return [ctn.top + config.dist, ctn.bottom - config.dist]
+   }, [containerRef, config])
 
-   // // On item drag, scroll when near the edges
-   // const onEdgeAutoScroll = (deltaTime: number) => {
-   //    if (typeof drag.clientPos.y !== "number") return
+   // On item drag, scroll when near the edges
+   const onEdgeAutoScroll = (deltaTime: number) => {
+      if (typeof drag.clientPos.y !== "number") return
 
-   //    scroll((top) => {
-   //       const scBound = drag.clientPos.y < scTop ? scTop : scBtm
-   //       const strength = config.multiplier * (drag.clientPos.y - scBound)
-   //       const newTop = top + strength / (clamp(deltaTime, { min: 1000 / 60 }) * 5)
+      scroll((top) => {
+         const scBound = drag.clientPos.y < scTop ? scTop : scBtm
+         const strength = config.multiplier * (drag.clientPos.y - scBound)
+         const newTop = top + strength / (clamp(deltaTime, { min: 1000 / 60 }) * 5)
 
-   //       setActive((prev) => ({ ...prev, scrolledY: newTop - activeInitScrolledYRef.current }))
-   //       return newTop
-   //    }, isDragging)
-   // }
+         setActive((prev) => ({ ...prev, scrolledY: newTop - activeInitScrolledYRef.current }))
+         return newTop
+      }, isDragging)
+   }
 
-   // // When dragging item is near the edges of the container
-   // useAnimation(onEdgeAutoScroll, [active.dy], {
-   //    conditional: (drag.clientPos.y < scTop || drag.clientPos.y > scBtm) && active.index !== -1,
-   // })
+   // When dragging item is near the edges of the container
+   useAnimation(onEdgeAutoScroll, [active.dy], {
+      conditional: (drag.clientPos.y < scTop || drag.clientPos.y > scBtm) && active.index !== -1,
+   })
 
    /* Follow selected (out of screen on reorder) */
 
@@ -270,14 +269,11 @@ function useReorder() {
 // Makes Scroll provider available to Manager
 function Container<T extends SourceProps>({ sources, onReorder, children, ...atts }: Omit<ManagerProps<T>, "config">) {
    return (
-      <div className="pos-relative">
-         {/* <Scroll.Wrap {...atts} config={{ wheelEvent: false }} className={`${atts.className} pos-relative`}> */}
-
+      <Scroll.Wrap {...atts} config={{ wheelEvent: false }} className={`${atts.className} pos-relative`}>
          <Manager sources={sources} onReorder={onReorder}>
             {children}
          </Manager>
-         {/* </Scroll.Wrap> */}
-      </div>
+      </Scroll.Wrap>
    )
 }
 
