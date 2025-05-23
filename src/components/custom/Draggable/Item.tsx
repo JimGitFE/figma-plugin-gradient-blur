@@ -4,7 +4,7 @@ import React, { act, createContext, HTMLAttributes, ReactNode, useCallback, useE
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
 import { useReorder } from "./Container"
-// import { useScrollCtx } from "./CustomScroll"
+import { useScrollCtx } from "./CustomScroll"
 import { clamp } from "@/utils"
 // import { useEventListener } from "@/hooks/useEventListener"
 
@@ -24,14 +24,14 @@ interface ItemProps extends SourceProps, HTMLAttributes<HTMLDivElement> {
 // Misconception uniqueId might have empty steps, index represents the actual position
 /** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
 function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
-   // const { containerRef } = useScrollCtx()
-   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { ...internal }] = useReorder()
+   const { containerRef } = useScrollCtx()
+   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { scrolledY, ...internal }] = useReorder()
 
    /** Item draggable Y clamp boundaries */
-   // const bounds = useMemo(() => {
-   //    if (!(rect && boundClamp) || !containerRef.current) return {}
-   //    return { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 }
-   // }, [lifecycle, scrolledY])
+   const bounds = useMemo(() => {
+      if (!(rect && boundClamp) || !containerRef.current) return {}
+      return { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 }
+   }, [scrolledY])
 
    /* 1 Item Positioning (floating) */
 
@@ -47,11 +47,11 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
          const direction = index > active.index ? -1 : 1
          const moveOut = isBetween(index, active.index, hovering.index) ? direction * active.rect?.height : 0
 
-         if (isActive) return translate + offset // clamp to bounds
+         if (isActive) return clamp(translate + offset, bounds)
 
          return moveOut + offset
       },
-      [index, offset, hovering] // bounds
+      [index, offset, hovering, bounds]
    )
 
    /* 2 keep item z on top after drop */
@@ -72,14 +72,10 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
          {/* 1 Item */}
          <div
             ref={(node) => {
+               if (internal.itemsRef.current[index]?.node) return
                if (node) {
-                  if (internal.itemsRef.current[index]?.node === node) return
                   const rect = node.getBoundingClientRect()
-                  console.warn("recomputing rect for at ", uniqueId)
                   internal.itemsRef.current[index] = { node, rect }
-               } else {
-                  console.log("should remove ", uniqueId, " at ", index, node, internal.itemsRef.current)
-                  internal.itemsRef.current.splice(index, 1)
                }
             }}
             onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}

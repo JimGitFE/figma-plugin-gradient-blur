@@ -13,3 +13,9 @@ export function isBetween(idxMid, idxA, idxB) {
    const high = Math.max(idxA, idxB)
    return idxMid >= low && idxMid <= high
 }
+
+/** Difference of source array with remove array */
+export const difference = (source: number[], remove: number[]): number[] => {
+   const blocked = new Set(remove) // O(b) to build
+   return source.filter((n) => !blocked.has(n)) // O(s) to scan
+}
