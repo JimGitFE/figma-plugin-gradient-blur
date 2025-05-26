@@ -4,14 +4,15 @@ import { create } from "zustand"
 const DEFAULT = {
    /** exponential gradient at pos 33 */
    handles: [
-      { pos: 0, blur: 0, uniqueId: 1 },
-      { pos: 33, blur: 0, uniqueId: 2 },
-      { pos: 55, blur: 4, uniqueId: 3 },
-      { pos: 77, blur: 30, uniqueId: 5 },
-      { pos: 100, blur: 64, uniqueId: 6 },
+      { pos: 0, blur: 1, uniqueId: 1 },
+      { pos: 33, blur: 2, uniqueId: 2 },
+      { pos: 55, blur: 3, uniqueId: 3 },
+      { pos: 77, blur: 50, uniqueId: 5 },
+      { pos: 100, blur: 60, uniqueId: 6 },
    ],
    angle: 110,
    resolution: 32,
+   lastUniqueId: 6,
 }
 
 /** Gradient User Inputted Config */
@@ -20,6 +21,7 @@ const useProperties = create<Properties>((set) => ({
       angle: DEFAULT.angle,
       resolution: DEFAULT.resolution,
       handles: DEFAULT.handles,
+      lastUniqueId: DEFAULT.lastUniqueId,
    },
    lastUniqueId: 6,
    setGrad: (grad) => set((state) => ({ grad: { ...state.grad, ...grad } })),

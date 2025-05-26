@@ -53,7 +53,10 @@ export default function PanelInputs({}: InputProps) {
             style={{ marginTop: -3, marginBottom: -3 }}
          >
             <Reorder.Container
-               onReorder={(newHandles, dropped) => setGrad({ handles: computeIntPos(newHandles, dropped.index) })}
+               onReorder={(newHandles, dropped) => {
+                  setGrad({ handles: computeIntPos(newHandles, dropped.index) })
+                  console.log("Reorder", newHandles, dropped)
+               }}
                sources={handles}
             >
                {handles.map((handle) => (

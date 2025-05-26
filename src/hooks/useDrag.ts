@@ -26,21 +26,21 @@ type Return = {
    initDrag: (e: EventFor<MouseEvent>) => void
    isDragging: boolean
    drag: {
-      downPos: Pos
+      down: Pos
       clientPos: Pos
    }
 }
 
 export default function useDrag<A extends Axes = undefined>({ callbacks = {} }: Props<A> = {}): DistanceFor<A, Return> {
    const [clientPos, setClientPos] = useState<Pos>({ x: null, y: null })
-   const [downPos, setDownPos] = useState<Pos>({ x: null, y: null })
+   const [down, setDown] = useState<Pos>({ x: null, y: null })
 
    const isDragging = typeof clientPos.x === "number" && typeof clientPos.y === "number"
 
-   const [dx, dy] = isDragging ? [clientPos.x - downPos.x, clientPos.y - downPos.y] : [null, null]
+   const [dx, dy] = isDragging ? [clientPos.x - down.x, clientPos.y - down.y] : [null, null]
 
    const initDrag = (e: EventFor<MouseEvent>) => {
-      setDownPos({ x: e.clientX, y: e.clientY })
+      setDown({ x: e.clientX, y: e.clientY })
       setClientPos({ x: e.clientX, y: e.clientY })
       callbacks.down && callbacks.down(e, { dx, dy } as DistanceFor<A>)
    }
@@ -51,7 +51,7 @@ export default function useDrag<A extends Axes = undefined>({ callbacks = {} }: 
    }
 
    const onMouseUp = (e) => {
-      setDownPos({ x: null, y: null })
+      setDown({ x: null, y: null })
       setClientPos({ x: null, y: null })
       callbacks.up && callbacks.up(e, { dx, dy } as DistanceFor<A>)
    }
@@ -60,7 +60,7 @@ export default function useDrag<A extends Axes = undefined>({ callbacks = {} }: 
    useEventListener("mousemove", onMouseMove, { conditional: isDragging })
    useEventListener("mouseup", onMouseUp, { conditional: isDragging })
 
-   return { dx, dy, initDrag, isDragging, drag: { downPos, clientPos } } as DistanceFor<A, Return>
+   return { dx, dy, initDrag, isDragging, drag: { down, clientPos } } as DistanceFor<A, Return>
 }
 
 // TODO: while dragging, disable initDrag until mouseup

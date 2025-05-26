@@ -1,5 +1,5 @@
 // Dependencies
-import React, { act, createContext, HTMLAttributes, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react"
+import React, { act, createContext, HTMLAttributes, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
@@ -10,6 +10,7 @@ import { clamp } from "@/utils"
 
 /** Required props */
 interface SourceProps {
+   /** Represents item slot */
    uniqueId: number
 }
 
@@ -25,7 +26,7 @@ interface ItemProps extends SourceProps, HTMLAttributes<HTMLDivElement> {
 /** Reorder Item - slot sorted by uniqueId, relatively positioned by index */
 function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
    const { containerRef } = useScrollCtx()
-   const [{ uniqueId, index, onDragStart, isActive, rect }, { active, hovering }, { scrolledY, ...internal }] = useReorder()
+   const [{ uniqueId, index, onDragStart, isActive, rect }, { sources, active, hovering }, { scrolledY, ...internal }] = useReorder()
 
    /** Item draggable Y clamp boundaries */
    const bounds = useMemo(() => {
@@ -37,8 +38,9 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
    /** Offset based on elements before */
    const offset = useMemo(() => {
-      return internal.itemsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0)
-   }, [index, internal.itemsRef.current, rect]) // rect? makes sure it updates on initialization (useLatyoutEffect)
+      console.log("measure ofset", internal.slotsRef.current, internal.slotsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0))
+      return internal.slotsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0)
+   }, [index, internal.slotsRef.current, rect, internal.lifecycle]) // rect? makes sure it updates on initialization (useLatyoutEffect)
 
    /** Calculate Y position of item */
    const calcPosY = useCallback(
@@ -51,7 +53,7 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
          return moveOut + offset
       },
-      [index, offset, hovering, bounds]
+      [index, offset, hovering, bounds, internal.lifecycle]
    )
 
    /* 2 keep item z on top after drop */
@@ -67,6 +69,25 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
    // TODO: observe resizes of items
 
+   // uselaytouteffect measures heights on sources recalc & tops
+   // enable slot refs (hoverings)
+   const handleRef = useCallback((node: HTMLDivElement | null) => {
+      console.log("handleRef", internal.slotsRef.current,sources)
+      if ( node) {
+         const indexOfSlot = [...sources].sort((a, b) => a.uniqueId - b.uniqueId).findIndex((slot) => slot.uniqueId === uniqueId)
+         internal.slotsRef.current[indexOfSlot] = {node, rect: node?.getBoundingClientRect(), index: indexOfSlot}
+      } else {
+         internal.slotsRef.current.splice(index, 1)
+      }
+      internal.setLifecycle((prev) => prev + 1) // trigger rerender
+    }, [sources, rect?.height]);    
+
+   //  if(isActive) {
+   //     console.warn("for ", uniqueId, " at ", index, calcPosY(active.dy + active.scrolledY), offset) // debug
+   //    } else {
+   //    console.log("for ", uniqueId, " at ", index, calcPosY(active.dy + active.scrolledY), offset) // debug
+   // }
+   
    return (
       <>
          {/* 1 Item */}
@@ -74,7 +95,7 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
             ref={(node) => {
                if (internal.itemsRef.current[index]?.node) return
                if (node) {
-                  const rect = node.getBoundingClientRect()
+                  const rect = node.getBoundingClientRect() // delayed by transform traslate y 0 at initialization
                   internal.itemsRef.current[index] = { node, rect }
                }
             }}
@@ -93,11 +114,13 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
          </div>
          {/* 2 display block representation of item */}
          <div
+         // ref callback called every time component changes identity
+         ref={handleRef}
             style={{
                display: "block",
                height: rect?.height, // TODO> variable heights on items
             }}
-            className={`w-100 ${isActive && "reorder-slot-active"}`}
+            className={`w-100 pos-relative ${isActive && "reorder-slot-active"} ${index +" " + uniqueId}`}
          />
       </>
    )

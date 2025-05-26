@@ -20,4 +20,6 @@ interface Properties {
    removeHandle: (uniqueId: number) => void
    /** Add at position */
    addHandle: (newHandle: Omit<GradientStep, "uniqueId">, at?: number) => void
+
+   lastUniqueId: number
 }
