@@ -121,7 +121,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    useEffect(() => {
       if (!slotsRef.current || active.index === -1) return
       // Account for scroll and drag distance
-      const mouseY = active.scrolledY + drag.down.y + active.dy // scrolledY
+      const mouseY = drag.down.y + active.dy // scrolledY
       
       recalculateSlotsRect() // recalculate slots rects (fix: unknown error on new items)
       let index = slotsRef.current.findIndex((ref) => ref?.rect && mouseY >= ref.rect.top && mouseY <= ref.rect.bottom)
