@@ -1,11 +1,22 @@
 // Dependencies
-import React, { act, createContext, HTMLAttributes, ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import React, {
+   act,
+   createContext,
+   HTMLAttributes,
+   ReactNode,
+   useCallback,
+   useEffect,
+   useLayoutEffect,
+   useMemo,
+   useRef,
+   useState,
+} from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
 import { useReorder } from "./Container"
 import { useScrollCtx } from "./CustomScroll"
-import { clamp } from "@/utils"
+import { clamp, isNum } from "@/utils"
 // import { useEventListener } from "@/hooks/useEventListener"
 
 /** Required props */
@@ -38,7 +49,12 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
    /** Offset based on elements before */
    const offset = useMemo(() => {
-      console.log("measure ofset", internal.slotsRef.current, internal.slotsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0))
+      console.log(
+         "measure ofset",
+         internal.slotsRef.current,
+         internal.slotsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0)
+      )
+      if (!rect?.height) return undefined
       return internal.slotsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0)
    }, [index, internal.slotsRef.current, rect, internal.lifecycle]) // rect? makes sure it updates on initialization (useLatyoutEffect)
 
@@ -71,23 +87,26 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
    // uselaytouteffect measures heights on sources recalc & tops
    // enable slot refs (hoverings)
-   const handleRef = useCallback((node: HTMLDivElement | null) => {
-      console.log("handleRef", internal.slotsRef.current,sources)
-      if ( node) {
-         const indexOfSlot = [...sources].sort((a, b) => a.uniqueId - b.uniqueId).findIndex((slot) => slot.uniqueId === uniqueId)
-         internal.slotsRef.current[indexOfSlot] = {node, rect: node?.getBoundingClientRect(), index: indexOfSlot}
-      } else {
-         internal.slotsRef.current.splice(index, 1)
-      }
-      internal.setLifecycle((prev) => prev + 1) // trigger rerender
-    }, [sources, rect?.height]);    
+   const handleRef = useCallback(
+      (node: HTMLDivElement | null) => {
+         console.log("handleRef", internal.slotsRef.current, sources)
+         if (node) {
+            const indexOfSlot = [...sources].sort((a, b) => a.uniqueId - b.uniqueId).findIndex((slot) => slot.uniqueId === uniqueId)
+            internal.slotsRef.current[indexOfSlot] = { node, rect: node?.getBoundingClientRect(), index: indexOfSlot }
+            internal.setSlotRects((prev) => {
+               const newRects = [...prev]
+               newRects[indexOfSlot] = node?.getBoundingClientRect()
+               return newRects
+            })
+         } else {
+            internal.slotsRef.current.splice(index, 1)
+            internal.setSlotRects((prev) => [...prev].splice(index, 1))
+         }
+         internal.setLifecycle((prev) => prev + 1) // update values (ex.: offset dep, height)
+      },
+      [sources, rect?.height]
+   )
 
-   //  if(isActive) {
-   //     console.warn("for ", uniqueId, " at ", index, calcPosY(active.dy + active.scrolledY), offset) // debug
-   //    } else {
-   //    console.log("for ", uniqueId, " at ", index, calcPosY(active.dy + active.scrolledY), offset) // debug
-   // }
-   
    return (
       <>
          {/* 1 Item */}
@@ -107,20 +126,20 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
                transform: `translateY(${calcPosY(active.dy + active.scrolledY)}px)`,
                zIndex: wasPrevActiveRef.current && 5,
                // transition: lifecycle >= 2 && behaviourSmooth ? "transform 130ms ease-in-out" : "",
-               // transition: topOffset !== 0 && "none" // fix transition, goes from 0 to 100
+               // transition: !(offset > 0) && "none" // fix transition, goes from 0 to 100
             }}
          >
             <DragContext.Provider value={{ onDragStart: (e) => onDragStart(e, uniqueId), isActive }}>{children}</DragContext.Provider>
          </div>
          {/* 2 display block representation of item */}
          <div
-         // ref callback called every time component changes identity
-         ref={handleRef}
+            // ref callback called every time component changes identity
+            ref={handleRef}
             style={{
                display: "block",
                height: rect?.height, // TODO> variable heights on items
             }}
-            className={`w-100 pos-relative ${isActive && "reorder-slot-active"} ${index +" " + uniqueId}`}
+            className={`w-100 pos-relative ${isActive && "reorder-slot-active"} ${index + " " + uniqueId}`}
          />
       </>
    )

@@ -44,6 +44,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    const itemsRef = useRef([]) // Items Dimension (sorted by index)
    /** Sorted by index thus updates on reorder events (when item uId 2 at 0 slot with uId 1 is at slotsRef[0]) */
    const slotsRef = useRef([]) // Items Dimension (sorted by index)
+   /** Slots Rects (sorted by index) */
+   const [slotRects, setSlotRects] = useState<DOMRect[]>([])
 
    /* 0 Restructure itemsRef on sources change (removed or new item) */
 
@@ -54,16 +56,15 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       prevSourcesRef.current = sources
       // requestAnimationFrame(() => recalculateItemsRect())
       // recalculateItemsRect()
-      console.log("recalculateItemsRect slots measure", slotsRef.current)
+      console.log("recalculateItemsRect slots mea™sure", slotsRef.current)
       recalculateSlotsRect()
-   }, [sources, itemsRef.current]) 
-   
-   
+   }, [sources, itemsRef.current])
+
    /* 0 Scroll Managing State */
-   
+
    const { scroll, scrolledY, containerRef } = Scroll.useScrollCtx() // (attach observer)
    const activeInitScrolledYRef = useRef(0) // Item offsets scroll
-   
+
    /* Item lifecycle */
 
    // prettier-ignore
@@ -71,7 +72,10 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    // - `1` Explicitly positioned - Moves to index position
    // - `2` Floating - Enables Transition
    // const [lifecycle, setLifecycle] = useState<(0 | 1 | 2)>(2)
+
    const [lifecycle, setLifecycle] = useState<number>(2)
+
+   console.log(slotRects)
 
    // prettier-ignore
    // Resize Observer - calc hover slots relative positions
@@ -121,11 +125,26 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    useEffect(() => {
       if (!slotsRef.current || active.index === -1) return
       // Account for scroll and drag distance
-      const mouseY = drag.down.y + active.dy // scrolledY
-      
-      recalculateSlotsRect() // recalculate slots rects (fix: unknown error on new items)
+      const mouseY = drag.down.y + active.dy
+
+      recalculateSlotsRect() // fix: rect relative to scrolled container (new items when scrolled have offseted rect, relative to rest)
       let index = slotsRef.current.findIndex((ref) => ref?.rect && mouseY >= ref.rect.top && mouseY <= ref.rect.bottom)
-      // console.warn("at hoveringm", active.uniqueId, " for: ", index, " at ", mouseY, drag.down.y, active.dy, "sc",active.scrolledY,scrolledY, activeInitScrolledYRef.current,  " slots: ", slotsRef.current) // debug
+      console.warn(
+         "at hoveringm",
+         active.uniqueId,
+         " for: ",
+         index,
+         " at ",
+         mouseY,
+         drag.down.y,
+         active.dy,
+         "sc",
+         active.scrolledY,
+         scrolledY,
+         activeInitScrolledYRef.current,
+         " slots: ",
+         slotsRef.current
+      ) // debug
 
       // Fallback to closest slot
       if (index === -1) index = slotsRef.current[0]?.rect.top >= mouseY ? 0 : slotsRef.current.length - 1
@@ -133,8 +152,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       if (hovering.index === index) return // object/array is a new reference in memory
 
       setHovering({ uniqueId: sources[index].uniqueId, index })
-   }, [active, sources, slotsRef.current, scrolledY]) // scrolledY
-
+   }, [active, sources, slotsRef.current, lifecycle])
 
    /* 3 Auto Scroll on bounds when dragging */
 
@@ -198,7 +216,6 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
          ),
       ].length > 0
 
-
    // Scroll contianer
    return [...children]
       .filter((child) => child.type === Item)
@@ -231,6 +248,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                {
                   itemsRef,
                   slotsRef,
+                  slotRects,
+                  setSlotRects,
                   lifecycle,
                   scrolledY,
                   setLifecycle,
@@ -242,7 +261,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       ))
 }
 
-type ItemRef = React.MutableRefObject<{ rect: DOMRect; node: HTMLDivElement, index?: number }[]>
+type ItemRef = React.MutableRefObject<{ rect: DOMRect; node: HTMLDivElement; index?: number }[]>
 
 type ReorderContextProps = [
    /** Item */
@@ -266,9 +285,12 @@ type ReorderContextProps = [
       itemsRef: ItemRef
       // slotsRef: React.MutableRefObject<HTMLDivElement[]>
       slotsRef: ItemRef
+      slotRects: DOMRect[]
+      setSlotRects: React.Dispatch<React.SetStateAction<DOMRect[]>>
       /**  0: idle, 1: drag start, 2: moved */
       lifecycle: number
       setLifecycle: React.Dispatch<React.SetStateAction<number>>
+
       scrolledY: number
    }
 ]
@@ -295,6 +317,5 @@ function Container<T extends SourceProps>({ sources, onReorder, children, ...att
       </Scroll.Wrap>
    )
 }
-
 
 export { Container, ReorderContext, useReorder }
