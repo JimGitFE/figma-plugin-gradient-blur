@@ -87,12 +87,13 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
    // uselaytouteffect measures heights on sources recalc & tops
    // enable slot refs (hoverings)
-   const handleRef = useCallback(
+   const handleSlotRef = useCallback(
       (node: HTMLDivElement | null) => {
-         console.log("handleRef", internal.slotsRef.current, sources)
+         console.log("handleSlotRef", internal.slotsRef.current, sources)
          if (node) {
             const indexOfSlot = [...sources].sort((a, b) => a.uniqueId - b.uniqueId).findIndex((slot) => slot.uniqueId === uniqueId)
             internal.slotsRef.current[indexOfSlot] = { node, rect: node?.getBoundingClientRect(), index: indexOfSlot }
+            // TODO: check if deep equal needed at this stage
             internal.setSlotRects((prev) => {
                const newRects = [...prev]
                newRects[indexOfSlot] = node?.getBoundingClientRect()
@@ -134,7 +135,7 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
          {/* 2 display block representation of item */}
          <div
             // ref callback called every time component changes identity
-            ref={handleRef}
+            ref={handleSlotRef}
             style={{
                display: "block",
                height: rect?.height, // TODO> variable heights on items

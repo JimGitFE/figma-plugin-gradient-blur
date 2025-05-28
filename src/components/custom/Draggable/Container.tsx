@@ -44,7 +44,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    const itemsRef = useRef([]) // Items Dimension (sorted by index)
    /** Sorted by index thus updates on reorder events (when item uId 2 at 0 slot with uId 1 is at slotsRef[0]) */
    const slotsRef = useRef([]) // Items Dimension (sorted by index)
-   /** Slots Rects (sorted by index) */
+   /** Slots Rects (sorted by index) */ // will trigger rerender on each item setting rect
    const [slotRects, setSlotRects] = useState<DOMRect[]>([])
 
    /* 0 Restructure itemsRef on sources change (removed or new item) */
