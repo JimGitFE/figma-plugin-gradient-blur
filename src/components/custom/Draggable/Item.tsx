@@ -49,14 +49,8 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
    /** Offset based on elements before */
    const offset = useMemo(() => {
-      console.log(
-         "measure ofset",
-         internal.slotsRef.current,
-         internal.slotsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0)
-      )
-      if (!rect?.height) return undefined
-      return internal.slotsRef.current.slice(0, index).reduce((totalHeight, ref) => totalHeight + ref?.rect.height, 0)
-   }, [index, internal.slotsRef.current, rect, internal.lifecycle]) // rect? makes sure it updates on initialization (useLatyoutEffect)
+      return internal.slotRects.slice(0, index).reduce((totalHeight, rect) => totalHeight + rect.height, 0)
+   }, [index, internal.slotRects, rect]) // rect? makes sure it updates on initialization (useLatyoutEffect)
 
    /** Calculate Y position of item */
    const calcPosY = useCallback(
@@ -69,7 +63,7 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
          return moveOut + offset
       },
-      [index, offset, hovering, bounds, internal.lifecycle]
+      [index, offset, hovering, bounds]
    )
 
    /* 2 keep item z on top after drop */
@@ -96,14 +90,15 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
             // TODO: check if deep equal needed at this stage
             internal.setSlotRects((prev) => {
                const newRects = [...prev]
-               newRects[indexOfSlot] = node?.getBoundingClientRect()
+               // independent from scroll status (exp: clientRect() abs pos to viewport) // TODO: would break if scroll contianer inside scroll container (parent rect - child rect)
+               const { top, bottom, height, width } = node?.getBoundingClientRect()
+               newRects[indexOfSlot] = { top: top + scrolledY, bottom: bottom + scrolledY, height, width } as DOMRect
                return newRects
             })
          } else {
             internal.slotsRef.current.splice(index, 1)
             internal.setSlotRects((prev) => [...prev].splice(index, 1))
          }
-         internal.setLifecycle((prev) => prev + 1) // update values (ex.: offset dep, height)
       },
       [sources, rect?.height]
    )

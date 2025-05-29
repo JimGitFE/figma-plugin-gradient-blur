@@ -1,5 +1,5 @@
 // Dependencies
-import React, { useRef, useState, createContext, useEffect, useMemo, useLayoutEffect, Children } from "react"
+import React, { useRef, useState, createContext, useEffect, useMemo, useLayoutEffect, Children, act } from "react"
 // Internal
 import useDrag from "@/hooks/useDrag"
 import { type SourceProps, Item } from "./Item"
@@ -57,7 +57,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       // requestAnimationFrame(() => recalculateItemsRect())
       // recalculateItemsRect()
       console.log("recalculateItemsRect slots mea™sure", slotsRef.current)
-      recalculateSlotsRect()
+      // recalculateSlotsRect()
    }, [sources, itemsRef.current])
 
    /* 0 Scroll Managing State */
@@ -72,10 +72,6 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    // - `1` Explicitly positioned - Moves to index position
    // - `2` Floating - Enables Transition
    // const [lifecycle, setLifecycle] = useState<(0 | 1 | 2)>(2)
-
-   const [lifecycle, setLifecycle] = useState<number>(2)
-
-   console.log(slotRects)
 
    // prettier-ignore
    // Resize Observer - calc hover slots relative positions
@@ -125,34 +121,18 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    useEffect(() => {
       if (!slotsRef.current || active.index === -1) return
       // Account for scroll and drag distance
-      const mouseY = drag.down.y + active.dy
+      const mouseY = scrolledY + drag.down.y + active.dy
 
-      recalculateSlotsRect() // fix: rect relative to scrolled container (new items when scrolled have offseted rect, relative to rest)
-      let index = slotsRef.current.findIndex((ref) => ref?.rect && mouseY >= ref.rect.top && mouseY <= ref.rect.bottom)
-      console.warn(
-         "at hoveringm",
-         active.uniqueId,
-         " for: ",
-         index,
-         " at ",
-         mouseY,
-         drag.down.y,
-         active.dy,
-         "sc",
-         active.scrolledY,
-         scrolledY,
-         activeInitScrolledYRef.current,
-         " slots: ",
-         slotsRef.current
-      ) // debug
+      // recalculateSlotsRect() // fix: rect relative to scrolled container (new items when scrolled have offseted rect, relative to rest)
+      let index = slotRects.findIndex((rect) => rect && mouseY >= rect.top && mouseY <= rect.bottom)
 
       // Fallback to closest slot
-      if (index === -1) index = slotsRef.current[0]?.rect.top >= mouseY ? 0 : slotsRef.current.length - 1
+      if (index === -1) index = slotRects[0]?.top >= mouseY ? 0 : slotRects.length - 1
 
       if (hovering.index === index) return // object/array is a new reference in memory
 
       setHovering({ uniqueId: sources[index].uniqueId, index })
-   }, [active, sources, slotsRef.current, lifecycle])
+   }, [active, scrolledY, sources, slotRects, lifecycle])
 
    /* 3 Auto Scroll on bounds when dragging */
 
@@ -250,9 +230,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                   slotsRef,
                   slotRects,
                   setSlotRects,
-                  lifecycle,
                   scrolledY,
-                  setLifecycle,
                },
             ]}
             /* Children */
@@ -288,9 +266,6 @@ type ReorderContextProps = [
       slotRects: DOMRect[]
       setSlotRects: React.Dispatch<React.SetStateAction<DOMRect[]>>
       /**  0: idle, 1: drag start, 2: moved */
-      lifecycle: number
-      setLifecycle: React.Dispatch<React.SetStateAction<number>>
-
       scrolledY: number
    }
 ]
