@@ -1,23 +1,11 @@
 // Dependencies
-import React, {
-   act,
-   createContext,
-   HTMLAttributes,
-   ReactNode,
-   useCallback,
-   useEffect,
-   useLayoutEffect,
-   useMemo,
-   useRef,
-   useState,
-} from "react"
+import React, { createContext, HTMLAttributes, ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
 // Internal
 import { isBetween } from "./utils"
 import styles from "./draggable.module.scss"
 import { useReorder } from "./Container"
 import { useScrollCtx } from "./CustomScroll"
-import { clamp, isNum } from "@/utils"
-// import { useEventListener } from "@/hooks/useEventListener"
+import { clamp } from "@/utils"
 
 /** Required props */
 interface SourceProps {
@@ -43,7 +31,7 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
    const bounds = useMemo(() => {
       if (!(rect && boundClamp) || !containerRef.current) return {}
       return { min: scrolledY - 1, max: containerRef.current.clientHeight - rect.height + scrolledY + 1 }
-   }, [scrolledY])
+   }, [internal.slotRects, scrolledY, containerRef, rect])
 
    /* 1 Item Positioning (floating) */
 
@@ -79,41 +67,38 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
 
    // TODO: observe resizes of items
 
+   const handleItemRef = useCallback(
+      (node: HTMLDivElement | null) => {
+         if (node) {
+            internal.itemsRef.current[index] = { node, rect: node.getBoundingClientRect() }
+         } else {
+            internal.itemsRef.current.splice(index, 1)
+         }
+      },
+      [sources]
+   )
+
    // uselaytouteffect measures heights on sources recalc & tops
    // enable slot refs (hoverings)
    const handleSlotRef = useCallback(
       (node: HTMLDivElement | null) => {
-         console.log("handleSlotRef", internal.slotsRef.current, sources)
+         // console.log("handleSlotRef", internal.slotsRef.current, sources)
          if (node) {
             const indexOfSlot = [...sources].sort((a, b) => a.uniqueId - b.uniqueId).findIndex((slot) => slot.uniqueId === uniqueId)
             internal.slotsRef.current[indexOfSlot] = { node, rect: node?.getBoundingClientRect(), index: indexOfSlot }
-            // TODO: check if deep equal needed at this stage
-            internal.setSlotRects((prev) => {
-               const newRects = [...prev]
-               // independent from scroll status (exp: clientRect() abs pos to viewport) // TODO: would break if scroll contianer inside scroll container (parent rect - child rect)
-               const { top, bottom, height, width } = node?.getBoundingClientRect()
-               newRects[indexOfSlot] = { top: top + scrolledY, bottom: bottom + scrolledY, height, width } as DOMRect
-               return newRects
-            })
          } else {
             internal.slotsRef.current.splice(index, 1)
-            internal.setSlotRects((prev) => [...prev].splice(index, 1))
          }
       },
       [sources, rect?.height]
    )
 
+   isActive && console.log("ac", offset, active.dy, active.scrolledY, internal.itemRects, internal.slotRects)
    return (
       <>
          {/* 1 Item */}
          <div
-            ref={(node) => {
-               if (internal.itemsRef.current[index]?.node) return
-               if (node) {
-                  const rect = node.getBoundingClientRect() // delayed by transform traslate y 0 at initialization
-                  internal.itemsRef.current[index] = { node, rect }
-               }
-            }}
+            ref={handleItemRef}
             onMouseDown={(e) => draggable && onDragStart(e, uniqueId)}
             className={`z-6 w-100 ${isActive && styles.active} ${styles.floating} ${atts.className}`}
             style={{

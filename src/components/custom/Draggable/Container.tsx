@@ -3,8 +3,7 @@ import React, { useRef, useState, createContext, useEffect, useMemo, useLayoutEf
 // Internal
 import useDrag from "@/hooks/useDrag"
 import { type SourceProps, Item } from "./Item"
-import { difference, reorder } from "./utils"
-import { useResizeObserver } from "@/hooks/useResizeObserver"
+import { reorder } from "./utils"
 import Scroll from "./CustomScroll"
 import { useEventListener } from "@/hooks/useEventListener"
 import useAnimation from "@/hooks/useAnimation"
@@ -46,6 +45,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    const slotsRef = useRef([]) // Items Dimension (sorted by index)
    /** Slots Rects (sorted by index) */ // will trigger rerender on each item setting rect
    const [slotRects, setSlotRects] = useState<DOMRect[]>([])
+   const [itemRects, setItemRects] = useState<DOMRect[]>([])
 
    /* 0 Restructure itemsRef on sources change (removed or new item) */
 
@@ -55,14 +55,16 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       // if (didSourcesChange(sources)) itemsRef.current = [] // update itemsRef
       // prevSourcesRef.current = sources
       // requestAnimationFrame(() => recalculateItemsRect())
-      // recalculateItemsRect()
       console.log("recalculateItemsRect slots mea™sure", slotsRef.current)
-      // recalculateSlotsRect()
-   }, [sources, itemsRef.current])
+      recalculateItemsRect()
+      recalculateSlotsRect()
+      setSlotRects(slotsRef.current.map((ref) => ref.rect))
+      setItemRects(itemsRef.current.map((ref) => ref.rect))
+   }, [sources, itemsRef, slotsRef]) // TODO: useMemo for itemsRef and slotsRef
 
    /* 0 Scroll Managing State */
 
-   const { scroll, scrolledY, containerRef } = Scroll.useScrollCtx() // (attach observer)
+   const { scroll, scrolledY, containerRef, wrapRef } = Scroll.useScrollCtx() // (attach observer)
    const activeInitScrolledYRef = useRef(0) // Item offsets scroll
 
    /* Item lifecycle */
@@ -100,7 +102,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    })
    const onDragStart = (e: EventFor<MouseEvent>, uniqueId: number) => {
       activeInitScrolledYRef.current = scrolledY
-      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0, scrolledY: 0, ...itemsRef.current[indexFromId(uniqueId)] })
+      setActive({ uniqueId, index: indexFromId(uniqueId), dy: 0, scrolledY: 0, rect: itemRects[indexFromId(uniqueId)] })
       setHovering({ uniqueId, index: indexFromId(uniqueId) })
       initDrag(e)
    }
@@ -132,7 +134,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       if (hovering.index === index) return // object/array is a new reference in memory
 
       setHovering({ uniqueId: sources[index].uniqueId, index })
-   }, [active, scrolledY, sources, slotRects, lifecycle])
+   }, [active, scrolledY, sources, slotRects])
 
    /* 3 Auto Scroll on bounds when dragging */
 
@@ -179,8 +181,22 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Utils */
 
-   const recalculateItemsRect = () => itemsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
-   const recalculateSlotsRect = () => slotsRef.current.forEach((ref) => ref.node && (ref.rect = ref.node.getBoundingClientRect()))
+   const recalculateItemsRect = () =>
+      itemsRef.current.forEach((ref) => ref.node && (ref.rect = rectRelativeToScroll(ref.node.getBoundingClientRect(), scrolledY)))
+   const recalculateSlotsRect = () =>
+      slotsRef.current.forEach((ref) => ref.node && (ref.rect = rectRelativeToScroll(ref.node.getBoundingClientRect(), scrolledY)))
+
+   const rectRelativeToScroll = (rect: DOMRect, scrolledY: number) => {
+      return {
+         ...rect,
+         top: rect.top + scrolledY,
+         bottom: rect.bottom + scrolledY,
+         left: rect.left,
+         right: rect.right,
+         height: rect.height,
+         width: rect.width,
+      }
+   }
 
    // if (active.index === -1 ) recalculateItemsRect()
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
@@ -195,6 +211,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
    //          sources.map((it) => it.uniqueId)
    //       ),
    //    ].length > 0
+
+   console.log(itemRects, slotRects)
 
    // Scroll contianer
    return [...children]
@@ -213,7 +231,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                   /** Slot representation (state key control) */
                   uniqueId: item.props.uniqueId ?? sortedIndex,
                   /** DOM rect dimensions */
-                  rect: itemsRef.current[indexFromId(item.props.uniqueId)]?.rect,
+                  rect: itemRects[indexFromId(item.props.uniqueId)],
                   /** drag handle Init */
                   onDragStart,
                   isActive: active.uniqueId === item.props.uniqueId,
@@ -230,6 +248,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                   slotsRef,
                   slotRects,
                   setSlotRects,
+                  itemRects,
+                  setItemRects,
                   scrolledY,
                },
             ]}
@@ -265,6 +285,8 @@ type ReorderContextProps = [
       slotsRef: ItemRef
       slotRects: DOMRect[]
       setSlotRects: React.Dispatch<React.SetStateAction<DOMRect[]>>
+      itemRects: DOMRect[]
+      setItemRects: React.Dispatch<React.SetStateAction<DOMRect[]>>
       /**  0: idle, 1: drag start, 2: moved */
       scrolledY: number
    }
