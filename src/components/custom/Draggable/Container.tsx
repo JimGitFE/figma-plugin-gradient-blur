@@ -49,11 +49,11 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* 0 Restructure itemsRef on sources change (removed or new item) */
 
-   const prevSourcesRef = useRef(sources) // Previous sources (sorted by uniqueId)
+   // const prevSourcesRef = useRef(sources) // Previous sources (sorted by uniqueId)
    useEffect(() => {
       // console.log("new sources ", sources)
-      if (didSourcesChange(sources)) itemsRef.current = [] // update itemsRef
-      prevSourcesRef.current = sources
+      // if (didSourcesChange(sources)) itemsRef.current = [] // update itemsRef
+      // prevSourcesRef.current = sources
       // requestAnimationFrame(() => recalculateItemsRect())
       // recalculateItemsRect()
       console.log("recalculateItemsRect slots mea™sure", slotsRef.current)
@@ -184,17 +184,17 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    // if (active.index === -1 ) recalculateItemsRect()
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
-   const didSourcesChange = (sources: T[]) =>
-      [
-         ...difference(
-            sources.map((it) => it.uniqueId),
-            prevSourcesRef.current.map((prev) => prev.uniqueId)
-         ),
-         ...difference(
-            prevSourcesRef.current.map((prev) => prev.uniqueId),
-            sources.map((it) => it.uniqueId)
-         ),
-      ].length > 0
+   // const didSourcesChange = (sources: T[]) =>
+   //    [
+   //       ...difference(
+   //          sources.map((it) => it.uniqueId),
+   //          prevSourcesRef.current.map((prev) => prev.uniqueId)
+   //       ),
+   //       ...difference(
+   //          prevSourcesRef.current.map((prev) => prev.uniqueId),
+   //          sources.map((it) => it.uniqueId)
+   //       ),
+   //    ].length > 0
 
    // Scroll contianer
    return [...children]
