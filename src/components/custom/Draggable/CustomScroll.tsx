@@ -60,7 +60,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
       if (!containerRef.current || !contentRef.current) return
       const hiddenHeight = contentRef.current?.clientHeight - containerRef.current?.clientHeight
 
-      const trackHeight = trackRef.current?.clientHeight
+      const trackHeight = trackRef.current?.clientHeight ?? containerRef.current?.clientHeight
       const thumbHeight = trackHeight * (containerRef.current?.clientHeight / contentRef.current?.clientHeight)
 
       setDims({ hiddenHeight, trackHeight, thumbHeight })
@@ -79,6 +79,8 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
    }, [normal])
    // Update scrolledY on content growth (fix: scrolledY addicts have an updated value)
    useResizeObserver({ ref: contentRef, callback: () => scroll((prev) => prev || 0) })
+   // prettier-ignore
+   useEffect(()=> {scroll((prev) => prev || 0) }, [dims])
 
    /* 3 Controlled scroll for wheel event */
 
