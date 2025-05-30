@@ -154,6 +154,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
          const scBound = drag.clientPos.y < scTop ? scTop : scBtm
          const strength = config.multiplier * (drag.clientPos.y - scBound)
          const newTop = top + strength / (clamp(deltaTime, { min: 1000 / 60 }) * 5)
+         console.warn("onEdgeAutoScroll", top, scrolledY, newTop, activeInitScrolledYRef.current)
 
          setActive((prev) => ({ ...prev, scrolledY: newTop - activeInitScrolledYRef.current }))
          return newTop
