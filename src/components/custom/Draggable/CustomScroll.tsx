@@ -49,8 +49,8 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
 
    // Scroll positioning
    /** Single source of truth for scroll position, normalised to 0-1 */
-   const [normalY, setNormalY] = useState(0)
-   /** Container absolute top in px (controlled scroll) !(DERIVED FROM normalY) */
+   const [normal, setNormal] = useState({ y: 0 })
+   /** Container absolute top in px (controlled scroll) !(DERIVED FROM normal) */
    const [scrolledTop, setScrolledTop] = useState(0)
    const scrolledTopRef = useRef(0) // Controlled scroll motion behaviour
 
@@ -71,12 +71,12 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
    /* 2 Centralized state management for derived state variables (Make Wrap element scroll (deps `scrolledTop`) TODO: move to scroll?) */
 
    useEffect(() => {
-      if (normalY !== clamp(normalY, { min: 0, max: 1 })) console.warn("debug, bad normalY")
-      const top = clamp(normalY, { min: 0, max: 1 }) * dims.hiddenHeight
+      if (normal.y !== clamp(normal.y, { min: 0, max: 1 })) console.warn("debug, bad normal")
+      const top = clamp(normal.y, { min: 0, max: 1 }) * dims.hiddenHeight
       // Scroll
       wrapRef.current.scrollTo({ top, behavior: (scrollInstant ? "instant" : "smooth") as ScrollBehavior })
       setScrolledTop(top)
-   }, [normalY])
+   }, [normal])
    // Update scrolledY on content growth (fix: scrolledY addicts have an updated value)
    useResizeObserver({ ref: contentRef, callback: () => scroll((prev) => prev || 0) })
 
@@ -97,16 +97,14 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
       const scrollToY = typeof callback === "number" ? callback : callback(scrolledTopRef.current)
       const normal = clamp(scrollToY / dims.hiddenHeight, { min: 0, max: 1 }) // normalised value
 
-      if (scrolledTopRef.current === normal * dims.hiddenHeight) return
-
       scrolledTopRef.current = normal * dims.hiddenHeight
       setScrollInstant(instant)
-      setNormalY(normal)
+      setNormal({ y: normal })
    }
 
    /* Thumb grab hook, (clamped dragging position) */
 
-   const { initDrag, thumb } = useThumb({ trackRef, thumbRef, trackContainerRef, dims, normalY, scroll })
+   const { initDrag, thumb } = useThumb({ trackRef, thumbRef, trackContainerRef, dims, normal, scroll })
 
    return (
       <ScrollContext.Provider value={{ scrolledY: scrolledTop, scroll, wrapRef, containerRef }}>
@@ -173,12 +171,12 @@ interface HookProps {
       trackHeight: number
       thumbHeight: number
    }
-   normalY: number
+   normal: { y: number }
    scroll: (callback: ((scrolledY: number) => number) | number, instant?: boolean) => void
 }
 
 /** Thumb movement: grab drag / click on track, update on scroll */
-function useThumb({ trackRef, thumbRef, trackContainerRef, dims, scroll, normalY }: HookProps) {
+function useThumb({ trackRef, thumbRef, trackContainerRef, dims, scroll, normal }: HookProps) {
    /** Thumb Y position measured in px */
    const [posY, setPosY] = useState(0)
    /** Move thumb position, to top from Y pos (convert thumb travelled dy to scrollTop) */
@@ -193,7 +191,7 @@ function useThumb({ trackRef, thumbRef, trackContainerRef, dims, scroll, normalY
 
    /* 1 Controlled thumb position (deps on scrolled)  */
 
-   useEffect(() => setPosY(normalY * (dims.trackHeight - dims.thumbHeight)), [normalY, dims])
+   useEffect(() => setPosY(normal.y * (dims.trackHeight - dims.thumbHeight)), [normal, dims])
 
    /* 2 Thumb grab scrolling, trigger (sequentially updates position via `normalY`) */
 
