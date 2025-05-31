@@ -63,7 +63,8 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
       const trackHeight = trackRef.current?.clientHeight ?? containerRef.current?.clientHeight
       const thumbHeight = trackHeight * (containerRef.current?.clientHeight / contentRef.current?.clientHeight)
 
-      setDims({ hiddenHeight, trackHeight, thumbHeight })
+      // New reference (re-render is expected on same value): fix: scrolledY addicts need an updated value
+      setDims({ hiddenHeight, trackHeight, thumbHeight }) // Will update scrolledY on content growth
    }
    useLayoutEffect(computeDimensions, [containerRef, contentRef])
    useResizeObserver({ ref: contentRef, callback: computeDimensions })
@@ -76,11 +77,7 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
       // Scroll
       wrapRef.current.scrollTo({ top, behavior: (scrollInstant ? "instant" : "smooth") as ScrollBehavior })
       setScrolledTop(top)
-   }, [normal])
-   // Update scrolledY on content growth (fix: scrolledY addicts have an updated value)
-   useResizeObserver({ ref: contentRef, callback: () => scroll((prev) => prev || 0) })
-   // prettier-ignore
-   useEffect(()=> {scroll((prev) => prev || 0) }, [dims])
+   }, [normal, dims])
 
    /* 3 Controlled scroll for wheel event */
 
