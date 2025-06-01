@@ -8,7 +8,7 @@ interface Config {
    conditional?: boolean
 }
 
-/** Animation Frame loop logic */
+/** RAF Loop Animation Frame loop logic */
 export default function useAnimation(frame: FrameLoop, deps: React.DependencyList, { conditional = true }: Config) {
    const lastTimeRef = useRef(null)
    useEffect(() => {
