@@ -52,7 +52,8 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
    const [normal, setNormal] = useState({ y: 0 })
    /** Container absolute top in px (controlled scroll) !(DERIVED FROM normal) */
    const [scrolledTop, setScrolledTop] = useState(0)
-   const scrolledTopRef = useRef(0) // Controlled scroll motion behaviour
+   /** Mirror `scrolledTop` - Expose updated value (fix: react closure on useAnimation) */
+   const scrolledTopRef = useRef(0)
 
    /* 1 Initialize dimensions, thumb height */
 
@@ -62,7 +63,6 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
 
       const trackHeight = trackRef.current?.clientHeight ?? containerRef.current?.clientHeight
       const thumbHeight = trackHeight * (containerRef.current?.clientHeight / contentRef.current?.clientHeight)
-
       // New reference (re-render is expected on same value): fix: scrolledY addicts need an updated value
       setDims({ hiddenHeight, trackHeight, thumbHeight }) // Will update scrolledY on content growth
    }
@@ -76,10 +76,25 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
       const top = clamp(normal.y, { min: 0, max: 1 }) * dims.hiddenHeight
       // Scroll
       wrapRef.current.scrollTo({ top, behavior: (scrollInstant ? "instant" : "smooth") as ScrollBehavior })
+      // Reflect scroll in state
+      scrolledTopRef.current = top
       setScrolledTop(top)
    }, [normal, dims])
 
-   /* 3 Controlled scroll for wheel event */
+   /* 3 Expose context consumers scroll endpoint method scroll(current => current + 2) */
+
+   const scroll = (callback: ((diff: number) => number) | number, instant?: boolean) => {
+      if (!contentRef.current || !containerRef.current) return
+
+      /** New y scroll from top position, ref usage prevent closure on useAnimation without proper deps (optimized) */
+      const scrollToY = typeof callback === "number" ? callback : callback(scrolledTopRef.current)
+      const normal = clamp(scrollToY / dims.hiddenHeight, { min: 0, max: 1 }) // normalised value
+      // Derived state update & scroll
+      setScrollInstant(instant)
+      setNormal({ y: normal })
+   }
+
+   /* 4 Controlled scroll for wheel event */
 
    const onWheel = (e: WheelEvent) => {
       e.preventDefault()
@@ -87,19 +102,6 @@ function Wrap({ thumb: thumbAtts, track: trackAtts, children, config: configProp
       scroll((top) => top + e.deltaY / 2, false)
    }
    useEventListener("wheel", onWheel, { element: containerRef, conditional: config.wheelEvent })
-
-   /* 4 Expose context consumers scroll endpoint method scroll(current => current + 2) */
-
-   const scroll = (callback: ((diff: number) => number) | number, instant?: boolean) => {
-      if (!contentRef.current || !containerRef.current) return
-
-      const scrollToY = typeof callback === "number" ? callback : callback(scrolledTopRef.current)
-      const normal = clamp(scrollToY / dims.hiddenHeight, { min: 0, max: 1 }) // normalised value
-
-      scrolledTopRef.current = normal * dims.hiddenHeight
-      setScrollInstant(instant)
-      setNormal({ y: normal })
-   }
 
    /* Thumb grab hook, (clamped dragging position) */
 
