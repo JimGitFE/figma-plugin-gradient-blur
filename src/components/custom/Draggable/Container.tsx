@@ -114,7 +114,6 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       if (!containerRef.current.contains(e.target as Node)) return
       scroll((top) => top + e.deltaY / 2, false)
    }
-
    useEventListener("wheel", onCustomWheel, { conditional: !isDragging, element: containerRef })
 
    /* 2 Hovering slot index */ // TODO: refactor
@@ -124,21 +123,16 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       if (!slotsRef.current || active.index === -1) return
       // Account for scroll and drag distance
       const mouseY = scrolledY + drag.down.y + active.dy
-
-      // recalculateSlotsRect() // fix: rect relative to scrolled container (new items when scrolled have offseted rect, relative to rest)
       let index = slotRects.findIndex((rect) => rect && mouseY >= rect.top && mouseY <= rect.bottom)
-
-      // Fallback to closest slot
-      if (index === -1) index = slotRects[0]?.top >= mouseY ? 0 : slotRects.length - 1
-
+      if (index === -1) index = slotRects[0]?.top >= mouseY ? 0 : slotRects.length - 1 // Fallback to closest slot
+      // Update hovering state
       if (hovering.index === index) return // object/array is a new reference in memory
-
       setHovering({ uniqueId: sources[index].uniqueId, index })
    }, [active, scrolledY, sources, slotRects])
 
    /* 3 Auto Scroll on bounds when dragging */
 
-   /** Define auto-scroll areas (offseted by config.dist from container bound) */
+   // Define auto-scroll areas (offseted by config.dist from container bound)
    const [scTop, scBtm] = useMemo(() => {
       if (!containerRef.current) return []
       const ctn = containerRef.current.getBoundingClientRect()
@@ -154,13 +148,11 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
          const scBound = drag.clientPos.y < scTop ? scTop : scBtm
          const strength = config.multiplier * (drag.clientPos.y - scBound)
          const newTop = top + strength / (clamp(deltaTime, { min: 1000 / 60 }) * 5)
-         console.warn("onEdgeAutoScroll", top, scrolledY, newTop, activeInitScrolledYRef.current)
 
          setActive((prev) => ({ ...prev, scrolledY: newTop - activeInitScrolledYRef.current }))
          return newTop
       }, isDragging)
    }
-
    // When dragging item is near the edges of the container
    useAnimation(onEdgeAutoScroll, [active.dy], {
       conditional: (drag.clientPos.y < scTop || drag.clientPos.y > scBtm) && active.index !== -1,
