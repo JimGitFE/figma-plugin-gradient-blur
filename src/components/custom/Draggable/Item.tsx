@@ -70,9 +70,9 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
    const handleItemRef = useCallback(
       (node: HTMLDivElement | null) => {
          if (node) {
-            internal.itemsRef.current[index] = { node, rect: node.getBoundingClientRect() }
+            internal.itemNodesRef.current[index] = node
          } else {
-            internal.itemsRef.current.splice(index, 1)
+            internal.itemNodesRef.current.splice(index, 1)
          }
       },
       [sources]
@@ -82,12 +82,11 @@ function Item({ draggable, boundClamp = true, children, ...atts }: ItemProps) {
    // enable slot refs (hoverings)
    const handleSlotRef = useCallback(
       (node: HTMLDivElement | null) => {
-         // console.log("handleSlotRef", internal.slotsRef.current, sources)
+         const indexOfSlot = [...sources].sort((a, b) => a.uniqueId - b.uniqueId).findIndex((slot) => slot.uniqueId === uniqueId)
          if (node) {
-            const indexOfSlot = [...sources].sort((a, b) => a.uniqueId - b.uniqueId).findIndex((slot) => slot.uniqueId === uniqueId)
-            internal.slotsRef.current[indexOfSlot] = { node, rect: node?.getBoundingClientRect(), index: indexOfSlot }
+            internal.slotNodesRef.current[indexOfSlot] = node
          } else {
-            internal.slotsRef.current.splice(index, 1)
+            internal.slotNodesRef.current.splice(index, 1)
          }
       },
       [sources, rect?.height]

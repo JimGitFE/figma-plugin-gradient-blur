@@ -7,7 +7,7 @@ import { reorder } from "./utils"
 import Scroll from "./CustomScroll"
 import { useEventListener } from "@/hooks/useEventListener"
 import useAnimation from "@/hooks/useAnimation"
-import { clamp } from "@/utils"
+import { clamp, isNum } from "@/utils"
 
 /** extends CustomScroll config */
 interface ManagerProps<T extends SourceProps> extends Partial<Omit<React.ComponentProps<typeof Scroll.Wrap>, "config">> {
@@ -40,32 +40,25 @@ const DEFAULT_CONFIG: Required<ManagerProps<any>["config"]> = {
 function Manager<T extends SourceProps>({ children, sources, onReorder, config: configProp = {} }: ManagerProps<T>) {
    const config = { ...DEFAULT_CONFIG, ...configProp }
    /** Sorted by index thus updates on reorder events */
-   const itemsRef = useRef([]) // Items Dimension (sorted by index)
-   /** Sorted by index thus updates on reorder events (when item uId 2 at 0 slot with uId 1 is at slotsRef[0]) */
-   const slotsRef = useRef([]) // Items Dimension (sorted by index)
+   const itemNodesRef = useRef([]) // Items Nodes (sorted by index)
+   /** Sorted by index thus updates on reorder events (when item uId 2 at 0 slot with uId 1 is at slotNodesRef[0]) */
+   const slotNodesRef = useRef([]) // Slots Nodes (sorted by index)
    /** Slots Rects (sorted by index) */ // will trigger rerender on each item setting rect
    const [slotRects, setSlotRects] = useState<DOMRect[]>([])
    const [itemRects, setItemRects] = useState<DOMRect[]>([])
-
-   /* 0 Restructure itemsRef on sources change (removed or new item) */
-
-   // const prevSourcesRef = useRef(sources) // Previous sources (sorted by uniqueId)
-   useEffect(() => {
-      // console.log("new sources ", sources)
-      // if (didSourcesChange(sources)) itemsRef.current = [] // update itemsRef
-      // prevSourcesRef.current = sources
-      // requestAnimationFrame(() => recalculateItemsRect())
-      console.log("recalculateItemsRect slots mea™sure", slotsRef.current)
-      recalculateItemsRect()
-      recalculateSlotsRect()
-      setSlotRects(slotsRef.current.map((ref) => ref.rect))
-      setItemRects(itemsRef.current.map((ref) => ref.rect))
-   }, [sources, itemsRef, slotsRef]) // TODO: useMemo for itemsRef and slotsRef
 
    /* 0 Scroll Managing State */
 
    const { scroll, scrolledY, containerRef, wrapRef } = Scroll.useScrollCtx() // (attach observer)
    const activeInitScrolledYRef = useRef(0) // Item offsets scroll
+
+   /* 0 Restructure itemNodesRef on sources change (removed or new item) */
+
+   useEffect(() => {
+      // Update rects relative to container
+      setSlotRects(relativeRects(slotNodesRef.current))
+      setItemRects(relativeRects(itemNodesRef.current))
+   }, [sources, itemNodesRef, slotNodesRef])
 
    /* Item lifecycle */
 
@@ -120,7 +113,7 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    // Accomodates dragged item (always represents an index of item[])
    useEffect(() => {
-      if (!slotsRef.current || active.index === -1) return
+      if (!slotNodesRef.current || active.index === -1) return
       // Account for scroll and drag distance
       const mouseY = scrolledY + drag.down.y + active.dy
       let index = slotRects.findIndex((rect) => rect && mouseY >= rect.top && mouseY <= rect.bottom)
@@ -162,8 +155,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    // useEffect(() => {
    //    const selectedId: number = 2
-   //    if (selectedId === -1 || !itemsRef.current || !containerRef.current) return
-   //    const selectedTop = itemsRef.current[indexFromId(selectedId)]?.rect?.top
+   //    if (selectedId === -1 || !itemNodesRef.current || !containerRef.current) return
+   //    const selectedTop = itemNodesRef.current[indexFromId(selectedId)]?.rect?.top
 
    //    const { top, height } = containerRef.current.getBoundingClientRect()
 
@@ -174,38 +167,21 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
 
    /* Utils */
 
-   const recalculateItemsRect = () =>
-      itemsRef.current.forEach((ref) => ref.node && (ref.rect = rectRelativeToScroll(ref.node.getBoundingClientRect(), scrolledY)))
-   const recalculateSlotsRect = () =>
-      slotsRef.current.forEach((ref) => ref.node && (ref.rect = rectRelativeToScroll(ref.node.getBoundingClientRect(), scrolledY)))
-
-   const rectRelativeToScroll = (rect: DOMRect, scrolledY: number) => {
-      return {
-         ...rect,
-         top: rect.top + scrolledY,
-         bottom: rect.bottom + scrolledY,
-         left: rect.left,
-         right: rect.right,
-         height: rect.height,
-         width: rect.width,
-      }
+   const relativeRects = (nodes: (HTMLDivElement | null)[]) => {
+      const scrolledTop = wrapRef.current?.scrollTop
+      return nodes.map((node) => {
+         if (!node || !isNum(scrolledTop)) return null
+         const rect = node.getBoundingClientRect()
+         // prettier-ignore
+         return {
+            ...rect,
+            top: rect.top + scrolledTop, bottom: rect.bottom + scrolledTop,
+            left: rect.left, right: rect.right, height: rect.height, width: rect.width, 
+         }
+      })
    }
 
-   // if (active.index === -1 ) recalculateItemsRect()
    const indexFromId = (uniqueId: number) => sources.findIndex((it) => it.uniqueId === uniqueId)
-   // const didSourcesChange = (sources: T[]) =>
-   //    [
-   //       ...difference(
-   //          sources.map((it) => it.uniqueId),
-   //          prevSourcesRef.current.map((prev) => prev.uniqueId)
-   //       ),
-   //       ...difference(
-   //          prevSourcesRef.current.map((prev) => prev.uniqueId),
-   //          sources.map((it) => it.uniqueId)
-   //       ),
-   //    ].length > 0
-
-   console.log(itemRects, slotRects)
 
    // Scroll contianer
    return [...children]
@@ -237,8 +213,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
                },
                /* Internal */
                {
-                  itemsRef,
-                  slotsRef,
+                  itemNodesRef,
+                  slotNodesRef,
                   slotRects,
                   setSlotRects,
                   itemRects,
@@ -252,7 +228,8 @@ function Manager<T extends SourceProps>({ children, sources, onReorder, config: 
       ))
 }
 
-type ItemRef = React.MutableRefObject<{ rect: DOMRect; node: HTMLDivElement; index?: number }[]>
+// type ItemRef = React.MutableRefObject<{ rect?: DOMRect; node: HTMLDivElement; index?: number }[]>
+type ItemRef = React.MutableRefObject<HTMLDivElement[]>
 
 type ReorderContextProps = [
    /** Item */
@@ -273,9 +250,9 @@ type ReorderContextProps = [
    },
    /** Internal */
    {
-      itemsRef: ItemRef
-      // slotsRef: React.MutableRefObject<HTMLDivElement[]>
-      slotsRef: ItemRef
+      itemNodesRef: ItemRef
+      // slotNodesRef: React.MutableRefObject<HTMLDivElement[]>
+      slotNodesRef: ItemRef
       slotRects: DOMRect[]
       setSlotRects: React.Dispatch<React.SetStateAction<DOMRect[]>>
       itemRects: DOMRect[]
